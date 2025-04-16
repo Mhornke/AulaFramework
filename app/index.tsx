@@ -1,4 +1,5 @@
 import { ScrollView, Text, View } from "react-native";
+import Header from './componts/header';
 import { Link } from "expo-router";
 import Card from "./componts/card";
 import dados from "../dados.json";
@@ -11,8 +12,12 @@ export default function Index() {
 })
   
   return (
+    <view>
+
+      <Header/>
     
-      <ScrollView>
+    
+    <ScrollView>
           
         <section className="max-w-screen-xl mx-auto flex flex-col items-center sm:block">
           <h1 className="mb-5 mt-3 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-gray-900">
@@ -30,6 +35,6 @@ export default function Index() {
         </section>
        
       </ScrollView>
-  
+      </view>
     );
 }
