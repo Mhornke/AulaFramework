@@ -13,7 +13,6 @@ export default function Index() {
   });
 
   return (
-    
     <ScrollView>
       <View>
         <Header />
@@ -38,7 +37,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 15,
     fontWeight: "semibold",
-    
   },
 
   card: {
@@ -46,3 +44,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+// troca de email e nome
