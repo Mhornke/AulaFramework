@@ -1,7 +1,7 @@
 import { ScrollView, Text, View, StyleSheet } from "react-native";
 import Header from "./componts/header";
 
-import { Link } from "expo-router";
+import  React from "react";
 import Card from "./componts/card";
 import dados from "../dados.json";
 
@@ -15,7 +15,7 @@ export default function Index() {
   return (
     <ScrollView>
       <View>
-        <Header />
+        <Header/>
       </View>
       <View style={styles.containerText}>
         <Text style={{ fontWeight: "bold", fontSize: 20 }}>Seu</Text>
@@ -40,8 +40,9 @@ const styles = StyleSheet.create({
   },
 
   card: {
+    
     flex: 1,
     alignItems: "center",
   },
 });
-// troca de email e nome
+

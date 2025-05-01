@@ -1,12 +1,11 @@
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Link } from "expo-router";
-import { Image, StyleSheet, View, Text, TouchableOpacity } from "react-native"
+import { useLocalSearchParams } from 'expo-router';
+export default function Detalhes(data: any) {
 
-export default function Card(data: any) {
-   
-   console.log(data.pet.id);
-   
+    const { id } = useLocalSearchParams();
+
     return(
-
 <View style={styles.conteiner} key={data.pet.id}>
         <Image 
         source={data.pet.foto}
@@ -19,11 +18,8 @@ export default function Card(data: any) {
         <Text style={styles.Text}>Idade: {data.pet.age}</Text>
         </View>
         <View>
-            <Link  href={{
-          pathname: '/details/[id]',
-          params: { id: data.pet.id },
-        }}>
-            
+        {/* preencher formulario de adocao */}
+            <Link href="/"> 
            <TouchableOpacity >
             <Text style={{backgroundColor:'blue', padding:10, borderRadius:3, width:200, margin:5,}}>Adotar</Text>
            </TouchableOpacity>
@@ -32,10 +28,10 @@ export default function Card(data: any) {
 </View>
 
 
-
     )
-    
 }
+
+
 
 const styles = StyleSheet.create({
 
