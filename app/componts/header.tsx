@@ -2,6 +2,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useState } from "react";
+import Color from "../theme/color"
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
 
@@ -24,25 +25,25 @@ export default function Header() {
           style={{ width: 40, height: 40 }}
         />
 
-        <Text>Adote</Text>
-        <Text>.Com </Text>
+        <Text style={styles.texto}>Adote</Text>
+        <Text style={styles.texto}>.Com </Text>
       </View>
       <View>
         <TouchableOpacity onPress={clickMenu}>
-          <Icon name={openMenu ? 'times': 'bars'  } size={30} color="black" />
+          <Icon name={openMenu ? 'times': 'bars'  } size={30} color="white" />
         </TouchableOpacity>
       
       <View>
         {openMenu && (
           <View style={styles.menu}> 
             <Link href="/">
-              <Text>Home</Text>
+              <Text style={styles.textoMenu}>Home</Text>
             </Link>
             <Link href="/">
-              <Text>Login</Text>
+              <Text style={styles.textoMenu}>Login</Text>
             </Link>
             <Link href="/">
-              <Text>Cadastro</Text>
+              <Text style={styles.textoMenu}>Cadastro</Text>
             </Link>
           </View>
         )}
@@ -56,10 +57,11 @@ const styles = StyleSheet.create({
   Header: {
     
     flexDirection: "row",
-    backgroundColor: "blue",
+    backgroundColor: Color.CorFundo,
     padding: 15,
     justifyContent: "space-between",
     alignItems: "center",
+    
   },
   logo: {
     flexDirection: "row",
@@ -71,9 +73,23 @@ const styles = StyleSheet.create({
     zIndex: 1,    
     top: 50,
     right: 0,
-    backgroundColor: "white",
+    backgroundColor: Color.CardFundo,
     padding: 10,
     borderRadius: 5,
     shadowColor: "#000",
     width: 500,
-  } });
+    height:500,
+    
+  },
+  textoMenu:{
+    color:"#ffff",
+  },
+  texto:{
+    color:"#ffff",
+    fontWeight:"700"
+  } ,
+
+
+
+
+});
