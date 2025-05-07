@@ -51,4 +51,4 @@ Join our community of developers creating universal apps.
 
 #instalar 
 npm install react-native-dotenv
-arquivo .env "NEXT_PUBLIC_URL_API="http://localhost:3004""
+arquivo .env "URL_API=URL_API=https://api-adocao-git-main-dieizons-projects.vercel.app"
