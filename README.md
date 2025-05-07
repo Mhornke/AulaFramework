@@ -51,4 +51,9 @@ Join our community of developers creating universal apps.
 
 #instalar 
 npm install react-native-dotenv
+<<<<<<< HEAD
 arquivo .env "URL_API=URL_API=https://api-adocao-git-main-dieizons-projects.vercel.app"
+
+REACT-HOOK-FORM
+npm install react-hook-form
+>>>>>>> b6094ee (implemetação de login com autenticação, API ja existente)

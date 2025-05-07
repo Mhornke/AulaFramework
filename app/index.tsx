@@ -43,7 +43,7 @@ console.log(response);
 
   //   return <Card key={pet.id} pet={pet} />;
   // });
-
+  if (!animais) return <Text>Carregando...</Text>;
   return (
     <ScrollView>
       <View>

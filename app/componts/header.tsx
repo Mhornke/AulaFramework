@@ -39,10 +39,10 @@ export default function Header() {
             <Link href="/">
               <Text style={styles.textoMenu}>Home</Text>
             </Link>
-            <Link href="/">
+            <Link href="/(auth)/login">
               <Text style={styles.textoMenu}>Login</Text>
             </Link>
-            <Link href="/">
+            <Link href="/(auth)/register">
               <Text style={styles.textoMenu}>Cadastro</Text>
             </Link>
           </View>
