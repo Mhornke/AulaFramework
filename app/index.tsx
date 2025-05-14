@@ -45,9 +45,10 @@ console.log(response);
   // });
   if (!animais) return <Text>Carregando...</Text>;
   return (
+    
     <ScrollView>
+      <Header />
       <View>
-        <Header />
       </View>
       <View style={styles.containerText}>
         <Text style={{ fontWeight: "bold", fontSize: 20 }}>Seu</Text>
@@ -59,6 +60,7 @@ console.log(response);
         {listaAnimais}
       </View>
     </ScrollView>
+    
   );
 }
 const styles = StyleSheet.create({
