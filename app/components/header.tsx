@@ -3,9 +3,11 @@ import { Link } from "expo-router";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useState } from "react";
 import Color from "../theme/color"
+
+
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
-  const screenWidth = Dimensions.get('window').width
+  const {width, height} = Dimensions.get('window')
 
   const styles = StyleSheet.create({
     Header: {
@@ -36,9 +38,15 @@ export default function Header() {
       color: "#ffff",
       fontWeight: "500",
       fontSize:20,
+      margin:10
       
       
-      
+    },
+    textMenuTablet:{
+      color: "#ffff",
+      fontWeight: "medium",
+      fontSize:16,
+      margin:10
     },
     texto: {
       color: "#ffff",
@@ -55,7 +63,7 @@ export default function Header() {
     SetOpenMenu(!openMenu);
   };
 
-
+if (width < 600) {
   return (
     <View style={styles.Header}>
       
@@ -93,11 +101,52 @@ export default function Header() {
               <Link href="/(auth)/register">
                 <Text style={styles.textoMenu}>Cadastro</Text>
               </Link>
+              <Link href="./pedidos">
+                <Text style={styles.textoMenu}>Pedidos</Text>
+              </Link>
             </View>
           </TouchableOpacity>
         </Modal>
       </View>
     </View>
   );
+}else if (width >= 600){
+
+  return (
+    <View style={styles.Header}>
+      
+      <View   style={styles.logo}>
+        <Link href="/">
+        <Image
+          source={{
+            uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
+          }}
+          style={{ width: 40, height: 40 }}
+        />
+</Link>
+        <Text style={styles.texto}>Adote</Text>
+        <Text style={styles.texto}>.Com </Text>
+ 
+      </View>        
+
+            <View  style={{alignItems:"center", flexDirection:"row"}}>
+              
+              <Link href="/(auth)/login">
+                <Text style={styles.textMenuTablet}>Login</Text>
+              </Link>
+              <Link href="/(auth)/register">
+                <Text style={styles.textMenuTablet}>Cadastro</Text>
+              </Link>
+              <Link href="./pedidos">
+                <Text style={styles.textMenuTablet}>Pedidos</Text>
+              </Link>
+            </View>
+         
+        
+      
+    </View>
+  );
+}
+  
 }
 

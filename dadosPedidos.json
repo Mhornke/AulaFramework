@@ -1,0 +1,88 @@
+{
+  "pedidos": [
+    {
+      "id": "1",
+      "animal": { "nome": "Bolinha" },
+      "descricao": "Gostaria de adotar o Bolinha para fazer companhia aos meus filhos.",
+      "resposta": "Adoção aprovada! Entraremos em contato.",
+      "createdAt": "2024-10-01T14:32:00Z",
+      "adotante": {
+        "id": "101",
+        "nome": "Maria Souza",
+        "email": "maria.souza@email.com"
+      }
+    },
+    {
+      "id": "2",
+      "animal": { "nome": "Luna" },
+      "descricao": "Tenho uma casa grande com quintal e gostaria muito de adotar a Luna.",
+      "resposta": null,
+      "createdAt": "2024-10-05T10:15:00Z",
+      "adotante": {
+        "id": "101",
+        "nome": "Maria Souza",
+        "email": "maria.souza@email.com"
+      }
+    },
+    {
+      "id": "3",
+      "animal": { "nome": "Rex" },
+      "descricao": "Vi o Rex no site e me apaixonei. Tenho experiência com cães de grande porte.",
+      "resposta": "Estamos analisando seu pedido.",
+      "createdAt": "2024-10-10T18:45:00Z",
+      "adotante": {
+        "id": "101",
+        "nome": "Maria Souza",
+        "email": "maria.souza@email.com"
+      }
+    },
+    {
+      "id": "4",
+      "animal": { "nome": "Mimi" },
+      "descricao": "Sou apaixonada por gatos e gostaria de adotar a Mimi.",
+      "resposta": "Aguardando visita ao abrigo.",
+      "createdAt": "2024-10-15T09:22:00Z",
+      "adotante": {
+        "id": "101",
+        "nome": "Maria Souza",
+        "email": "maria.souza@email.com"
+      }
+    },
+    {
+      "id": "5",
+      "animal": { "nome": "Tigrão" },
+      "descricao": "Tenho um espaço seguro para gatos e vi que o Tigrão precisa de um lar.",
+      "resposta": null,
+      "createdAt": "2024-10-18T16:10:00Z",
+      "adotante": {
+        "id": "101",
+        "nome": "Maria Souza",
+        "email": "maria.souza@email.com"
+      }
+    },
+    {
+      "id": "6",
+      "animal": { "nome": "Luna" },
+      "descricao": "Tenho uma casa grande com quintal, e muita vontade de adotar a Luna.",
+      "resposta": null,
+      "createdAt": "2024-10-05T10:15:00Z",
+      "adotante": {
+        "id": "102",
+        "nome": "Carlos Lima",
+        "email": "carlos.lima@email.com"
+      }
+    },
+    {
+      "id": "7",
+      "animal": { "nome": "Rex" },
+      "descricao": "Vi o Rex no site e me apaixonei. Estou disponível para visitas.",
+      "resposta": "Estamos analisando seu pedido.",
+      "createdAt": "2024-10-10T18:45:00Z",
+      "adotante": {
+        "id": "103",
+        "nome": "Ana Oliveira",
+        "email": "ana.oliveira@email.com"
+      }
+    }
+  ]
+}

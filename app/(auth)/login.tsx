@@ -1,6 +1,6 @@
 import { Text, View, StyleSheet, Dimensions, Image, TextInput, Switch, TouchableOpacity } from "react-native";
 import { Link, router } from "expo-router";
-import Header from "../componts/header";
+import Header from "../components/header";
 import Color from "../theme/color"
 import { useForm, Controller } from 'react-hook-form'
 type Input = {

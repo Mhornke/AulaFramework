@@ -4,6 +4,7 @@ module.exports = function (api) {
     presets: ['babel-preset-expo'], // ou 'module:metro-react-native-babel-preset' se não usar Expo
     plugins: [
       [
+         
         'module:react-native-dotenv',
         {
           moduleName: '@env',

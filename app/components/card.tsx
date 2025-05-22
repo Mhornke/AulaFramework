@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import { Image, StyleSheet, View, Text, TouchableOpacity } from "react-native"
 import Color from "../theme/color";
-import { AnimalI } from "../../utils/types/animias";
+import { AnimalI } from "../utils/types/animias";
 
 
 export default function Card( {data}:{data:AnimalI}   ) {
@@ -45,11 +45,11 @@ export default function Card( {data}:{data:AnimalI}   ) {
 const styles = StyleSheet.create({
 
 conteiner:{
-    flex: 1,  
     backgroundColor: Color.CorFundo,
     marginVertical:15,
     borderRadius:5,
-    
+   
+
 },
 butao:{
     margin:10,
