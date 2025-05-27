@@ -1,0 +1,29 @@
+{
+    "pets": [
+      {
+
+        "id": 1,
+        "foto": "https://www.petz.com.br/blog/wp-content/uploads/2019/03/cachorro-mini-pet.jpg",
+        "name": "Fido",
+        "type": "dog",
+        "age": 5,
+        "weight": 20
+      },
+      {
+        "id": 2,
+        "foto": "https://www.direcional.com.br/wp-content/uploads/2022/08/cachorro-para-apartamento.jpg.webp",
+        "name": "Whiskers",
+        "type": "cat",
+        "age": 3,
+        "weight": 10
+      },
+      {
+        "id": 3,
+        "foto": "https://www.petz.com.br/blog/wp-content/uploads/2020/07/raca-de-cachorro-muito-popular-no-brasil-1.jpg",
+        "name": "Goldie",
+        "type": "fish",
+        "age": 1,
+        "weight": 0.5
+      }
+    ]
+  }

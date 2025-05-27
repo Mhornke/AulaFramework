@@ -1,75 +1,127 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ScrollView, Text, View, StyleSheet, Dimensions } from "react-native";
+import Header from "../../components/header";
+import { useEffect, useState } from "react";
+import React from "react"
+import Card from "../../components/card";
+//import dados from "../dados.json";
+//import { URL_API } from "@env";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+import { AnimalI } from "../../utils/types/animias";
+
+
+
+export default function Home() {
+    const [animais, setAnimais] = useState<AnimalI[]>([])
+    console.log(animais);
+    const { width, height } = Dimensions.get('window')
+
+
+    const styles = StyleSheet.create({
+        containerText: {
+            flexDirection: "row",
+            alignItems: "center",
+        },
+        text: {
+            fontSize: 15,
+            fontWeight: "semibold",
+        },
+
+        card: {
+
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 10,
+        },
+        cardTable: {
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "space-around",
+            padding: 20,
+
+
+
+
+        }
+    });
+
+    useEffect(() => {
+
+        async function buscaDados() {
+
+            try {
+                const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
+                const dados = await response.json()
+                console.log(response);
+                console.log(response);
+
+                setAnimais(dados)
+
+            } catch (error) {
+                console.log("erro ao buscar dados", error);
+
+            }
+        }
+        buscaDados()
+
+    }, []);
+
+
+    const listaAnimais = animais.map((animal) => (
+        <Card data={animal} key={animal.id} />
+    ))
+    // const listaPet = dados.pets.map((pet) => {
+    //     console.log(pet);
+
+    //     return <Card key={pet.id} pet={pet} />;
+    // });
+    if (!animais) return <Text>Carregando...</Text>;
+    if (width < 600) {
+
+
+        return (
+
+            <ScrollView>
+                <Header />
+                <View>
+                </View>
+                <View style={styles.containerText}>
+                    <Text style={{ fontWeight: "bold", fontSize: 20 }}>Seu</Text>
+                    <Text style={styles.text}>.Pet</Text>
+                    <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
+                </View>
+                <View style={styles.card}>
+                    {listaAnimais}
+                </View>
+            </ScrollView>
+
+        );
+    } else if (width >= 600) {
+
+        return (
+
+            <ScrollView>
+                <Header />
+
+                <View style={styles.containerText}>
+                    <Text style={{ fontWeight: "bold", fontSize: 20 }}>Seu</Text>
+                    <Text style={styles.text}>.Pet</Text>
+                    <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
+                </View>
+                <View style={styles.cardTable}>
+                    {listaAnimais}
+                </View>
+
+            </ScrollView>
+
+        );
+
+
+
+    }
+
+
+
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+
