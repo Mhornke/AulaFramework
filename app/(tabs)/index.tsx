@@ -8,6 +8,7 @@ import Card from "../../components/card";
 
 
 import { AnimalI } from "../../utils/types/animias";
+import Pesquisa from "@/components/pesquisa";
 
 
 
@@ -20,11 +21,14 @@ export default function Home() {
     const styles = StyleSheet.create({
         containerText: {
             flexDirection: "row",
-            alignItems: "center",
+            flexWrap: "wrap",
+            height: 20,
+            alignItems: "flex-end",
+            paddingLeft: 20,
         },
         text: {
             fontSize: 15,
-            fontWeight: "semibold",
+            fontWeight: '600',
         },
 
         card: {
@@ -83,13 +87,14 @@ export default function Home() {
 
             <ScrollView>
                 <Header />
+                <Pesquisa />
                 <View>
                 </View>
-                <View style={styles.containerText}>
-                    <Text style={{ fontWeight: "bold", fontSize: 20 }}>Seu</Text>
-                    <Text style={styles.text}>.Pet</Text>
+                <Text style={styles.containerText}>
+                    <Text style={{ fontWeight: "700", fontSize: 20 }}>Seu<Text style={styles.text}>.Pet</Text></Text>
+                    
                     <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
-                </View>
+                </Text>
                 <View style={styles.card}>
                     {listaAnimais}
                 </View>
@@ -102,10 +107,10 @@ export default function Home() {
 
             <ScrollView>
                 <Header />
-
+                <Pesquisa />
                 <View style={styles.containerText}>
-                    <Text style={{ fontWeight: "bold", fontSize: 20 }}>Seu</Text>
-                    <Text style={styles.text}>.Pet</Text>
+                    <Text style={{ fontWeight: "700", fontSize: 20 }}>Seu<Text style={styles.text}>.Pet</Text></Text>
+
                     <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
                 </View>
                 <View style={styles.cardTable}>

@@ -26,7 +26,7 @@ export default function Card( {data}:{data:AnimalI}   ) {
         </View>
         <View style={styles.butao}>
         <Link
-          href={`./app/(tabs)/${data.id}`} key={data.id}>   {/* erro ao transitar entre pastas */}
+          href={`/datails/${data.id}`} key={data.id}>   {/* erro ao transitar entre pastas */}
             
             
            <TouchableOpacity >

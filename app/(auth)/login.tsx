@@ -31,7 +31,7 @@ export default function Login() {
       const dados = await response.json();
       //logaAdotante(dados) armazenar contexto
       alert("Login realizado")
-      router.push("./");
+      router.push("/");
      }else{
       alert("Erro... Email ou Senha incorreto")
      }
@@ -131,7 +131,10 @@ export default function Login() {
       </View>
 
 
-
+<View >
+  <Text>E-mail dieizonos@gmail.com</Text>
+  <Text>Senha: @Atila123</Text>
+</View>
 
 
 

@@ -5,6 +5,7 @@ import Header from "../../components/header";
 import Colors from "../../theme/color";
 import dados from "../../dadosPedidos.json"
 
+
 // Definições de interfaces
 interface Adotante {
   id: string;
@@ -63,6 +64,7 @@ console.log(`dados do json ${dados.pedidos}`);
     return (
       <View style={{ height: height }}>
         <Header />
+        
         <ScrollView contentContainerStyle={{ alignItems: "center", padding: 16 }}>
           <Text style={{ fontSize: 25, fontWeight: "700" }}>Meus Pedidos (MOBILE)</Text>
 
