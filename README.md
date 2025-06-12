@@ -53,3 +53,4 @@ Join our community of developers creating universal apps.
 - npx expo start --clear
 ## Dependencias 
 - npm install react-hook-form
+- npm i react-native-toast-message

@@ -1,35 +1,30 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+} from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+
+// import Toast from "react-native-toast-message";
+import React, { useState } from "react";
+import { Link } from "expo-router";
+import { push } from "expo-router/build/global-state/routing";
 
 export default function Pesquisa() {
-  const handleSearch = (searchText) => {
-    console.log('Texto pesquisado:', searchText.trim()); // trim() remove espaços antes e depois
-    //  lógica de busca
-  };
+  const [termo, setTermo] = useState("");
 
-  return (
-    <View style={styles.screenContainer}>
-      <SearchBar onSearch={handleSearch} />
-      {/* adicionar outros componentes aqui */}
-    </View>
-  );
-}
 
-const SearchBar = ({ onSearch }) => {
-  const [searchText, setSearchText] = useState('');
+  
+  const enviaPesquisa = (text: any) =>{
+setTermo(text)
 
-  const handleSearch = () => {
-    const trimmed = searchText.trim();
-    if (trimmed !== '') {
-      onSearch(trimmed);
-    }
-  };
-
-  const handleClear = () => {
-    setSearchText('');
-    onSearch('');
-  };
+  }
+  function LimpaPesquisa() {
+    setTermo("");
+    push("/");
+  }
 
   return (
     <View style={styles.container}>
@@ -37,40 +32,42 @@ const SearchBar = ({ onSearch }) => {
         <TextInput
           style={styles.input}
           placeholder="Pesquisar..."
-          value={searchText}
-          onChangeText={setSearchText}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
+          value={termo}
+          onChangeText={enviaPesquisa }
+          
         />
 
-        {searchText.length > 0 && (
-          <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
+        {termo.length > 0 && (
+          <TouchableOpacity onPress={LimpaPesquisa} style={styles.clearButton}>
             <FontAwesome name="close" size={20} color="gray" />
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity onPress={handleSearch} style={styles.searchButton}>
-          <FontAwesome name="search" size={20} color="white" />
-        </TouchableOpacity>
+        <Link style={styles.searchButton}
+          href={{ pathname: "/pesquisa/[termo]", params: { termo } }}
+        ></Link>
       </View>
+      <TouchableOpacity onPress={LimpaPesquisa} style={styles.ClearButton}>
+        <Text>limpar</Text>
+      </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
     paddingTop: 15,
     paddingHorizontal: 15,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   container: {
-    marginBottom:50,
+    marginBottom: 50,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
     borderRadius: 25,
     paddingHorizontal: 15,
   },
@@ -83,9 +80,19 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   searchButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 20,
     padding: 8,
     marginLeft: 5,
+  },
+  ClearButton: {
+    backgroundColor: "green",
+    borderRadius: 10,
+    width: 100,
+    fontWeight: "500",
+    padding: 8,
+    marginLeft: 5,
+    color: "white",
+    alignItems: "center",
   },
 });
