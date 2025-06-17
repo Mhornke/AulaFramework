@@ -53,3 +53,8 @@ Join our community of developers creating universal apps.
 - npx expo start --clear
 ## Dependencias 
 - npm install react-hook-form
+- npm install @react-native-async-storage/async-storage
+
+
+## Links
+-- API Adote.com https://api-adocao-git-main-dieizons-projects.vercel.app/

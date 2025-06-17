@@ -131,9 +131,9 @@ export default function Login() {
       </View>
 
 
-<View >
-  <Text>E-mail dieizonos@gmail.com</Text>
-  <Text>Senha: @Atila123</Text>
+<View  style={{width:200, height:100, backgroundColor:"green", alignItems:"center", justifyContent:"center"}}>
+  <Text style={{color:"white"}} >E-mail dieizonos@gmail.com</Text>
+  <Text style={{color:"white"}} >Senha: @Atila123</Text>
 </View>
 
 

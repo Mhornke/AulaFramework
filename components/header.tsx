@@ -3,12 +3,12 @@ import { Link } from "expo-router";
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from "react";
 import Color from "../theme/color"
-
+import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
   const {width, height} = Dimensions.get('window')
-
+const {user} = useAuth()
   const styles = StyleSheet.create({
     Header: {
 
