@@ -7,8 +7,11 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
-  const {width, height} = Dimensions.get('window')
-const {user} = useAuth()
+  const { width, height } = Dimensions.get('window')
+  const { user } = useAuth()
+
+
+
   const styles = StyleSheet.create({
     Header: {
 
@@ -28,25 +31,25 @@ const {user} = useAuth()
       flex: 1,
       backgroundColor: 'rgba(0, 0, 0, 0.83)',
       justifyContent: 'flex-start',
-      alignItems: 'center',      
+      alignItems: 'center',
       paddingTop: 100,
-      
-      
+
+
 
     },
     textoMenu: {
       color: "#ffff",
       fontWeight: "500",
-      fontSize:20,
-      margin:10
-      
-      
+      fontSize: 20,
+      margin: 10
+
+
     },
-    textMenuTablet:{
+    textMenuTablet: {
       color: "#ffff",
       fontWeight: "medium",
-      fontSize:16,
-      margin:10
+      fontSize: 16,
+      margin: 10
     },
     texto: {
       color: "#ffff",
@@ -63,90 +66,124 @@ const {user} = useAuth()
     SetOpenMenu(!openMenu);
   };
 
-if (width < 600) {
-  return (
-    <View style={styles.Header}>
-      
-      <View   style={styles.logo}>
-        <Link href="/">
-        <Image
-          source={{
-            uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
-          }}
-          style={{ width: 40, height: 40 }}
-        />
-</Link>
-        <Text style={styles.texto}>Adote</Text>
-        <Text style={styles.texto}>.Com </Text>
- 
-      </View>
+  if (width < 600) {
+    return (
+      <View style={styles.Header}>
 
-      <View>
-        <TouchableOpacity onPress={clickMenu}>
-          <FontAwesome name={openMenu ? 'times' : 'bars'} size={30} color="white" />
-        </TouchableOpacity>
+        <View style={styles.logo}>
+          <Link href="/">
+            <Image
+              source={{
+                uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
+              }}
+              style={{ width: 40, height: 40 }}
+            />
+          </Link>
+          <Text style={styles.texto}>Adote</Text>
+          <Text style={styles.texto}>.Com </Text>
 
-        <Modal  visible={openMenu} transparent animationType="fade">
-          <TouchableOpacity activeOpacity={1}
-            style={styles.menu}
-            onPress={() => SetOpenMenu(false)}>
+        </View>
 
-            <View  >
-              <Link href="/">
-                <Text style={styles.textoMenu}>Home</Text>
-              </Link>
-              <Link href="/(auth)/login">
-                <Text style={styles.textoMenu}>Login</Text>
-              </Link>
-              <Link href="/(auth)/register">
-                <Text style={styles.textoMenu}>Cadastro</Text>
-              </Link>
-              <Link href="/pedidos">
-                <Text style={styles.textoMenu}>Pedidos</Text>
-              </Link>
-            </View>
+        <View>
+          <TouchableOpacity onPress={clickMenu}>
+            <FontAwesome name={openMenu ? 'times' : 'bars'} size={30} color="white" />
           </TouchableOpacity>
-        </Modal>
-      </View>
-    </View>
-  );
-}else if (width >= 600){
 
-  return (
-    <View style={styles.Header}>
-      
-      <View   style={styles.logo}>
-        <Link href="/">
-        <Image
-          source={{
-            uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
-          }}
-          style={{ width: 40, height: 40 }}
-        />
-</Link>
-        <Text style={styles.texto}>Adote</Text>
-        <Text style={styles.texto}>.Com </Text>
- 
-      </View>        
-
-            <View  style={{alignItems:"center", flexDirection:"row"}}>
+          <Modal visible={openMenu} transparent animationType="fade">
+            <TouchableOpacity activeOpacity={1}
+              style={styles.menu}
+              onPress={() => SetOpenMenu(false)}>
               
-              <Link href="/(auth)/login">
-                <Text style={styles.textMenuTablet}>Login</Text>
-              </Link>
-              <Link href="/(auth)/register">
-                <Text style={styles.textMenuTablet}>Cadastro</Text>
-              </Link>
-              <Link href="/pedidos">
-                <Text style={styles.textMenuTablet}>Pedidos</Text>
-              </Link>
-            </View>
-         
-        
+              {user ? (<View>
+                <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
+                <Link href="/">
+                  <Text style={styles.textoMenu}>Home</Text>
+                </Link>
+                <Link href="/pedidos">
+                  <Text style={styles.textoMenu}>Pedidos</Text>
+                </Link>
+                {/* Adicione botão de logout se quiser */}
+              </View>
+              
+            ) : (
+
+                <View  >
+                  <Link href="/">
+                    <Text style={styles.textoMenu}>Home</Text>
+                  </Link>
+                  <Link href="/(auth)/login">
+                    <Text style={styles.textoMenu}>Login</Text>
+                  </Link>
+                  <Link href="/(auth)/register">
+                    <Text style={styles.textoMenu}>Cadastro</Text>
+                  </Link>
+                  <Link href="/pedidos">
+                    <Text style={styles.textoMenu}>Pedidos</Text>
+                  </Link>
+                </View>
+              )}
+              
+            </TouchableOpacity>
+          </Modal>
+        </View>
+      </View >
+    );
+  } else if (width >= 600) {
+
+    return (
+      <View style={styles.Header}>
+
+        <View style={styles.logo}>
+          <Link href="/">
+            <Image
+              source={{
+                uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
+              }}
+              style={{ width: 40, height: 40 }}
+            />
+          </Link>
+          <Text style={styles.texto}>Adote</Text>
+          <Text style={styles.texto}>.Com </Text>
+
+        </View>
+
+       
+
+          {user ? (<View style={{ alignItems: "center", flexDirection: "row" }}>
+                <Text style={styles.textMenuTablet}>Olá, {user.nome}</Text>
+                <Link href="/">
+                  <Text style={styles.textMenuTablet}>Home</Text>
+                </Link>
+                <Link href="/pedidos">
+                  <Text style={styles.textMenuTablet}>Pedidos</Text>
+                </Link>
+                {/* Adicione botão de logout se quiser */}
+              </View>
+              
+            ) : (
+
+                <View style={{ alignItems: "center", flexDirection: "row" }} >
+                  <Link href="/">
+                    <Text style={styles.textMenuTablet}>Home</Text>
+                  </Link>
+                  <Link href="/(auth)/login">
+                    <Text style={styles.textMenuTablet}>Login</Text>
+                  </Link>
+                  <Link href="/(auth)/register">
+                    <Text style={styles.textMenuTablet}>Cadastro</Text>
+                  </Link>
+                  <Link href="/pedidos">
+                    <Text style={styles.textMenuTablet}>Pedidos</Text>
+                  </Link>
+                </View>
+              )}
+        </View>
+
+
+
       
-    </View>
-  );
-}
-  
+    );
+  }
+
 }
 

@@ -10,7 +10,7 @@ interface User {
 
 interface AuthContextData {
   user: User | null;
-  login: (userData: User) => Promise<void>;
+  login: (userData: User, persist?:boolean) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loadUser();
   }, []);
 
-  const login = async (userData: User) => {
+  const login = async (userData: User, persist:boolean= false) => {
     setUser(userData);
     await Storage.setItem('user', JSON.stringify(userData));
   };

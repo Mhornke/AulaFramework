@@ -3,38 +3,46 @@ import { Link, router } from "expo-router";
 import Header from "../../components/header";
 import Color from "../../theme/color"
 import { useForm, Controller } from 'react-hook-form'
+import { useAuth } from "@/context/AuthContext";
+
 type Input = {
-  email:string,
-  senha:string,
-  manter:boolean
+  email: string,
+  senha: string,
+  manter: boolean
 }
 
 export default function Login() {
   const { control, handleSubmit, formState: { errors } } = useForm<Input>({
-    defaultValues:{
-      email:"",
-      senha:"",
-      manter:false
+    defaultValues: {
+      email: "",
+      senha: "",
+      manter: false
     }
   });
+  const { login } = useAuth()
 
-  async function onSubmit (data: Input)  {
+  async function onSubmit(data: Input) {
     //console.log("dados do input", data);
     const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/adotantes/login`, {
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       method: "POST",
       body: JSON.stringify({ email: data.email, senha: data.senha })
-  });
-     if (response.status === 200){
+    });
+    if (response.status === 200) {
       const dados = await response.json();
       //logaAdotante(dados) armazenar contexto
       alert("Login realizado")
+      
+      if (data.manter){
+        await login(dados)
+      }
+      
       router.push("/");
-     }else{
+    } else {
       alert("Erro... Email ou Senha incorreto")
-     }
+    }
 
 
   }
@@ -55,7 +63,7 @@ export default function Login() {
           style={{ width: 100, height: 100 }}
         />
         <View style={styles.container}>
-          <Text style={{ color: "#ffff", fontWeight: "bold", fontSize:20 }}>Informe seus Dados de Acesso</Text>
+          <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>Informe seus Dados de Acesso</Text>
 
           <View style={styles.containerInputs}>
             <Text style={styles.texto}>Email</Text>
@@ -95,14 +103,14 @@ export default function Login() {
               )}
             />
           </View>
-          <View style={{ flex: 1, flexDirection: "row", alignItems: "center", alignContent:"space-between" }}>
+          <View style={{ flex: 1, flexDirection: "row", alignItems: "center", alignContent: "space-between" }}>
 
             <View style={{ flexDirection: "row", padding: 5 }}>
               <Controller
                 control={control}
                 name="manter"
                 defaultValue={false}
-                
+
                 render={({ field: { onChange, value } }) => (
 
                   <Switch
@@ -122,19 +130,19 @@ export default function Login() {
 
           </View>
 
-                  <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
-                    <Text style={{color:"#ffff", fontWeight:"400", fontSize:16}}>Entrar</Text>
+          <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
+            <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Entrar</Text>
 
-                  </TouchableOpacity>
+          </TouchableOpacity>
         </View>
 
       </View>
 
 
-<View  style={{width:200, height:100, backgroundColor:"green", alignItems:"center", justifyContent:"center"}}>
-  <Text style={{color:"white"}} >E-mail dieizonos@gmail.com</Text>
-  <Text style={{color:"white"}} >Senha: @Atila123</Text>
-</View>
+      <View style={{ width: 200, height: 100, backgroundColor: "green", alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ color: "white" }} >E-mail dieizonos@gmail.com</Text>
+        <Text style={{ color: "white" }} >Senha: @Atila123</Text>
+      </View>
 
 
 
@@ -156,8 +164,8 @@ const styles = StyleSheet.create({
   containerInputs: {
     flex: 1,
     flexDirection: "column",
-    justifyContent:"space-around",
-    padding:10
+    justifyContent: "space-around",
+    padding: 10
 
   },
   inputs: {
@@ -167,10 +175,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   botao: {
-backgroundColor:Color.Butao,
-padding:10,
-borderRadius:5,
-alignItems:"center"
+    backgroundColor: Color.Butao,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center"
   }
 
 })
