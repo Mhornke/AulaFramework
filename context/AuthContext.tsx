@@ -5,7 +5,7 @@ import {Storage} from "../utils/types/storege"
 interface User {
   id: string;
   nome: string;
-  // outros campos que você quiser
+  email?:string
 }
 
 interface AuthContextData {
