@@ -1,11 +1,12 @@
 // contexts/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {Storage} from "../utils/types/storege"
+//import {Storage} from "../utils/types/storege"
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface User {
   id: string;
   nome: string;
-  // outros campos que você quiser
+  email:string
 }
 
 interface AuthContextData {
@@ -24,7 +25,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Carregar usuário salvo ao iniciar
     const loadUser = async () => {
-      const userData = await Storage.getItem('user');
+      const userData = await AsyncStorage.getItem('user');
       if (userData) {
         setUser(JSON.parse(userData));
       }
@@ -35,13 +36,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (userData: User, persist:boolean= false) => {
     setUser(userData);
-    await Storage.setItem('user', JSON.stringify(userData));
+    await AsyncStorage.setItem('user', JSON.stringify(userData));
   };
 
+
   const logout = async () => {
-    setUser(null);
-    await Storage.removeItem('user');
-  };
+  await AsyncStorage.removeItem('user');
+  console.log("Usuário removido do storage");
+  setUser(null);
+};
+
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isLoading }}>

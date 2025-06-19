@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, Modal } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, Modal, Alert } from "react-native";
 import { Link } from "expo-router";
 import { FontAwesome } from '@expo/vector-icons';
 import { useState } from "react";
@@ -8,9 +8,22 @@ import { useAuth } from "@/context/AuthContext";
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
   const { width, height } = Dimensions.get('window')
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
 
-
+  const sair = () => {
+    console.log("logout sendo");
+    
+    Alert.alert(
+      "Confirmação",
+      "Você realmente deseja sair?",
+      [
+        {
+          text: "Cancelar", style: "cancel"
+        },
+        { text: "Sim", onPress: () => logout() },
+      ]
+    );
+  }
 
   const styles = StyleSheet.create({
     Header: {
@@ -92,20 +105,31 @@ export default function Header() {
           <Modal visible={openMenu} transparent animationType="fade">
             <TouchableOpacity activeOpacity={1}
               style={styles.menu}
-              onPress={() => SetOpenMenu(false)}>
-              
-              {user ? (<View>
-                <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
-                <Link href="/">
-                  <Text style={styles.textoMenu}>Home</Text>
-                </Link>
-                <Link href="/pedidos">
-                  <Text style={styles.textoMenu}>Pedidos</Text>
-                </Link>
-                {/* Adicione botão de logout se quiser */}
-              </View>
-              
-            ) : (
+              onPressOut={() => SetOpenMenu(false)}>
+
+              {user ? (
+                <View>
+                  <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
+                  <Link href="/">
+                    <Text style={styles.textoMenu}>Home</Text>
+                  </Link>
+                  <Link href="/pedidos">
+                    <Text style={styles.textoMenu}>Pedidos</Text>
+                  </Link>
+
+                  <TouchableOpacity onPress={sair}>
+                    <Text style={{
+                      color: "#0000CD",
+                      fontWeight: "500",
+                      fontSize: 20,
+                      margin: 10
+                    }}>Sair</Text>
+
+                  </TouchableOpacity>
+
+                </View>
+
+              ) : (
 
                 <View  >
                   <Link href="/">
@@ -117,14 +141,13 @@ export default function Header() {
                   <Link href="/(auth)/register">
                     <Text style={styles.textoMenu}>Cadastro</Text>
                   </Link>
-                  <Link href="/pedidos">
-                    <Text style={styles.textoMenu}>Pedidos</Text>
-                  </Link>
+
                 </View>
               )}
-              
+
             </TouchableOpacity>
           </Modal>
+          
         </View>
       </View >
     );
@@ -147,41 +170,47 @@ export default function Header() {
 
         </View>
 
-       
 
-          {user ? (<View style={{ alignItems: "center", flexDirection: "row" }}>
-                <Text style={styles.textMenuTablet}>Olá, {user.nome}</Text>
-                <Link href="/">
-                  <Text style={styles.textMenuTablet}>Home</Text>
-                </Link>
-                <Link href="/pedidos">
-                  <Text style={styles.textMenuTablet}>Pedidos</Text>
-                </Link>
-                {/* Adicione botão de logout se quiser */}
-              </View>
-              
-            ) : (
 
-                <View style={{ alignItems: "center", flexDirection: "row" }} >
-                  <Link href="/">
-                    <Text style={styles.textMenuTablet}>Home</Text>
-                  </Link>
-                  <Link href="/(auth)/login">
-                    <Text style={styles.textMenuTablet}>Login</Text>
-                  </Link>
-                  <Link href="/(auth)/register">
-                    <Text style={styles.textMenuTablet}>Cadastro</Text>
-                  </Link>
-                  <Link href="/pedidos">
-                    <Text style={styles.textMenuTablet}>Pedidos</Text>
-                  </Link>
-                </View>
-              )}
+        {user ? (<View style={{ alignItems: "center", flexDirection: "row" }}>
+          <Text style={styles.textMenuTablet}>Olá, {user.nome}</Text>
+          <Link href="/">
+            <Text style={styles.textMenuTablet}>Home</Text>
+          </Link>
+          <Link href="/pedidos">
+            <Text style={styles.textMenuTablet}>Pedidos</Text>
+          </Link>
+          <TouchableOpacity onPress={sair}>
+            <Text style={{
+              color: "#0000CD",
+              fontWeight: "500",
+              fontSize: 20,
+              margin: 10
+            }}>Sair</Text>
+
+          </TouchableOpacity>
+
         </View>
 
+        ) : (
+
+          <View style={{ alignItems: "center", flexDirection: "row" }} >
+            <Link href="/">
+              <Text style={styles.textMenuTablet}>Home</Text>
+            </Link>
+            <Link href="/(auth)/login">
+              <Text style={styles.textMenuTablet}>Login</Text>
+            </Link>
+            <Link href="/(auth)/register">
+              <Text style={styles.textMenuTablet}>Cadastro</Text>
+            </Link>
+          </View>
+        )}
+      </View>
 
 
-      
+
+
     );
   }
 

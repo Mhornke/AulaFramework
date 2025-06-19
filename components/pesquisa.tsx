@@ -11,7 +11,7 @@ export default function Pesquisa() {
   return (
     <View style={styles.screenContainer}>
       <SearchBar onSearch={handleSearch} />
-      {/* adicionar outros componentes aqui */}
+      
     </View>
   );
 }
