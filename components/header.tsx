@@ -11,19 +11,10 @@ export default function Header() {
   const { user, logout } = useAuth()
 
   const sair = () => {
-    console.log("logout sendo");
-    
-    Alert.alert(
-      "Confirmação",
-      "Você realmente deseja sair?",
-      [
-        {
-          text: "Cancelar", style: "cancel"
-        },
-        { text: "Sim", onPress: () => logout() },
-      ]
-    );
-  }
+    console.log("logout sendo disparado");
+    alert("Deslogado com sucesso!!")
+     logout() 
+      }
 
   const styles = StyleSheet.create({
     Header: {

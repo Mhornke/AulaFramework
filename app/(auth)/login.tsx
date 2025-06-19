@@ -33,11 +33,10 @@ export default function Login() {
     if (response.status === 200) {
       const dados = await response.json();
       //logaAdotante(dados) armazenar contexto
-      alert("Login realizado")
+      alert("Login realizado")      
       
-      if (data.manter){
-        await login(dados)
-      }
+        await login(dados, data.manter)
+      
       
       router.push("/");
     } else {

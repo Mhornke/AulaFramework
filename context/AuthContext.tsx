@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface User {
   id: string;
   nome: string;
-  email:string
+  email?:string
 }
 
 interface AuthContextData {
@@ -36,7 +36,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (userData: User, persist:boolean= false) => {
     setUser(userData);
-    await AsyncStorage.setItem('user', JSON.stringify(userData));
+    if (persist) {
+      
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+    }
   };
 
 
