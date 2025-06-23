@@ -51,10 +51,8 @@ export default function Login() {
   const comprimento = Dimensions.get('window').height
 
   return (
-    <View style={{ backgroundColor: Color.CorFundo, width: largura, height: comprimento }} >
-      <Header />
-
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+    <View style={{ backgroundColor: Color.CorFundo, height:comprimento }} >
+           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <Image
           source={{
             uri: "https://raw.githubusercontent.com/DieizonOliveira/frontAdocao/refs/heads/main/public/logo2.png",
@@ -135,13 +133,13 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-      </View>
-
-
-      <View style={{ width: 200, height: 100, backgroundColor: "green", alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 400, height:50,  backgroundColor: "green", alignItems: "center", justifyContent: "center" }}>
         <Text style={{ color: "white" }} >E-mail dieizonos@gmail.com</Text>
         <Text style={{ color: "white" }} >Senha: @Atila123</Text>
       </View>
+      </View>
+
+
 
 
 
@@ -154,7 +152,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Color.CardFundo,
     padding: 50,
-    height: 500
+    height: "60%"
   },
   texto: {
     color: "#ffff",

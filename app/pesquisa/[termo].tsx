@@ -73,7 +73,7 @@ export default function ResultadoPesquisa() {
   if (width < 600) {
     return (
       <ScrollView>
-        <Header />
+        
         <Pesquisa />
         <View></View>
         <Text style={styles.containerText}>

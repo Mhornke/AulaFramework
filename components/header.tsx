@@ -13,8 +13,8 @@ export default function Header() {
   const sair = () => {
     console.log("logout sendo disparado");
     alert("Deslogado com sucesso!!")
-     logout() 
-      }
+    logout()
+  }
 
   const styles = StyleSheet.create({
     Header: {
@@ -107,6 +107,9 @@ export default function Header() {
                   <Link href="/pedidos">
                     <Text style={styles.textoMenu}>Pedidos</Text>
                   </Link>
+                  <Link href="../components/cadastro">
+                    <Text style={styles.textoMenu}>Cadastre de animais</Text>
+                  </Link>
 
                   <TouchableOpacity onPress={sair}>
                     <Text style={{
@@ -133,12 +136,13 @@ export default function Header() {
                     <Text style={styles.textoMenu}>Cadastro</Text>
                   </Link>
 
+
                 </View>
               )}
 
             </TouchableOpacity>
           </Modal>
-          
+
         </View>
       </View >
     );
@@ -170,6 +174,9 @@ export default function Header() {
           </Link>
           <Link href="/pedidos">
             <Text style={styles.textMenuTablet}>Pedidos</Text>
+          </Link>
+          <Link href="/(tabs)/cadastro">
+            <Text style={styles.textMenuTablet}>Cadastre um animais</Text>
           </Link>
           <TouchableOpacity onPress={sair}>
             <Text style={{

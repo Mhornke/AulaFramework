@@ -63,7 +63,7 @@ console.log(`dados do json ${dados.pedidos}`);
     // Telas pequenas (celulares)
     return (
       <View style={{ height: height }}>
-        <Header />
+       
         
         <ScrollView contentContainerStyle={{ alignItems: "center", padding: 16 }}>
           <Text style={{ fontSize: 25, fontWeight: "700" }}>Meus Pedidos (MOBILE)</Text>

@@ -63,7 +63,7 @@ export default function Cadastrado() {
   return (
     <View style={{ backgroundColor: Color.CorFundo, height: comprimento }} >
       
-      <Header />
+      
       
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <View style={styles.container}>

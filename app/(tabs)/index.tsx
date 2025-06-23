@@ -105,8 +105,7 @@ export default function Home() {
 
         return (
 
-            <ScrollView>
-                <Header />
+            <ScrollView>                
                 <Pesquisa />
                 <View style={styles.containerText}>
                     <Text style={{ fontWeight: "700", fontSize: 20 }}>Seu<Text style={styles.text}>.Pet</Text></Text>
