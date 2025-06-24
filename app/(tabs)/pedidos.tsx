@@ -4,6 +4,7 @@ import Header from "../../components/header";
 //import { useAdotanteStore } from "@/context/adotante"; // Contexto do adotante
 import Colors from "../../theme/color";
 import dados from "../../dadosPedidos.json"
+import { useAuth } from "@/context/AuthContext";
 
 
 // Definições de interfaces
@@ -30,35 +31,36 @@ export default function PedidosPage() {
 console.log(`dados do json ${dados.pedidos}`);
   
  const { width, height } = Dimensions.get('window');
-  const [pedidos, setPedidos] = useState<Pedido[]>([]); // Estado para armazenar os pedidos
-  //const { adotante } = useAdotanteStore(); // Obtém o adotante logado
-  //console.log("Adotante logado:", adotante); // Log do adotante
-
-  // useEffect(() => {
-  //   const fetchPedidos = async () => {
-  //     if (adotante && adotante.id) { // Verifica se adotante e adotante.id estão disponíveis
-  //       console.log("ID do adotante:", adotante.id); // Log do ID do adotante
-  //       try {
-  //         const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/pedidos?adotanteId=${adotante.id}`);
-  //         if (response.ok) {
-  //           const dados = await response.json();
-  //           console.log("Dados recebidos:", dados); // Log dos dados recebidos
-  //           setPedidos(dados); // Armazena os dados no estado
-  //         } else {
-  //           console.error("Erro ao buscar pedidos:", response.statusText);
-  //         }
-  //       } catch (error) {
-  //         console.error("Erro ao buscar pedidos:", error);
-  //       }
-  //     } else {
-  //       console.warn("Adotante não está logado ou não possui ID."); // Log de aviso
-  //     }
-  //   };
-
-  //   fetchPedidos(); // Chama a função para buscar pedidos
-  // }, [adotante]); // Dependência para recarregar quando o adotante mudar
+  const [pedidos, setPedidos] = useState<Pedido[]>([]); 
   
-  //console.log("Pedidos armazenados:", pedidos); // Log dos pedidos armazenados
+  const { user } = useAuth(); 
+  console.log("Adotante logado:", user); 
+
+  useEffect(() => {
+    const buscaPedidos = async () => {
+      if (user && user.id) { 
+        console.log("ID do adotante:", user.id); 
+        try {
+          const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/pedidos?adotanteId=${user.id}`);
+          if (response.ok) {
+            const dados = await response.json();
+            console.log("Dados recebidos:", dados); 
+            setPedidos(dados); 
+          } else {
+            console.error("Erro ao buscar pedidos:", response.statusText);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar pedidos:", error);
+        }
+      } else {
+        console.warn("Adotante não está logado ou não possui ID."); 
+      }
+    };
+
+    buscaPedidos(); 
+  }, [user]); 
+  
+  console.log("Pedidos armazenados:", pedidos); 
  if (width < 600) {
     // Telas pequenas (celulares)
     return (
