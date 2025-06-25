@@ -1,70 +1,66 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, Modal, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  Modal,
+  Alert,
+} from "react-native";
 import { Link } from "expo-router";
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
-import Color from "../theme/color"
+import Color from "../theme/color";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
-  const { width, height } = Dimensions.get('window')
-  const { user, logout } = useAuth()
+  const { width, height } = Dimensions.get("window");
+  const { user, logout } = useAuth();
 
   const sair = () => {
     console.log("logout sendo disparado");
-    alert("Deslogado com sucesso!!")
-    logout()
-  }
+    alert("Deslogado com sucesso!!");
+    logout();
+  };
 
   const styles = StyleSheet.create({
     Header: {
-
       flexDirection: "row",
       backgroundColor: Color.CorFundo,
       padding: 15,
       justifyContent: "space-between",
       alignItems: "center",
-
     },
     logo: {
       flexDirection: "row",
       alignItems: "center",
     },
     menu: {
-
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.83)',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
+      backgroundColor: "rgba(0, 0, 0, 0.83)",
+      justifyContent: "flex-start",
+      alignItems: "center",
       paddingTop: 100,
-
-
-
     },
     textoMenu: {
       color: "#ffff",
       fontWeight: "500",
       fontSize: 20,
-      margin: 10
-
-
+      margin: 10,
     },
     textMenuTablet: {
       color: "#ffff",
       fontWeight: "medium",
       fontSize: 16,
-      margin: 10
+      margin: 10,
     },
     texto: {
       color: "#ffff",
-      fontWeight: "700"
+      fontWeight: "700",
     },
-
-
-
-
   });
-
 
   const clickMenu = () => {
     SetOpenMenu(!openMenu);
@@ -73,7 +69,6 @@ export default function Header() {
   if (width < 600) {
     return (
       <View style={styles.Header}>
-
         <View style={styles.logo}>
           <Link href="/">
             <Image
@@ -85,47 +80,60 @@ export default function Header() {
           </Link>
           <Text style={styles.texto}>Adote</Text>
           <Text style={styles.texto}>.Com </Text>
-
         </View>
 
         <View>
           <TouchableOpacity onPress={clickMenu}>
-            <FontAwesome name={openMenu ? 'times' : 'bars'} size={30} color="white" />
+            <FontAwesome
+              name={openMenu ? "times" : "bars"}
+              size={30}
+              color="white"
+            />
           </TouchableOpacity>
 
           <Modal visible={openMenu} transparent animationType="fade">
-            <TouchableOpacity activeOpacity={1}
-              style={styles.menu}
-              onPressOut={() => SetOpenMenu(false)}>
 
+              <TouchableOpacity
+              style={{position:"absolute", zIndex:9999,}}
+              onPressOut={() => SetOpenMenu(false)}>
+                <FontAwesome
+                  name={openMenu ? "times" : "bars"}
+                  size={30}
+                  color="white"
+                />
+              </TouchableOpacity>
+
+
+            <View style={styles.menu}>
+              
               {user ? (
                 <View>
                   <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
                   <Link href="/">
                     <Text style={styles.textoMenu}>Home</Text>
                   </Link>
-                  <Link href="/pedidos">
+                  <Link href="/(tabs)/pedidos">
                     <Text style={styles.textoMenu}>Pedidos</Text>
                   </Link>
-                  <Link href="../components/cadastro">
+                  <Link href="/cadastro">
                     <Text style={styles.textoMenu}>Cadastro de animais</Text>
                   </Link>
 
                   <TouchableOpacity onPress={sair}>
-                    <Text style={{
-                      color: "#0000CD",
-                      fontWeight: "500",
-                      fontSize: 20,
-                      margin: 10
-                    }}>Sair</Text>
-
+                    <Text
+                      style={{
+                        color: "#0000CD",
+                        fontWeight: "500",
+                        fontSize: 20,
+                        margin: 10,
+                      }}
+                    >
+                      Sair
+                    </Text>
                   </TouchableOpacity>
-
                 </View>
-
               ) : (
-
-                <View  >
+                <View>
                   <Link href="/">
                     <Text style={styles.textoMenu}>Home</Text>
                   </Link>
@@ -135,22 +143,16 @@ export default function Header() {
                   <Link href="/(auth)/register">
                     <Text style={styles.textoMenu}>Cadastro</Text>
                   </Link>
-
-
                 </View>
               )}
-
-            </TouchableOpacity>
+            </View>
           </Modal>
-
         </View>
-      </View >
+      </View>
     );
   } else if (width >= 600) {
-
     return (
       <View style={styles.Header}>
-
         <View style={styles.logo}>
           <Link href="/">
             <Image
@@ -162,37 +164,35 @@ export default function Header() {
           </Link>
           <Text style={styles.texto}>Adote</Text>
           <Text style={styles.texto}>.Com </Text>
-
         </View>
 
-
-
-        {user ? (<View style={{ alignItems: "center", flexDirection: "row" }}>
-          <Text style={styles.textMenuTablet}>Olá, {user.nome}</Text>
-          <Link href="/">
-            <Text style={styles.textMenuTablet}>Home</Text>
-          </Link>
-          <Link href="/pedidos">
-            <Text style={styles.textMenuTablet}>Pedidos</Text>
-          </Link>
-          <Link href="/(tabs)/cadastro">
-            <Text style={styles.textMenuTablet}>Cadastro de animais</Text>
-          </Link>
-          <TouchableOpacity onPress={sair}>
-            <Text style={{
-              color: "#0000CD",
-              fontWeight: "500",
-              fontSize: 20,
-              margin: 10
-            }}>Sair</Text>
-
-          </TouchableOpacity>
-
-        </View>
-
+        {user ? (
+          <View style={{ alignItems: "center", flexDirection: "row" }}>
+            <Text style={styles.textMenuTablet}>Olá, {user.nome}</Text>
+            <Link href="/">
+              <Text style={styles.textMenuTablet}>Home</Text>
+            </Link>
+            <Link href="/pedidos">
+              <Text style={styles.textMenuTablet}>Pedidos</Text>
+            </Link>
+            <Link href="/(tabs)/cadastro">
+              <Text style={styles.textMenuTablet}>Cadastro de animais</Text>
+            </Link>
+            <TouchableOpacity onPress={sair}>
+              <Text
+                style={{
+                  color: "#0000CD",
+                  fontWeight: "500",
+                  fontSize: 20,
+                  margin: 10,
+                }}
+              >
+                Sair
+              </Text>
+            </TouchableOpacity>
+          </View>
         ) : (
-
-          <View style={{ alignItems: "center", flexDirection: "row" }} >
+          <View style={{ alignItems: "center", flexDirection: "row" }}>
             <Link href="/">
               <Text style={styles.textMenuTablet}>Home</Text>
             </Link>
@@ -205,12 +205,6 @@ export default function Header() {
           </View>
         )}
       </View>
-
-
-
-
     );
   }
-
 }
-
