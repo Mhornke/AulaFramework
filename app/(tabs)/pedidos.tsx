@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, Dimensions, ScrollView } from "react-native";
 import Header from "../../components/header";
-//import { useAdotanteStore } from "@/context/adotante"; // Contexto do adotante
 import Colors from "../../theme/color";
 import dados from "../../dadosPedidos.json"
 import { useAuth } from "@/context/AuthContext";
@@ -22,8 +21,8 @@ interface Pedido {
   id: string;
   animal: Animal;
   descricao: string;
-  resposta?: string; // Esse campo pode ser opcional
-  createdAt: string; // ou Date, dependendo do que você está recebendo
+  resposta?: string; 
+  createdAt: string; 
   adotante: Adotante;
 }
 
@@ -62,7 +61,7 @@ console.log(`dados do json ${dados.pedidos}`);
   
   console.log("Pedidos armazenados:", pedidos); 
  if (width < 600) {
-    // Telas pequenas (celulares)
+    
     return (
       <View style={{ height: height }}>
        

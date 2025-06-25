@@ -1,15 +1,32 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Dimensions, TouchableOpacity, Image, StyleSheet, Alert, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { RadioButton } from 'react-native-paper';
+import RNPickerSelect from 'react-native-picker-select';
+import Colors from '@/theme/color';
 
-
+type Inputs = {
+  nome: string
+  idade: number
+  sexo: string
+  foto: string
+  descricao: string
+  porte: string
+  especieId: string
+}
 export default function Cadastrado() {
   const [name, setName] = useState('');
-  const [species, setSpecies] = useState('');
-  const [size, setSize] = useState('médio');
-  const [gender, setGender] = useState('macho');
+
+  const [especies, setEspecies] = useState<{ id: string; nome: string }[]>([]);
+  const [especieId, setEspecieId] = useState<string | null>(null);
+
+  const [size, setSize] = useState('Medio');
+  const [age, setAge] = useState('');
+  const [description, setDescription] = useState('');
+  const [gender, setGender] = useState('Macho');
   const [image, setImage] = useState(null);
+  const URL = "http://localhost:3004";
+  const { width } = Dimensions.get('window');
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -23,114 +40,349 @@ export default function Cadastrado() {
       setImage(result.assets[0].uri);
     }
   };
+  useEffect(() => {
+    async function getEspecies() {
+      try {
+        const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/especies`)
+        const dados = await response.json()
+        setEspecies(dados)
+      } catch (error) {
+        alert("erro ao buscar especies"
+        )
+      }
+    }
+    getEspecies()
+  }, [])
+  async function handleSubmit(): Promise<void> {
 
-  const handleSubmit = () => {
-    const animalData = {
-      name,
-      species,
-      size,
-      gender,
-      image
-    };
-    console.log('Dados do animal:', animalData);
-    // Aqui você pode enviar os dados para sua API ou banco de dados
-  };
+    const novoAnimal: Inputs = {
+      nome: name,
+      idade: Number(age),
+      sexo: gender,
+      foto: image ?? '',
+      descricao: description,
+      porte: size,
+      especieId: especieId ?? "",
+    }
+    console.log("dados recebido dos inputs:", JSON.stringify(novoAnimal, null, 2));
 
+
+    try {
+      const response = await fetch(`${URL}/animais`, {
+        method: "POST",
+        body: JSON.stringify(novoAnimal),
+      })
+
+
+      // Captura e log da resposta da API
+      const responseData = await response.json();
+      console.log("Response Data:", responseData);
+
+
+
+      if (response.ok) {
+        Alert.alert("Ok! Animal cadastrado com sucesso.")
+
+      } else {
+        console.error("Erro no cadastro:", responseData);
+        Alert.alert("Erro no cadastro do animal.")
+      }
+    } catch (error) {
+      console.error("Erro no fetch:", error);
+      Alert.alert("Erro na comunicação com o servidor.")
+    }
+  }
+  const especiesOptions = especies.map((item) => ({
+    label: item.nome,
+    value: item.id.toString(),
+  }));
+
+
+  if (width > 600) {
   return (
-    <View contentContainerStyle={styles.container}>
-      
+    <View style={styles.containerLarge}>
       <Text style={styles.title}>Cadastro de Animal</Text>
 
-      {/* Campo para foto */}
-      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
-        ) : (
-          <Text style={styles.imagePlaceholder}>+ Adicionar Foto</Text>
-        )}
-      </TouchableOpacity>
-
-      {/* Campo para nome */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Nome do Animal</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Digite o nome do animal"
-          value={name}
-          onChangeText={setName}
-        />
-      </View>
-
-      {/* Campo para espécie */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Espécie</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex: Cachorro, Gato, Pássaro"
-          value={species}
-          onChangeText={setSpecies}
-        />
-      </View>
-
-      {/* Seleção de tamanho */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Tamanho</Text>
-        <View style={styles.radioGroup}>
-          <TouchableOpacity 
-            style={[styles.radioButton, size === 'pequeno' && styles.radioButtonSelected]}
-            onPress={() => setSize('pequeno')}
-          >
-            <Text style={styles.radioText}>Pequeno</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.radioButton, size === 'médio' && styles.radioButtonSelected]}
-            onPress={() => setSize('médio')}
-          >
-            <Text style={styles.radioText}>Médio</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.radioButton, size === 'grande' && styles.radioButtonSelected]}
-            onPress={() => setSize('grande')}
-          >
-            <Text style={styles.radioText}>Grande</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Seleção de sexo */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Sexo</Text>
-        <View style={styles.radioGroup}>
-          <View style={styles.radioOption}>
-            <RadioButton
-              value="macho"
-              status={gender === 'macho' ? 'checked' : 'unchecked'}
-              onPress={() => setGender('macho')}
-              color="#4CAF50"
-            />
-            <Text style={styles.radioText}>Macho</Text>
+      <View >
+        {/* Linha 1 - Foto e Descrição */}
+        <View style={styles.row}>
+          {/* Coluna da Foto */}
+          <View style={styles.column}>
+            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+              {image ? (
+                <Image source={{ uri: image }} style={styles.image} />
+              ) : (
+                <Text style={styles.imagePlaceholder}>+ Adicionar Foto</Text>
+              )}
+            </TouchableOpacity>
           </View>
-          <View style={styles.radioOption}>
-            <RadioButton
-              value="fêmea"
-              status={gender === 'fêmea' ? 'checked' : 'unchecked'}
-              onPress={() => setGender('fêmea')}
-              color="#4CAF50"
-            />
-            <Text style={styles.radioText}>Fêmea</Text>
+          
+          {/* Coluna da Descrição */}
+          <View style={[styles.column, styles.descriptionColumn]}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Descrição</Text>
+              <TextInput
+                style={[styles.input]}
+                placeholder="Digite uma descrição do animal"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Linha 2 - Dados Básicos */}
+        <View style={styles.row}>
+          {/* Coluna 1 - Nome e Espécie */}
+          <View style={styles.column}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nome do Animal</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Digite o nome do animal"
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Espécie</Text>
+              <RNPickerSelect
+                onValueChange={(value) => setEspecieId(value)}
+                items={especiesOptions}
+                placeholder={{ label: 'Selecione uma espécie...', value: null }}
+                style={{
+                  inputWeb: styles.input,
+                  inputAndroid: styles.input,
+                  inputIOS: styles.input,
+                }}
+                value={especieId}
+              />
+            </View>
+          </View>
+
+          {/* Coluna 2 - Idade e Tamanho */}
+          <View style={styles.column}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Idade</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Digite a idade do animal"
+                value={age}
+                onChangeText={setAge}
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Tamanho</Text>
+              <View style={styles.radioGroup}>
+                <TouchableOpacity
+                  style={[styles.radioButton, size === 'Pequeno' && styles.radioButtonSelected]}
+                  onPress={() => setSize('Pequeno')}
+                >
+                  <Text style={styles.radioText}>Pequeno</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.radioButton, size === 'Medio' && styles.radioButtonSelected]}
+                  onPress={() => setSize('Medio')}
+                >
+                  <Text style={styles.radioText}>Médio</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.radioButton, size === 'Grande' && styles.radioButtonSelected]}
+                  onPress={() => setSize('Grande')}
+                >
+                  <Text style={styles.radioText}>Grande</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          {/* Coluna 3 - Sexo */}
+          <View style={styles.column}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Sexo</Text>
+              <View style={styles.radioGroup}>
+                <View style={styles.radioOption}>
+                  <RadioButton
+                    value="Macho"
+                    status={gender === 'Macho' ? 'checked' : 'unchecked'}
+                    onPress={() => setGender('Macho')}
+                    color="#4CAF50"
+                  />
+                  <Text style={styles.radioText}>Macho</Text>
+                </View>
+                <View style={styles.radioOption}>
+                  <RadioButton
+                    value="Femea"
+                    status={gender === 'Femea' ? 'checked' : 'unchecked'}
+                    onPress={() => setGender('Femea')}
+                    color="#4CAF50"
+                  />
+                  <Text style={styles.radioText}>Fêmea</Text>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
       </View>
 
       {/* Botão de cadastro */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Cadastrar Animal</Text>
-      </TouchableOpacity>
+      <View >
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Cadastrar Animal</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
-};
+} else {
 
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+
+        <Text style={styles.title}>Cadastro de Animal</Text>
+
+        {/* Campo para foto */}
+        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : (
+            <Text style={styles.imagePlaceholder}>+ Adicionar Foto</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Campo para nome */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Nome do Animal</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite o nome do animal"
+            value={name}
+            onChangeText={setName}
+          />
+        </View>
+
+        {/* Campo para espécie */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Espécie</Text>
+          <RNPickerSelect
+            onValueChange={(value) => setEspecieId(value)}
+            items={especiesOptions}
+            placeholder={{ label: 'Selecione uma espécie...', value: null }}
+            style={{
+              inputWeb: styles.input,
+              inputAndroid: styles.input,
+              inputIOS: styles.input,
+            }}
+            value={especieId}
+          />
+        </View>
+
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Idade</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite a idade do animal"
+            value={age}
+            onChangeText={setAge}
+            keyboardType="numeric"
+          />
+        </View>
+
+        {/* Seleção de tamanho */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Tamanho</Text>
+          <View style={styles.radioGroup}>
+            <TouchableOpacity
+              style={[styles.radioButton, size === 'pequeno' && styles.radioButtonSelected]}
+              onPress={() => setSize('pequeno')}
+            >
+              <Text style={styles.radioText}>Pequeno</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.radioButton, size === 'médio' && styles.radioButtonSelected]}
+              onPress={() => setSize('médio')}
+            >
+              <Text style={styles.radioText}>Médio</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.radioButton, size === 'Grande' && styles.radioButtonSelected]}
+              onPress={() => setSize('Grande')}
+            >
+              <Text style={styles.radioText}>Grande</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Seleção de sexo */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Sexo</Text>
+          <View style={styles.radioGroup}>
+            <View style={styles.radioOption}>
+              <RadioButton
+                value="macho"
+                status={gender === 'macho' ? 'checked' : 'unchecked'}
+                onPress={() => setGender('macho')}
+                color="#4CAF50"
+              />
+              <Text style={styles.radioText}>Macho</Text>
+            </View>
+            <View style={styles.radioOption}>
+              <RadioButton
+                value="fêmea"
+                status={gender === 'fêmea' ? 'checked' : 'unchecked'}
+                onPress={() => setGender('Femea')}
+                color="#4CAF50"
+              />
+              <Text style={styles.radioText}>Fêmea</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Descrição</Text>
+          <TextInput
+            style={[styles.input, { height: 100 }]}
+            placeholder="Digite uma descrição do animal"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+          />
+        </View>
+        {/* Botão de cadastro */}
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Cadastrar Animal</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+};
 const styles = StyleSheet.create({
+
+ containerLarge: {
+    flex: 1,
+    padding: 20,
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+  },
+ row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    flexWrap: 'wrap',
+  },
+  column: {
+    flex: 1,
+    minWidth: 300,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+  },
+  descriptionColumn: {
+    flex: 2,
+  },
   container: {
     flexGrow: 1,
     padding: 20,
@@ -146,8 +398,8 @@ const styles = StyleSheet.create({
   imagePicker: {
     width: 150,
     height: 150,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 75,
+    backgroundColor: Colors.inputCor,
+    borderRadius: 10,
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
@@ -159,7 +411,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   imagePlaceholder: {
-    color: '#666',
+    color: Colors.LetraCinza,
     textAlign: 'center',
   },
   inputContainer: {
@@ -168,11 +420,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    color: '#444',
+    color: '#fffff',
     fontWeight: '500',
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.inputCor,
+    color: Colors.LetraCinza,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -195,8 +448,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   radioButtonSelected: {
-    backgroundColor: '#E8F5E9',
-    borderColor: '#4CAF50',
+    borderRadius: 1,
+    backgroundColor: Colors.Butao,
+
   },
   radioOption: {
     flexDirection: 'row',
@@ -206,16 +460,17 @@ const styles = StyleSheet.create({
   radioText: {
     marginLeft: 8,
     fontSize: 16,
+    
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: Colors.Butao,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
+    color: '#ffff',
     fontSize: 18,
     fontWeight: 'bold',
   },

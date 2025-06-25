@@ -54,6 +54,7 @@ Join our community of developers creating universal apps.
 ## Dependencias 
 - npm install react-hook-form
 - npm install @react-native-async-storage/async-storage
+- npm install react-native-picker-select
 
 
 ## Links
