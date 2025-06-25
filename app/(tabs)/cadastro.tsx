@@ -4,6 +4,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { RadioButton } from 'react-native-paper';
 import RNPickerSelect from 'react-native-picker-select';
 import Colors from '@/theme/color';
+import { convertToBase64 } from '@/utils/converteFoto';
+
+
 
 type Inputs = {
   nome: string
@@ -12,7 +15,7 @@ type Inputs = {
   foto: string
   descricao: string
   porte: string
-  especieId: string
+  especieId: number
 }
 export default function Cadastrado() {
   const [name, setName] = useState('');
@@ -20,12 +23,12 @@ export default function Cadastrado() {
   const [especies, setEspecies] = useState<{ id: string; nome: string }[]>([]);
   const [especieId, setEspecieId] = useState<string | null>(null);
 
-  const [size, setSize] = useState('Medio');
+  const [size, setSize] = useState<'Pequeno' | 'Medio' | 'Grande'>('Medio');
   const [age, setAge] = useState('');
   const [description, setDescription] = useState('');
-  const [gender, setGender] = useState('Macho');
+  const [gender, setGender] = useState<'Macho' | 'Femea'>('Macho');
   const [image, setImage] = useState(null);
-  const URL = "http://localhost:3004";
+  const URL = "http://localhost:3004/animais";
   const { width } = Dimensions.get('window');
 
   const pickImage = async () => {
@@ -55,20 +58,22 @@ export default function Cadastrado() {
   }, [])
   async function handleSubmit(): Promise<void> {
 
+    const fotoBase64 = image? await convertToBase64(image) : ''
+
     const novoAnimal: Inputs = {
       nome: name,
       idade: Number(age),
       sexo: gender,
-      foto: image ?? '',
+      foto: fotoBase64,
       descricao: description,
       porte: size,
-      especieId: especieId ?? "",
+      especieId: Number(especieId),
     }
     console.log("dados recebido dos inputs:", JSON.stringify(novoAnimal, null, 2));
 
 
     try {
-      const response = await fetch(`${URL}/animais`, {
+      const response = await fetch(`${URL}`, {
         method: "POST",
         body: JSON.stringify(novoAnimal),
       })
@@ -81,15 +86,15 @@ export default function Cadastrado() {
 
 
       if (response.ok) {
-        Alert.alert("Ok! Animal cadastrado com sucesso.")
+        alert("Ok! Animal cadastrado com sucesso.")
 
       } else {
         console.error("Erro no cadastro:", responseData);
-        Alert.alert("Erro no cadastro do animal.")
+        alert("Erro no cadastro do animal.")
       }
     } catch (error) {
       console.error("Erro no fetch:", error);
-      Alert.alert("Erro na comunicação com o servidor.")
+      alert("Erro na comunicação com o servidor.")
     }
   }
   const especiesOptions = especies.map((item) => ({
@@ -297,14 +302,14 @@ export default function Cadastrado() {
           <Text style={styles.label}>Tamanho</Text>
           <View style={styles.radioGroup}>
             <TouchableOpacity
-              style={[styles.radioButton, size === 'pequeno' && styles.radioButtonSelected]}
-              onPress={() => setSize('pequeno')}
+              style={[styles.radioButton, size === 'Pequeno' && styles.radioButtonSelected]}
+              onPress={() => setSize('Pequeno')}
             >
               <Text style={styles.radioText}>Pequeno</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.radioButton, size === 'médio' && styles.radioButtonSelected]}
-              onPress={() => setSize('médio')}
+              style={[styles.radioButton, size === 'Medio' && styles.radioButtonSelected]}
+              onPress={() => setSize('Medio')}
             >
               <Text style={styles.radioText}>Médio</Text>
             </TouchableOpacity>
@@ -324,8 +329,8 @@ export default function Cadastrado() {
             <View style={styles.radioOption}>
               <RadioButton
                 value="macho"
-                status={gender === 'macho' ? 'checked' : 'unchecked'}
-                onPress={() => setGender('macho')}
+                status={gender === 'Macho' ? 'checked' : 'unchecked'}
+                onPress={() => setGender('Macho')}
                 color="#4CAF50"
               />
               <Text style={styles.radioText}>Macho</Text>
@@ -333,7 +338,7 @@ export default function Cadastrado() {
             <View style={styles.radioOption}>
               <RadioButton
                 value="fêmea"
-                status={gender === 'fêmea' ? 'checked' : 'unchecked'}
+                status={gender === 'Femea' ? 'checked' : 'unchecked'}
                 onPress={() => setGender('Femea')}
                 color="#4CAF50"
               />

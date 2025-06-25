@@ -89,7 +89,7 @@ export default function ResultadoPesquisa() {
   } else if (width >= 600) {
     return (
       <ScrollView>
-        <Header />
+        
         <Pesquisa />
         <View style={styles.containerText}>
           <Text style={{ fontWeight: "700", fontSize: 20 }}>
