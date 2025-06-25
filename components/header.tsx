@@ -108,7 +108,7 @@ export default function Header() {
                     <Text style={styles.textoMenu}>Pedidos</Text>
                   </Link>
                   <Link href="../components/cadastro">
-                    <Text style={styles.textoMenu}>Cadastre de animais</Text>
+                    <Text style={styles.textoMenu}>Cadastro de animais</Text>
                   </Link>
 
                   <TouchableOpacity onPress={sair}>
@@ -176,7 +176,7 @@ export default function Header() {
             <Text style={styles.textMenuTablet}>Pedidos</Text>
           </Link>
           <Link href="/(tabs)/cadastro">
-            <Text style={styles.textMenuTablet}>Cadastre um animais</Text>
+            <Text style={styles.textMenuTablet}>Cadastro de animais</Text>
           </Link>
           <TouchableOpacity onPress={sair}>
             <Text style={{
