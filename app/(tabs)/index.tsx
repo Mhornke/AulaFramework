@@ -1,5 +1,5 @@
 import { ScrollView, Text, View, StyleSheet, Dimensions } from "react-native";
-import Header from "../../components/header";
+
 import { useEffect, useState } from "react";
 import React from "react"
 import Card from "../../components/card";
@@ -86,7 +86,7 @@ export default function Home() {
         return (
 
             <ScrollView>
-                <Header />
+                
                 <Pesquisa />
                 <View>
                 </View>

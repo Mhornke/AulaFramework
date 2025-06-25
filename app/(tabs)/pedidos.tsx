@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { View, Text, Dimensions, ScrollView } from "react-native";
-import Header from "../../components/header";
 import Colors from "../../theme/color";
 import dados from "../../dadosPedidos.json"
 import { useAuth } from "@/context/AuthContext";

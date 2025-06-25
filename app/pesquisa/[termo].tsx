@@ -1,5 +1,5 @@
 import { ScrollView, Text, View, StyleSheet, Dimensions } from "react-native";
-import Header from "../../components/header";
+
 import { useEffect, useState } from "react";
 
 

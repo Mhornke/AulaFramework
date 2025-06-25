@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { AnimalI } from "../../utils/types/animias";
 import { useEffect, useState } from "react";
 import cor from '../../theme/color'
-import Header from "../../components/header";
+
 
 
 
@@ -37,7 +37,7 @@ export default function Detalhes() {
     if (width < 600) {
         return (
             <View style={{}}>
-                <Header />
+              
                 <View style={styles.conteiner} key={data.id}>
                     <Image
                         source={{ uri: data.foto }}
@@ -86,7 +86,7 @@ export default function Detalhes() {
     } else if (width >= 600) {
         return (
             <View style={{}}>
-                <Header />
+                
                 <View style={styles.conteinerlarg} key={data.id}>
                     <Image
                         source={{ uri: data.foto }}
