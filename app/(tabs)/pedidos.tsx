@@ -69,8 +69,8 @@ console.log(`dados do json ${dados.pedidos}`);
         <ScrollView contentContainerStyle={{ alignItems: "center", padding: 16 }}>
           <Text style={{ fontSize: 25, fontWeight: "700" }}>Meus Pedidos (MOBILE)</Text>
 
-          {dados.pedidos.length > 0 ? (
-            dados.pedidos.map((pedido) => (
+          {pedidos.length > 0 ? (
+            pedidos.map((pedido) => (
               <View key={pedido.id} style={{ marginVertical: 8, padding: 12, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, backgroundColor: "#eee", width: "100%" }}>
                 <Text>Pedido nº: {pedido.id}</Text>
                 <Text><Text style={{ fontWeight: "bold" }}>Animal:</Text> {pedido.animal.nome}</Text>
@@ -92,12 +92,12 @@ console.log(`dados do json ${dados.pedidos}`);
   }else if(width >= 600){
  return (
       <View style={{ height: height}}>
-        <Header />
+      
         <ScrollView contentContainerStyle={{ alignItems: "center", padding: 16 }}>
           <Text style={{ fontSize: 30, fontWeight: "700", marginBottom: 20 }}>Meus Pedidos (Tablet)</Text>
 
-          {dados.pedidos.length > 0 ? (
-            dados.pedidos.map((pedido) => (
+          {pedidos.length > 0 ? (
+            pedidos.map((pedido) => (
               <View key={pedido.id} style={{ marginVertical: 10, padding: 16, borderWidth: 1, borderColor: "#aaa", borderRadius: 10, backgroundColor: "#f0f0f0", width: "100%" }}>
                 <Text style={{ fontSize: 16 }}>Pedido nº: {pedido.id}</Text>
                 <Text><Text style={{ fontWeight: "bold" }}>Animal:</Text> {pedido.animal.nome}</Text>
