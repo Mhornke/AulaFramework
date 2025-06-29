@@ -8,12 +8,12 @@ import {
   Modal,
   Alert,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
 import Color from "../theme/color";
 import { useAuth } from "@/context/AuthContext";
-
+import { useRouter } from "expo-router";
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
   const { width, height } = Dimensions.get("window");
@@ -26,6 +26,21 @@ export default function Header() {
   };
 
   const styles = StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: Color.CorFundo,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    sair: {
+      color: '#0000CD',
+      fontWeight: '500',
+      fontSize: 20,
+      marginTop: 20,
+      textAlign: 'center',
+    },
+
     Header: {
       flexDirection: "row",
       backgroundColor: Color.CorFundo,
@@ -39,17 +54,19 @@ export default function Header() {
     },
     menu: {
       flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.83)",
+      width: width,
       justifyContent: "flex-start",
       alignItems: "center",
-      paddingTop: 100,
+
     },
     textoMenu: {
       color: "#ffff",
       fontWeight: "500",
       fontSize: 20,
-      margin: 10,
+      marginBottom: 16,
+      textAlign: "center",
     },
+
     textMenuTablet: {
       color: "#ffff",
       fontWeight: "medium",
@@ -92,61 +109,79 @@ export default function Header() {
           </TouchableOpacity>
 
           <Modal visible={openMenu} transparent animationType="fade">
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => SetOpenMenu(false)}
+              style={styles.overlay}
+            >
+              <View >
+                <TouchableOpacity
+                  activeOpacity={1}
+                  style={styles.menu}
+                  onPress={() => { }}
+                >
+                  {user ? (
+                    <View>
+                      <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/')
+                        }}>
+                        <Text style={styles.textoMenu}>Home</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/cadastro')
+                        }}>
+                        <Text style={styles.textoMenu}>Cadastro de animais</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/(tabs)/pedidos')
+                        }}>
+                        <Text style={styles.textoMenu}>Pedidos</Text>
+                      </TouchableOpacity>                    
+                    
 
-              <TouchableOpacity
-              style={{position:"absolute", zIndex:9999,}}
-              onPressOut={() => SetOpenMenu(false)}>
-                <FontAwesome
-                  name={openMenu ? "times" : "bars"}
-                  size={30}
-                  color="white"
-                />
-              </TouchableOpacity>
-
-
-            <View style={styles.menu}>
-              
-              {user ? (
-                <View>
-                  <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
-                  <Link href="/">
-                    <Text style={styles.textoMenu}>Home</Text>
-                  </Link>
-                  <Link href="/(tabs)/pedidos">
-                    <Text style={styles.textoMenu}>Pedidos</Text>
-                  </Link>
-                  <Link href="/cadastro">
-                    <Text style={styles.textoMenu}>Cadastro de animais</Text>
-                  </Link>
-
-                  <TouchableOpacity onPress={sair}>
-                    <Text
-                      style={{
-                        color: "#0000CD",
-                        fontWeight: "500",
-                        fontSize: 20,
-                        margin: 10,
-                      }}
-                    >
-                      Sair
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View>
-                  <Link href="/">
-                    <Text style={styles.textoMenu}>Home</Text>
-                  </Link>
-                  <Link href="/(auth)/login">
-                    <Text style={styles.textoMenu}>Login</Text>
-                  </Link>
-                  <Link href="/(auth)/register">
-                    <Text style={styles.textoMenu}>Cadastro</Text>
-                  </Link>
-                </View>
-              )}
-            </View>
+                      <TouchableOpacity onPress={sair}>
+                        <Text style={styles.sair}>Sair</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/')
+                        }}>
+                        <Text style={styles.textoMenu}>Home</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/(auth)/login')
+                        }}>
+                        <Text style={styles.textoMenu}>Login</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/(auth)/register')
+                        }}>
+                        <Text style={styles.textoMenu}>Cadastro</Text>
+                      </TouchableOpacity>
+                     
+                     
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
           </Modal>
+
         </View>
       </View>
     );
