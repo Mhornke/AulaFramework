@@ -1,19 +1,22 @@
-import { ScrollView, Text, View, StyleSheet, Dimensions } from "react-native";
+import { Dimensions, FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { useEffect, useState } from "react";
-import React from "react"
-import Card from "../../components/card";
+import React, { useEffect, useState } from "react";
+import CardII from "../../components/cardAnimalNormal";
+import Card from "../../components/cardAnimalDestaque"
 //import dados from "../dados.json";
 //import { URL_API } from "@env";
+import Carrossel from "@/components/carrossel";
 
-
-import { AnimalI } from "../../utils/types/animias";
 import Pesquisa from "@/components/pesquisa";
+import { AnimalI } from "../../utils/types/animias";
+import Colors from "@/theme/color";
 
 
 
 export default function Home() {
     const [animais, setAnimais] = useState<AnimalI[]>([])
+    const [animaisDestaque, setAnimaisDestaque] = useState<AnimalI[]>([])
+
     console.log(animais);
     const { width, height } = Dimensions.get('window')
 
@@ -66,14 +69,42 @@ export default function Home() {
 
             }
         }
-        buscaDados()
 
+        async function buscaDadosDestaque() {
+
+            try {
+                const response = await fetch(`http://localhost:3004/animais`)
+                const dados = await response.json()
+                console.log(response);
+                console.log(response);
+
+                setAnimaisDestaque(dados)
+
+            } catch (error) {
+                console.log("erro ao buscar dados", error);
+
+            }
+        }
+        buscaDados()
+        buscaDadosDestaque()
     }, []);
 
 
     const listaAnimais = animais.map((animal) => (
-        <Card data={animal} key={animal.id} />
-    ))
+
+        <CardII key={animal.id} data={animal as AnimalI} />
+
+
+    )
+    )
+
+    // const listaAnimaisDestaque = animaisDestaque.map((animal) => (
+    //     <Card key={animal.id} data={animal} />
+    // ))
+
+
+
+
     // const listaPet = dados.pets.map((pet) => {
     //     console.log(pet);
 
@@ -86,15 +117,16 @@ export default function Home() {
         return (
 
             <ScrollView>
-                
+
                 <Pesquisa />
                 <View>
                 </View>
                 <Text style={styles.containerText}>
-                    <Text style={{ fontWeight: "700", fontSize: 20 }}>Seu<Text style={styles.text}>.Pet</Text></Text>
                     
+
                     <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
                 </Text>
+               <Carrossel data={animaisDestaque} />
                 <View style={styles.card}>
                     {listaAnimais}
                 </View>
@@ -105,13 +137,15 @@ export default function Home() {
 
         return (
 
-            <ScrollView>                
+            <ScrollView keyboardShouldPersistTaps='handled'>
                 <Pesquisa />
                 <View style={styles.containerText}>
-                    <Text style={{ fontWeight: "700", fontSize: 20 }}>Seu<Text style={styles.text}>.Pet</Text></Text>
-
+                
                     <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
                 </View>
+                                              
+                <Carrossel data={animaisDestaque} />
+                
                 <View style={styles.cardTable}>
                     {listaAnimais}
                 </View>

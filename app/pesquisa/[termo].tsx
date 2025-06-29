@@ -1,15 +1,15 @@
-import { ScrollView, Text, View, StyleSheet, Dimensions } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useEffect, useState } from "react";
 
 
-import Card from "../../components/card";
+import Card from "../../components/cardAnimalNormal";
 //import dados from "../dados.json";
 //import { URL_API } from "@env";
 
-import { AnimalI } from "../../utils/types/animias";
 import Pesquisa from "@/components/pesquisa";
 import { useLocalSearchParams } from "expo-router/build/hooks";
+import { AnimalI } from "../../utils/types/animias";
 
 export default function ResultadoPesquisa() {
   const [animais, setAnimais] = useState<AnimalI[]>([]);
@@ -73,7 +73,7 @@ export default function ResultadoPesquisa() {
   if (width < 600) {
     return (
       <ScrollView>
-        
+
         <Pesquisa />
         <View></View>
         <Text style={styles.containerText}>
@@ -89,7 +89,7 @@ export default function ResultadoPesquisa() {
   } else if (width >= 600) {
     return (
       <ScrollView>
-        
+
         <Pesquisa />
         <View style={styles.containerText}>
           <Text style={{ fontWeight: "700", fontSize: 20 }}>

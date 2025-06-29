@@ -4,12 +4,14 @@ import Color from "../theme/color";
 import { AnimalI } from "../utils/types/animias";
 
 
-export default function Card( {data}:{data:AnimalI}   ) {
+
+export default function CardII ( {data}:{data:AnimalI}   ) {
    
    
    
    
     return(
+        
 
 <View style={styles.conteiner} key={data.id}>
         <Image 
@@ -21,6 +23,8 @@ export default function Card( {data}:{data:AnimalI}   ) {
         <Text style={styles.Text}>{data.especie.nome}</Text>
         <Text style={styles.Text}>{data.idade}</Text>
         <Text style={styles.Text}>{data.sexo}</Text>
+        <Text style={styles.Text}>{
+        data.castrado ? 'Castrado' : 'Não castrado'}</Text>
         <Text style={styles.Text}>{data.porte}</Text>
         <Text style={styles.Text}>{data.descricao}</Text>
         </View>

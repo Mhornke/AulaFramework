@@ -5,13 +5,14 @@ id: number
 nome: string
 idade: number
 sexo: string
-destaque: boolean
+destaque?: boolean
 foto: string     
-descricao: string
+descricao?: string
 createdAt: Date
 updatedAt: Date
 porte: string
 especie: EspecieI
 especieId: number
+castrado?:Boolean
       
-}
+};
