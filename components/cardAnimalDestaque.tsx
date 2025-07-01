@@ -3,23 +3,25 @@ import { Link } from "expo-router";
 import Color from "../theme/color";
 import { AnimalI } from "../utils/types/animias";
 
-const { width } = Dimensions.get("window"); 
+const { width } = Dimensions.get("window");
 
 export default function Card({ data }: { data: AnimalI }) {
   return (
     <View style={styles.container}>
-        
+
       <Image
         source={{ uri: data.foto }}
         style={{ width: "100%", height: 400 }} // margem de 20px dos lados
       />
-      
+
       <View style={styles.containerText}>
-        
+
         <Text style={styles.TextName}>{data.nome}</Text>
         <Text style={styles.Text}>{data.especie.nome}</Text>
         <Text style={styles.Text}>{data.idade}</Text>
         <Text style={styles.Text}>{data.sexo}</Text>
+        <Text style={styles.Text}>{
+          data.castrado ? 'Castrado' : 'Não castrado'}</Text>
         <Text style={styles.Text}>{data.porte}</Text>
         <Text style={styles.Text}>{data.descricao}</Text>
       </View>
@@ -49,10 +51,10 @@ export default function Card({ data }: { data: AnimalI }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Color.CorFundo,
-    borderRadius: 5,   
-     width:"80%",
-    
-   
+    borderRadius: 5,
+    width: "80%",
+
+
   },
   butao: {
     margin: 10,

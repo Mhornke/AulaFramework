@@ -23,7 +23,7 @@ export default function Login() {
 
   async function onSubmit(data: Input) {
     //console.log("dados do input", data);
-    const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/adotantes/login`, {
+    const response = await fetch(`http://localhost:3004/adotantes/login`, {
       headers: {
         "Content-Type": "application/json"
       },

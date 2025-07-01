@@ -48,7 +48,7 @@ export default function ResultadoPesquisa() {
     async function buscaDados() {
       try {
         const response = await fetch(
-          `https://api-adocao-git-main-dieizons-projects.vercel.app/animais/pesquisa/${termo}`
+          `http://localhost:3004/animais/pesquisa/${termo}`
         );
         const dados = await response.json()
         console.log(dados);

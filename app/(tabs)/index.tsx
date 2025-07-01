@@ -57,7 +57,8 @@ export default function Home() {
         async function buscaDados() {
 
             try {
-                const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
+                // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
+                const response = await fetch(`http://localhost:3004/animais`)
                 const dados = await response.json()
                 console.log(response);
                 console.log(response);
@@ -77,8 +78,8 @@ export default function Home() {
                 const dados = await response.json()
                 console.log(response);
                 console.log(response);
-
-                setAnimaisDestaque(dados)
+                const destaques = dados.filter((animal: AnimalI) => animal.destaque === true)
+                setAnimaisDestaque(destaques)
 
             } catch (error) {
                 console.log("erro ao buscar dados", error);
@@ -122,11 +123,11 @@ export default function Home() {
                 <View>
                 </View>
                 <Text style={styles.containerText}>
-                    
+
 
                     <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
                 </Text>
-               <Carrossel data={animaisDestaque} />
+                <Carrossel data={animaisDestaque} />
                 <View style={styles.card}>
                     {listaAnimais}
                 </View>
@@ -140,12 +141,12 @@ export default function Home() {
             <ScrollView keyboardShouldPersistTaps='handled'>
                 <Pesquisa />
                 <View style={styles.containerText}>
-                
+
                     <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
                 </View>
-                                              
+
                 <Carrossel data={animaisDestaque} />
-                
+
                 <View style={styles.cardTable}>
                     {listaAnimais}
                 </View>

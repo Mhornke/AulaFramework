@@ -23,8 +23,7 @@ export default function CardII ( {data}:{data:AnimalI}   ) {
         <Text style={styles.Text}>{data.especie.nome}</Text>
         <Text style={styles.Text}>{data.idade}</Text>
         <Text style={styles.Text}>{data.sexo}</Text>
-        <Text style={styles.Text}>{
-        data.castrado ? 'Castrado' : 'Não castrado'}</Text>
+       
         <Text style={styles.Text}>{data.porte}</Text>
         <Text style={styles.Text}>{data.descricao}</Text>
         </View>
