@@ -4,17 +4,16 @@ import { useLocalSearchParams } from 'expo-router';
 import { AnimalI } from "../../utils/types/animias";
 import { useEffect, useState } from "react";
 import cor from '../../theme/color'
+import { useAuth } from "@/context/AuthContext";
 
 
-
-
-// ...importações permanecem iguais
 
 export default function Detalhes() {
     const [data, setData] = useState<AnimalI>();
     const { id } = useLocalSearchParams();
     const [texto, setTexto] = useState('');
     const { width } = Dimensions.get('window');
+    const { user } = useAuth()
 
     useEffect(() => {
         async function buscaDados() {
@@ -28,6 +27,35 @@ export default function Detalhes() {
         }
         buscaDados();
     }, [id]);
+
+    async function enviaForm() {
+        try {
+            const novoPedido = {
+                userId: user,
+                animalId: Number(id),
+                descricao: texto
+            }
+            console.log(novoPedido);
+
+            const response = await fetch(`http://localhost:3004/pedidos`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(novoPedido)
+                }
+            )
+            if (response.ok) {
+                alert("Pedido enviado com sucesso!");
+            } else {
+                alert("Erro ao enviar pedido.");
+            }
+        } catch (error) {
+            console.error("Erro ao enviar pedido:", error);
+            alert("Erro na comunicação com o servidor.");
+        }
+    }
 
     if (!data) return <Text>Carregando...</Text>;
 
@@ -43,8 +71,7 @@ export default function Detalhes() {
                     <Text style={styles.Text}>{data.porte}</Text>
                     <Text style={styles.Text}>{data.descricao}</Text>
                 </View>
-
-                <View style={[styles.containerTextArea, width >= 700 && styles.containerTextAreaLarg]}>
+                {user ? (<View style={[styles.containerTextArea, width >= 700 && styles.containerTextAreaLarg]}>
                     <Text style={styles.tituloFormulario}>Formulário de Adoção</Text>
                     <Text style={styles.TextFormulario}>
                         Em poucas palavras, diga se você já tem animais e porque gostaria de adotar este animal.
@@ -61,15 +88,22 @@ export default function Detalhes() {
                         style={styles.TextAreaInput}
                     />
 
-                    <View style={{ alignItems: 'center', marginTop: 15,  }}>
-                        <Link href="./" asChild>
-                            <TouchableOpacity style={styles.botao}>
-                                <Text style={styles.botaoTexto}>Enviar</Text>
-                            </TouchableOpacity>
-                        </Link>
+                    <View style={{ alignItems: 'center', marginTop: 15, }}>
+
+                        <TouchableOpacity style={styles.botao} onPress={enviaForm}>
+                            <Text style={styles.botaoTexto}>Enviar</Text>
+                        </TouchableOpacity>
+
                     </View>
 
-                </View>
+                </View>) : (
+                    <Link href="/(auth)/login">
+                        <TouchableOpacity>
+
+                            <Text style={{ color: "#ffff", }}>Tenho interesse</Text>
+                        </TouchableOpacity></Link>
+                )}
+
             </View>
         </View>
     );
@@ -146,7 +180,7 @@ const styles = StyleSheet.create({
         backgroundColor: cor.Butao,
         paddingVertical: 10,
         paddingHorizontal: "40%",
-        
+
         borderRadius: 5,
         marginTop: 15,
     },
