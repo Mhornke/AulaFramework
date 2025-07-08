@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <View style={styles.footerContainer}>
       {/* Play Store */}     
-        <TouchableOpacity onPress={() => Linking.openURL("https://play.google.com/store")}>
+        <TouchableOpacity onPress={() => Linking.openURL("https://github.com/Mhornke/AulaFramework/releases/tag/v1.0.0")}>
           <Image
             source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" }}
             style={styles.playStore}
