@@ -7,10 +7,10 @@ import {
   View,
 } from "react-native";
 
-// import Toast from "react-native-toast-message";
 import { Link } from "expo-router";
 import { push } from "expo-router/build/global-state/routing";
 import React, { useState } from "react";
+import Colors from "../theme/color";
 
 export default function Pesquisa() {
   const [termo, setTermo] = useState("");
@@ -46,7 +46,7 @@ export default function Pesquisa() {
           <FontAwesome name="search" size={20} color="white" />
         </Link>
         <TouchableOpacity onPress={LimpaPesquisa} style={styles.ClearButton}>
-        <Text>limpar</Text>
+        <Text style={{color:"#ffff"}}>limpar</Text>
       </TouchableOpacity>
       </View>
       
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   },
   container: {
     marginBottom: 50,
+    marginTop:10
   },
   searchContainer: {
     flexDirection: "row",
@@ -75,18 +76,22 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     fontSize: 16,
+    backgroundColor:Colors.CorFundo,
+    color:Colors.LetraCinza,
+    paddingLeft:10,
+    borderRadius:10
   },
   clearButton: {
     padding: 5,
   },
   searchButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: Colors.Butao,
     borderRadius: 20,
     padding: 8,
     marginLeft: 5,
   },
   ClearButton: {
-    backgroundColor: "green",
+    backgroundColor: Colors.Butao,
     borderRadius: 10,
     width: 100,
     fontWeight: "500",

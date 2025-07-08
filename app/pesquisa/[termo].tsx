@@ -1,15 +1,10 @@
 import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
-
 import { useEffect, useState } from "react";
-
-
 import Card from "../../components/cardAnimalNormal";
-//import dados from "../dados.json";
-//import { URL_API } from "@env";
-
-import Pesquisa from "@/components/pesquisa";
+import Pesquisa from "../../components/pesquisa";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { AnimalI } from "../../utils/types/animias";
+import { URL_Adocao } from "@/utils/url";
 
 export default function ResultadoPesquisa() {
   const [animais, setAnimais] = useState<AnimalI[]>([]);
@@ -48,7 +43,7 @@ export default function ResultadoPesquisa() {
     async function buscaDados() {
       try {
         const response = await fetch(
-          `http://localhost:3004/animais/pesquisa/${termo}`
+          `${URL_Adocao}/animais/pesquisa/${termo}`
         );
         const dados = await response.json()
         console.log(dados);

@@ -1,84 +1,73 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Ou outra biblioteca de ícones
-import Card from './cardAnimalDestaque';
-import { AnimalI } from '@/utils/types/animias';
-import Colors from '@/theme/color';
-const { width } = Dimensions.get('window');
+import React, { useEffect, useState } from "react";
+import { View, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Card from "./cardAnimalDestaque";
+import { AnimalI } from "../utils/types/animias";
+import Colors from "../theme/color";
+
+const { width } = Dimensions.get("window");
 
 type Props = {
-  data:AnimalI[]
-}
-export default function Carrossel( {data}: Props) {
-  const flatListRef = useRef<FlatList>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  data: AnimalI[];
+};
 
-  
+export default function Carrossel({ data }: Props) {
+  const [indexAtual, setIndexAtual] = useState(0);
 
-  const scrollToIndex = (index: number) => {
-    if (index >= 0 && index < data.length) {
-      flatListRef.current?.scrollToIndex({ animated: true, index });
-      setCurrentIndex(index);
+  useEffect(() => {
+    const INTERVALO = 5000;
+
+    const intervaloId = setInterval(() => {
+      setIndexAtual((prevIndex) =>
+        prevIndex === data.length - 1 ? 0 : prevIndex + 1)
+    }, INTERVALO)
+    return () => clearInterval(intervaloId)
+  }, [indexAtual, data.length])
+
+  const handlePrev = () => {
+    if (indexAtual > 0) {
+      setIndexAtual(indexAtual - 1);
     }
   };
 
   const handleNext = () => {
-    scrollToIndex(currentIndex + 1);
+    if (indexAtual < data.length - 1) {
+      setIndexAtual(indexAtual + 1);
+    }
   };
 
-  const handlePrev = () => {
-    scrollToIndex(currentIndex - 1);
-  };
+  const itemAtual = data[indexAtual];
 
   return (
     <View style={styles.container}>
-      
       {/* Botão esquerdo */}
-      <TouchableOpacity 
-        style={[styles.arrowButton, styles.leftArrow]} 
+      <TouchableOpacity
+        style={[styles.arrowButton, styles.leftArrow]}
         onPress={handlePrev}
-        disabled={currentIndex === 0}
+        disabled={indexAtual === 0}
       >
-        <Ionicons name="chevron-back" size={24} color={currentIndex === 0 ? '#ccc' : '#000'} />
+        <Ionicons
+          name="chevron-back"
+          size={24}
+          color={indexAtual === 0 ? "#ccc" : "#000"}
+        />
       </TouchableOpacity>
 
-      {/* Carrossel */}
-      
-      <FlatList
-        ref={flatListRef}
-        data={data}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={{ width:width, alignItems:"center" }}>
-            <Card data={item} />
-          </View>
-        )}
-        onMomentumScrollEnd={(event) => {
-          const newIndex = Math.round(
-            event.nativeEvent.contentOffset.x / (width - 40)
-          );
-          setCurrentIndex(newIndex);
-        }}
-        getItemLayout={(data, index) => ({
-          length: width ,
-          offset: (width - 40) * index,
-          index,
-        })}
-      />
+      {/* Card central */}
+      <View style={{ alignItems: "center",width:"99%" }}>
+        <Card data={itemAtual} />
+      </View>
 
       {/* Botão direito */}
-      <TouchableOpacity 
-        style={[styles.arrowButton, styles.rightArrow]} 
+      <TouchableOpacity
+        style={[styles.arrowButton, styles.rightArrow]}
         onPress={handleNext}
-        disabled={currentIndex === data.length - 1}
+        disabled={indexAtual === data.length - 1}
       >
-        <Ionicons 
-          name="chevron-forward" 
-          size={24} 
-          color={currentIndex === data.length - 1 ? '#ccc' : '#000'} 
+        <Ionicons
+          name="chevron-forward"
+          size={24}
+          color={indexAtual === data.length - 1 ? "#ccc" : "#000"}
         />
       </TouchableOpacity>
     </View>
@@ -87,17 +76,21 @@ export default function Carrossel( {data}: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor:Colors.CorFundo, 
-  
-   
+    borderRadius: 10,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+    
+    backgroundColor: Colors.CorFundo,
+
+
   },
   arrowButton: {
     padding: 10,
     borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    position: 'absolute',
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    position: "absolute",
     zIndex: 1,
   },
   leftArrow: {

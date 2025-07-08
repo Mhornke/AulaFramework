@@ -34,13 +34,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loadUser();
   }, []);
 
-  const login = async (userData: User, persist:boolean= false) => {
-    setUser(userData);
-    if (persist) {
+  const login = async (userData: User) => {
+        setUser(userData);    
       
       await AsyncStorage.setItem('user', JSON.stringify(userData));
-    }
+    
   };
+
+  // const login = async (userData: User, persist:boolean= false) => {
+  //   setUser(userData);
+  //   if (persist) {
+      
+  //     await AsyncStorage.setItem('user', JSON.stringify(userData));
+  //   }
+  // };
 
 
   const logout = async () => {

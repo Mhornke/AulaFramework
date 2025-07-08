@@ -1,57 +1,74 @@
-import { Text, View, StyleSheet, Dimensions, Image, TextInput, Switch, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, Dimensions, Image, TextInput, TouchableOpacity } from "react-native";
 import { Link, router } from "expo-router";
 
 import Color from "../../theme/color"
 import { useForm, Controller } from 'react-hook-form'
+import { useAuth } from "@/context/AuthContext";
+import { URL_Adocao } from "@/utils/url";
+import { showAlert } from "@/components/swalAlert";
+
 type Input = {
-  nome:string,
-  fone:string,
-  endereco:string,
-  email:string,
-  senha:string,
+  nome: string,
+  fone: string,
+  endereco: string,
+  email: string,
+  senha: string,
 
 }
 
 export default function Cadastrado() {
   const { control, handleSubmit, formState: { errors } } = useForm<Input>({
-    defaultValues:{
-      email:"",
-      senha:"",
-      endereco:"",
-      nome:"",
-      fone:""
+    defaultValues: {
+      email: "",
+      senha: "",
+      endereco: "",
+      nome: "",
+      fone: "",
+      
     }
   });
+  const { login } = useAuth()
 
- console.log(control);
- 
+  console.log(control);
 
 
-  async function onSubmit (data: Input)  {
+
+  async function onSubmit(data: Input) {
+
     console.log("dados do input", data);
-    const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/adotantes`, {
+
+    const response = await fetch(`${URL_Adocao}/adotantes`, {
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       },
       method: "POST",
       body: JSON.stringify({
-      nome: data.nome,
-      endereco: data.endereco,
-      fone: data.fone,
-      email: data.email,
-      senha: data.senha
-    }),
-  });
-  console.log(response.status);
-  
-     if (response.status === 201){
+        nome: data.nome,
+        endereco: data.endereco,
+        fone: data.fone,
+        email: data.email,
+        senha: data.senha
+      }),
+    });
+
+    console.log(response.status);
+
+    if (response.status === 201) {
       const dados = await response.json();
-      //logaAdotante(dados) armazenar contexto
-      alert("Cadastrado com sucesso")
+      login(dados, data.manter)
+   
+      showAlert("cadastro Realizado com sucesso",
+        "Seja bem vindo a nossa plataforma",
+        'success'
+      )
       router.push("/");
-     }else{
-      alert("Erro... Não foi possivel cadastrar")
-     }
+    } else {
+      
+      showAlert("Erro ao se cadastrar", 
+        "Não foi possivel criar o cadastro tente novamente ou mais tarde",
+        'error'
+      )
+    }
 
 
   }
@@ -62,20 +79,20 @@ export default function Cadastrado() {
 
   return (
     <View style={{ backgroundColor: Color.CorFundo, height: comprimento }} >
-      
-      
-      
+
+
+
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <View style={styles.container}>
 
-          <View style={{flexDirection:"row", alignItems:"center", justifyContent:"space-between"}}>
-          <Text style={{ color: "#ffff", fontWeight: "bold", fontSize:20 }}>Cadastro</Text>
-        <Image
-          source={{
-            uri: "https://raw.githubusercontent.com/DieizonOliveira/frontAdocao/refs/heads/main/public/pegada.png",
-          }}
-          style={{ width: 70, height: 70 }}
-        />
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>Cadastro</Text>
+            <Image
+              source={{
+                uri: "https://raw.githubusercontent.com/DieizonOliveira/frontAdocao/refs/heads/main/public/pegada.png",
+              }}
+              style={{ width: 70, height: 70 }}
+            />
           </View>
           <View style={styles.containerInputs}>
             <Text style={styles.texto}>Nome</Text>
@@ -168,12 +185,12 @@ export default function Cadastrado() {
                 />
               )}
             />
-          </View>        
+          </View>
 
-                  <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
-                    <Text style={{color:"#ffff", fontWeight:"400", fontSize:16}}>Entrar</Text>
+          <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
+            <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Entrar</Text>
 
-                  </TouchableOpacity>
+          </TouchableOpacity>
         </View>
 
       </View>
@@ -190,11 +207,11 @@ export default function Cadastrado() {
 
 
 
- const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     backgroundColor: Color.CardFundo,
     padding: 30,
-    width:400,
+    width: 400,
     height: 600
   },
   texto: {
@@ -204,8 +221,8 @@ export default function Cadastrado() {
   containerInputs: {
     flex: 1,
     flexDirection: "column",
-    justifyContent:"space-around",
-    padding:10
+    justifyContent: "space-around",
+    padding: 10
 
   },
   inputs: {
@@ -215,10 +232,10 @@ export default function Cadastrado() {
     padding: 10,
   },
   botao: {
-backgroundColor:Color.Butao,
-padding:10,
-borderRadius:5,
-alignItems:"center"
+    backgroundColor: Color.Butao,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center"
   }
 
 })

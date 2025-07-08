@@ -8,21 +8,25 @@ import {
   Modal,
   Alert,
 } from "react-native";
+import { showAlert } from "./swalAlert";
 import { Link, router } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
 import Color from "../theme/color";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "expo-router";
+import { useAuth } from "../context/AuthContext";
+
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
   const { width, height } = Dimensions.get("window");
   const { user, logout } = useAuth();
 
   const sair = () => {
-    console.log("logout sendo disparado");
-    alert("Deslogado com sucesso!!");
+    showAlert("Usuario deslogado com sucesso",
+      "Até mais tarde",
+      "success"
+    )
     logout();
+    router.replace('/');
   };
 
   const styles = StyleSheet.create({
@@ -34,58 +38,67 @@ export default function Header() {
     },
 
     sair: {
-      color: '#0000CD',
+      color: 'red',
       fontWeight: '500',
-      fontSize: 20,
+      fontSize: 16, // padronizado
       marginTop: 20,
       textAlign: 'center',
     },
 
     Header: {
       flexDirection: "row",
+      width: "100%",
       backgroundColor: Color.CorFundo,
       padding: 15,
-      justifyContent: "space-between",
       alignItems: "center",
+      justifyContent: "space-between"
+
     },
+
     logo: {
       flexDirection: "row",
       alignItems: "center",
     },
+
+    texto: {
+      color: "#fff",
+      fontWeight: "700",
+      fontSize: 20, // padronizado para o nome da marca
+      marginLeft: 4,
+    },
+
     menu: {
       flex: 1,
       width: width,
       justifyContent: "flex-start",
       alignItems: "center",
-
     },
+
     textoMenu: {
-      color: "#ffff",
+      color: "#fff",
       fontWeight: "500",
-      fontSize: 20,
+      fontSize: 18, // padronizado para menu mobile
       marginBottom: 16,
       textAlign: "center",
     },
 
-    textMenuTablet: {
-      color: "#ffff",
-      fontWeight: "medium",
-      fontSize: 16,
-      margin: 10,
-    },
-    texto: {
-      color: "#ffff",
-      fontWeight: "700",
+    textMenuDesktop: {
+      color: "#fff",
+      fontWeight: "500",
+      fontSize: 16, // padronizado para desktop/tablet
+      marginHorizontal: 10,
     },
   });
+
 
   const clickMenu = () => {
     SetOpenMenu(!openMenu);
   };
 
-  if (width < 600) {
+  if (width < 1100) {
     return (
-      <View style={styles.Header}>
+      <View style={[styles.Header,{}]}>
+
         <View style={styles.logo}>
           <Link href="/">
             <Image
@@ -128,26 +141,38 @@ export default function Header() {
                           SetOpenMenu(false)
                           router.push('/')
                         }}>
-                        <Text style={styles.textoMenu}>Home</Text>
+                        <Text style={styles.textoMenu}>Início</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
                           router.push('/cadastro')
                         }}>
-                        <Text style={styles.textoMenu}>Cadastro de animais</Text>
+                        <Text style={styles.textoMenu}>Cadastrar Animal</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
                           router.push('/(tabs)/pedidos')
                         }}>
-                        <Text style={styles.textoMenu}>Pedidos</Text>
-                      </TouchableOpacity>                    
-                    
+                        <Text style={styles.textoMenu}>Meus Pedidos de Adoção</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/(tabs)/ListaCadastroAnimais')
+                        }}>
+                        <Text style={styles.textoMenu}>Meus Animais</Text>
+                      </TouchableOpacity>
 
-                      <TouchableOpacity onPress={sair}>
-                        <Text style={styles.sair}>Sair</Text>
+
+                      <TouchableOpacity onPress={() => {
+                        SetOpenMenu(false)
+                        sair()
+
+                      }}>
+
+                        <Text style={styles.sair}>Encerrar Sessão</Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -157,24 +182,24 @@ export default function Header() {
                           SetOpenMenu(false)
                           router.push('/')
                         }}>
-                        <Text style={styles.textoMenu}>Home</Text>
+                        <Text style={styles.textoMenu}>Início</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
                           router.push('/(auth)/login')
                         }}>
-                        <Text style={styles.textoMenu}>Login</Text>
+                        <Text style={styles.textoMenu}>Entrar</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
                           router.push('/(auth)/register')
                         }}>
-                        <Text style={styles.textoMenu}>Cadastro</Text>
+                        <Text style={styles.textoMenu}>Criar Conta</Text>
                       </TouchableOpacity>
-                     
-                     
+
+
                     </View>
                   )}
                 </TouchableOpacity>
@@ -184,61 +209,79 @@ export default function Header() {
 
         </View>
       </View>
-    );
-  } else if (width >= 600) {
-    return (
-      <View style={styles.Header}>
-        <View style={styles.logo}>
-          <Link href="/">
-            <Image
-              source={{
-                uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
-              }}
-              style={{ width: 40, height: 40 }}
-            />
-          </Link>
-          <Text style={styles.texto}>Adote</Text>
-          <Text style={styles.texto}>.Com </Text>
-        </View>
 
-        {user ? (
-          <View style={{ alignItems: "center", flexDirection: "row" }}>
-            <Text style={styles.textMenuTablet}>Olá, {user.nome}</Text>
+    );
+  } else {
+    return (
+      <View style={{ backgroundColor: Color.CorFundo, alignItems: "center", paddingBottom:15, paddingTop:15 }}>
+
+        <View style={{
+          width: '100%',
+          maxWidth: 1200,
+          alignItems: "center",
+          justifyContent: 'space-between',
+
+          flexDirection: "row"
+        }}>
+
+          <View style={styles.logo}>
             <Link href="/">
-              <Text style={styles.textMenuTablet}>Home</Text>
-            </Link>
-            <Link href="/pedidos">
-              <Text style={styles.textMenuTablet}>Pedidos</Text>
-            </Link>
-            <Link href="/(tabs)/cadastro">
-              <Text style={styles.textMenuTablet}>Cadastro de animais</Text>
-            </Link>
-            <TouchableOpacity onPress={sair}>
-              <Text
-                style={{
-                  color: "#0000CD",
-                  fontWeight: "500",
-                  fontSize: 20,
-                  margin: 10,
+              <Image
+                source={{
+                  uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
                 }}
-              >
-                Sair
-              </Text>
-            </TouchableOpacity>
+                style={{ width: 40, height: 40 }}
+              />
+            </Link>
+            <Text style={styles.texto}>Adote</Text>
+            <Text style={styles.texto}>.Com </Text>
           </View>
-        ) : (
-          <View style={{ alignItems: "center", flexDirection: "row" }}>
-            <Link href="/">
-              <Text style={styles.textMenuTablet}>Home</Text>
-            </Link>
-            <Link href="/(auth)/login">
-              <Text style={styles.textMenuTablet}>Login</Text>
-            </Link>
-            <Link href="/(auth)/register">
-              <Text style={styles.textMenuTablet}>Cadastro</Text>
-            </Link>
-          </View>
-        )}
+
+          {user ? (
+            <View style={{ alignItems: "center", flexDirection: "row" }}>
+              <Text style={styles.textMenuDesktop}>Olá, {user.nome}</Text>
+              <Link href="/">
+                <Text style={styles.textMenuDesktop}>Início</Text>
+              </Link>
+              <Link href="/pedidos">
+                <Text style={styles.textMenuDesktop}>Meus Pedidos de Adoção</Text>
+              </Link>
+              <Link href="/(tabs)/ListaCadastroAnimais">
+                <Text style={styles.textMenuDesktop}>Meus Animais</Text>
+              </Link>
+
+              <Link href="/(tabs)/cadastro">
+                <Text style={styles.textMenuDesktop}>Cadastrar Animal
+
+                </Text>
+              </Link>
+              <TouchableOpacity onPress={sair}>
+                <Text
+                  style={{
+                    color: "red",
+                    fontWeight: "500",
+                    fontSize: 20,
+                    margin: 10,
+                  }}
+                >
+                  Encerrar Sessão
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={{ alignItems: "center", flexDirection: "row" }}>
+              <Link href="/">
+                <Text style={styles.textMenuDesktop}>Início</Text>
+              </Link>
+              <Link href="/(auth)/login">
+                <Text style={styles.textMenuDesktop}>Entrar</Text>
+              </Link>
+              <Link href="/(auth)/register">
+                <Text style={styles.textMenuDesktop}>Criar Conta</Text>
+              </Link>
+            </View>
+          )}
+        </View>
       </View>
     );
   }

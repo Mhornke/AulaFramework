@@ -1,24 +1,30 @@
-import { Dimensions, FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CardII from "../../components/cardAnimalNormal";
-import Card from "../../components/cardAnimalDestaque"
-//import dados from "../dados.json";
-//import { URL_API } from "@env";
-import Carrossel from "@/components/carrossel";
+import CardIII from "../../components/cardAnimalNormalAdotado"
 
-import Pesquisa from "@/components/pesquisa";
+
+import Carrossel from "../../components/carrossel";
+import Footer from "../../components/footer";
+import Pesquisa from "../../components/pesquisa";
 import { AnimalI } from "../../utils/types/animias";
-import Colors from "@/theme/color";
 
+import { FontAwesome } from "@expo/vector-icons";
+import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
 
 
 export default function Home() {
     const [animais, setAnimais] = useState<AnimalI[]>([])
     const [animaisDestaque, setAnimaisDestaque] = useState<AnimalI[]>([])
+    const [quantVisivelAdotados, setQuantVisivelAdotados] = useState(4)
+    const scrollViewRef = useRef<ScrollView>(null)
 
+    const scrollParaTopo = () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    };
     console.log(animais);
-    const { width, height } = Dimensions.get('window')
+    const { width } = Dimensions.get('window')
 
 
     const styles = StyleSheet.create({
@@ -46,11 +52,35 @@ export default function Home() {
             justifyContent: "space-around",
             padding: 20,
 
+        },
+        botaoFlutuante: {
+            zIndex: 9999,
+            position: "absolute",
+            right: 20,
+            bottom: 40,
+            backgroundColor: "#333",
+            padding: 15,
+            borderRadius: 30,
+            elevation: 5,
+        },
+        cardTableAdotados: {
+            flexWrap: "wrap",
+            justifyContent: "space-around",
+            padding: 20,
+            width: "100%",
+            alignItems: "center",
+            marginTop: 200
+        },
 
-
-
-        }
+        contentWrapper: {
+            width: '100%',
+            maxWidth: 1200,
+            alignSelf: 'center',
+            paddingHorizontal: 20,
+        },
     });
+
+
 
     useEffect(() => {
 
@@ -58,7 +88,7 @@ export default function Home() {
 
             try {
                 // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
-                const response = await fetch(`http://localhost:3004/animais`)
+                const response = await fetch(`${URL_Adocao}/animais`)
                 const dados = await response.json()
                 console.log(response);
                 console.log(response);
@@ -74,7 +104,7 @@ export default function Home() {
         async function buscaDadosDestaque() {
 
             try {
-                const response = await fetch(`http://localhost:3004/animais`)
+                const response = await fetch(`${URL_GestaoPet}/animais/destaque`)
                 const dados = await response.json()
                 console.log(response);
                 console.log(response);
@@ -90,69 +120,124 @@ export default function Home() {
         buscaDadosDestaque()
     }, []);
 
+    const animaisDisponiveis = animais.filter(animais => animais.status === true)
+    const animaisAdotados = animais.filter(animais => animais.status === false)
 
-    const listaAnimais = animais.map((animal) => (
+    const listaAnimais = animaisDisponiveis.map((animal) => (
 
         <CardII key={animal.id} data={animal as AnimalI} />
 
 
     )
     )
+    const listaAnimaisAdotados = animaisAdotados.slice(0, quantVisivelAdotados).map((animal) => (
 
-    // const listaAnimaisDestaque = animaisDestaque.map((animal) => (
-    //     <Card key={animal.id} data={animal} />
-    // ))
-
+        <CardIII key={animal.id} data={animal as AnimalI} />
 
 
+    )
+    )
 
-    // const listaPet = dados.pets.map((pet) => {
-    //     console.log(pet);
 
-    //     return <Card key={pet.id} pet={pet} />;
-    // });
     if (!animais) return <Text>Carregando...</Text>;
     if (width < 600) {
 
 
         return (
+            <>
+                <ScrollView ref={scrollViewRef}
+                showsVerticalScrollIndicator={false}>
 
-            <ScrollView>
-
-                <Pesquisa />
-                <View>
-                </View>
-                <Text style={styles.containerText}>
+                    <Pesquisa />
+                    <View>
+                    </View>
+                    <Text style={styles.containerText}>
 
 
-                    <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
-                </Text>
-                <Carrossel data={animaisDestaque} />
-                <View style={styles.card}>
-                    {listaAnimais}
-                </View>
-            </ScrollView>
+                        <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
+                    </Text>
+                    {animaisDestaque.length > 0 ? (
+                        <View style={{ alignItems: "center", marginTop: 20 }}>
 
+                            <Carrossel data={animaisDestaque} />
+                        </View>
+                    ) : (
+                        <Text style={{ color: "#fff", textAlign: "center" }}>Nenhum animal em destaque no momento.</Text>
+                    )}
+                    <View style={styles.card}>
+
+                        {listaAnimais}
+                    </View>
+                    <Footer />
+                </ScrollView>
+                <TouchableOpacity style={styles.botaoFlutuante} onPress={scrollParaTopo}>
+                    <FontAwesome name="arrow-up" size={15} color="#fff" />
+                </TouchableOpacity>
+            </>
         );
     } else if (width >= 600) {
 
         return (
+            < >
+                <ScrollView keyboardShouldPersistTaps='handled'
+                    showsVerticalScrollIndicator={false}
+                    ref={scrollViewRef}
+                >
+                    <View style={styles.contentWrapper}>
+                        <Pesquisa />
+                        <View style={styles.containerText}>
 
-            <ScrollView keyboardShouldPersistTaps='handled'>
-                <Pesquisa />
-                <View style={styles.containerText}>
+                            <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
+                        </View>
 
-                    <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
-                </View>
+                        {animaisDestaque.length > 0 ? (
 
-                <Carrossel data={animaisDestaque} />
+                            <View style={{ alignItems: "center", marginTop: 20 }}>
 
-                <View style={styles.cardTable}>
-                    {listaAnimais}
-                </View>
+                                <Carrossel data={animaisDestaque} />
+                            </View>
 
-            </ScrollView>
+                        ) : (
+                            <View style={{ alignItems: "center", justifyContent: "center", marginTop: 20 }}>
+                                <Text style={{ color: "black", textAlign: "center", marginBottom: 10 }}>
+                                    Nenhum animal em destaque no momento.
+                                </Text>
 
+                                <Image
+                                    source={require('../../assets/images/imagenVazia.jpg')}
+                                    style={{ width: 150, height: 150 }}
+                                />
+                            </View>
+                        )
+                        }
+
+                        <View style={styles.cardTable}>
+                            {listaAnimais}
+                        </View>
+
+                        <View style={styles.cardTableAdotados}>
+                            <Text style={{ fontWeight: "700", textAlign: "center", fontSize: 18, marginBottom: 10, width: "100%" }}>
+                                Amigos que Já Encontraram um Lar
+                            </Text>
+
+                            <View style={{ flexWrap: "wrap", flexDirection: "row", gap: 100, justifyContent: "center" }}>
+                                {listaAnimaisAdotados}
+
+                            </View>
+                            <TouchableOpacity
+                                style={{ marginTop: 10, padding: 10, }}
+                                onPress={() => setQuantVisivelAdotados((prev) => prev + 4)}
+                            >
+                                <Text style={{ textAlign: "center", color: "blue" }}>Ver mais</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <Footer />
+                </ScrollView>
+                <TouchableOpacity style={styles.botaoFlutuante} onPress={scrollParaTopo}>
+                    <FontAwesome name="arrow-up" size={15} color="#fff" />
+                </TouchableOpacity>
+            </>
         );
 
 

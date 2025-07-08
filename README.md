@@ -56,7 +56,11 @@ Join our community of developers creating universal apps.
 - npm install @react-native-async-storage/async-storage
 - npm install react-native-picker-select
 - npx expo install expo-file-system
-
-
+- npm install --save-dev eslint-import-resolver-typescript
+- npm install --save-dev @react-native-community/cli
+- npm install axios expo-image-picker
+- npx expo install expo-file-system expo-image-manipulator
+- npm install sweetalert2
+- npm install browser-image-compression
 ## Links
 -- API Adote.com https://api-adocao-git-main-dieizons-projects.vercel.app/

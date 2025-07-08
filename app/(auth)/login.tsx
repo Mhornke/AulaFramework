@@ -1,9 +1,11 @@
 import { Text, View, StyleSheet, Dimensions, Image, TextInput, Switch, TouchableOpacity } from "react-native";
 import { Link, router } from "expo-router";
+import { showAlert } from "@/components/swalAlert";
 
 import Color from "../../theme/color"
 import { useForm, Controller } from 'react-hook-form'
 import { useAuth } from "@/context/AuthContext";
+import { URL_Adocao } from "@/utils/url";
 
 type Input = {
   email: string,
@@ -23,7 +25,7 @@ export default function Login() {
 
   async function onSubmit(data: Input) {
     //console.log("dados do input", data);
-    const response = await fetch(`http://localhost:3004/adotantes/login`, {
+    const response = await fetch(`${URL_Adocao}/adotantes/login`, {
       headers: {
         "Content-Type": "application/json"
       },
@@ -33,14 +35,19 @@ export default function Login() {
     if (response.status === 200) {
       const dados = await response.json();
       //logaAdotante(dados) armazenar contexto
-      alert("Login realizado")      
+    
+      showAlert("Login Realizado",  "Seja bem-vindo(a) de volta.", 'success')    
       
         await login(dados, data.manter)
       
       
       router.push("/");
     } else {
-      alert("Erro... Email ou Senha incorreto")
+    
+      showAlert("Erro ao Logar",
+        "Email ou senha incorretos",
+        'error'
+      )
     }
 
 
@@ -133,10 +140,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-      <View style={{ width: 400, height:50,  backgroundColor: "green", alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ color: "white" }} >E-mail dieizonos@gmail.com</Text>
-        <Text style={{ color: "white" }} >Senha: @Atila123</Text>
-      </View>
+      
       </View>
 
 
