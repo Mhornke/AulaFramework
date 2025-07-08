@@ -55,7 +55,7 @@ export default function Cadastrado() {
 
     if (response.status === 201) {
       const dados = await response.json();
-      login(dados, data.manter)
+      login(dados)
    
       showAlert("cadastro Realizado com sucesso",
         "Seja bem vindo a nossa plataforma",
