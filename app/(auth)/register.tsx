@@ -6,6 +6,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
 import { showAlert } from "@/components/swalAlert";
+import { useState } from "react";
 
 type Input = {
   nome: string,
@@ -17,6 +18,9 @@ type Input = {
 }
 
 export default function Cadastrado() {
+  const [digitosSenha, setDigitoSenha] = useState('')
+  const [digTelefone, setdigTelefone] = useState('')
+
   const { control, handleSubmit, formState: { errors } } = useForm<Input>({
     defaultValues: {
       email: "",
@@ -24,7 +28,7 @@ export default function Cadastrado() {
       endereco: "",
       nome: "",
       fone: "",
-      
+
     }
   });
   const { login } = useAuth()
@@ -56,15 +60,15 @@ export default function Cadastrado() {
     if (response.status === 201) {
       const dados = await response.json();
       login(dados)
-   
+
       showAlert("cadastro Realizado com sucesso",
         "Seja bem vindo a nossa plataforma",
         'success'
       )
       router.push("/");
     } else {
-      
-      showAlert("Erro ao se cadastrar", 
+
+      showAlert("Erro ao se cadastrar",
         "Não foi possivel criar o cadastro tente novamente ou mais tarde",
         'error'
       )
@@ -72,7 +76,11 @@ export default function Cadastrado() {
 
 
   }
-
+  const min = digitosSenha.length >= 8;
+  const maiu = /[A-Z]/.test(digitosSenha);
+  const caracter = /[!@#$%^&()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(digitosSenha)
+  const num = /[0-9]/.test(digitosSenha)
+  const numTelefone = /^[0-9]*$/.test(digTelefone)
 
   const largura = Dimensions.get('window').width
   const comprimento = Dimensions.get('window').height
@@ -95,7 +103,7 @@ export default function Cadastrado() {
             />
           </View>
           <View style={styles.containerInputs}>
-            <Text style={styles.texto}>Nome</Text>
+            <Text style={styles.texto}>Nome completo</Text>
             <Controller
               control={control}
               name="nome"
@@ -125,23 +133,26 @@ export default function Cadastrado() {
                 <TextInput
                   placeholder="(xx) xxxx-xxxx"
                   value={value}
-                  onChangeText={onChange}
-                  style={styles.inputs}
+                  onChangeText={(text) => {
+                    onChange(text)
+                    setdigTelefone(text)
+                  }}
+                  style={[styles.inputs,{color: numTelefone ? Color.LetraCinza: 'red'}]}
 
                 />
               )}
             />
-            <Text style={styles.texto}>Endereco</Text>
+            <Text style={styles.texto}>Endereço</Text>
             <Controller
               control={control}
               name="endereco"
 
-              rules={{ required: '' }}
+              rules={{ required: 'Rua, Avenida, Bairro...' }}
               render={({ field: { onChange, value } }) => (
 
 
                 <TextInput
-                  placeholder=""
+                  placeholder="Rua, Avenida, Bairro..."
                   value={value}
                   onChangeText={onChange}
                   style={styles.inputs}
@@ -149,7 +160,7 @@ export default function Cadastrado() {
                 />
               )}
             />
-            <Text style={styles.texto}>Email</Text>
+            <Text style={styles.texto}>E-mail</Text>
             <Controller
               control={control}
               name="email"
@@ -168,6 +179,8 @@ export default function Cadastrado() {
               )}
             />
             <Text style={styles.texto}>Senha</Text>
+
+
             <Controller
               control={control}
               name="senha"
@@ -179,12 +192,26 @@ export default function Cadastrado() {
                 <TextInput
                   placeholder="***************"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(text) => {
+                    onChange(text);
+                    setDigitoSenha(text)
+                  }}
                   style={styles.inputs}
 
                 />
+
               )}
             />
+
+            <View style={{ marginTop: 10, flexDirection: "column" }}>
+              <Text style={[styles.textoSenha, { color: "white", fontWeight: "600" }]}>Campos nescessarios para criar senha:</Text>
+              <Text style={[styles.textoSenha, { color: min ? 'green' : 'white' }]}>Minimmo 8 digitos</Text>
+              <Text style={[styles.textoSenha, { color: maiu ? 'green' : 'white' }]}>Minimo 1 letra Maiuscula:</Text>
+              <Text style={[styles.textoSenha, { color: caracter ? 'green' : 'white' }]}>Minimo 1 caracter especial</Text>
+              <Text style={[styles.textoSenha, { color: num ? 'green' : 'white' }]}>Minimo 1 numero</Text>
+            </View>
+
+
           </View>
 
           <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
@@ -236,6 +263,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: "center"
+  },
+  textoSenha: {
+    fontWeight: "400"
   }
 
 })
