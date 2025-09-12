@@ -10,7 +10,7 @@ import { URL_Adocao } from "@/utils/url";
 type Input = {
   email: string,
   senha: string,
-  manter: boolean
+  salvar: boolean
 }
 
 export default function Login() {
@@ -18,7 +18,7 @@ export default function Login() {
     defaultValues: {
       email: "",
       senha: "",
-      manter: false
+      salvar: false
     }
   });
   const { login } = useAuth()
@@ -35,15 +35,20 @@ export default function Login() {
     if (response.status === 200) {
       const dados = await response.json();
       //logaAdotante(dados) armazenar contexto
-    
-      showAlert("Login Realizado",  "Seja bem-vindo(a) de volta.", 'success')    
+     const credenciais ={
+      username: data.email,
+      password: data.senha
+     }
+        
       
-        await login(dados, data.manter)
-      
-      
+      showAlert("Login Realizado", "Seja bem-vindo(a) de volta.", 'success')
+
+      await login(dados,credenciais, data.salvar)
+
+
       router.push("/");
     } else {
-    
+
       showAlert("Erro ao Logar",
         "Email ou senha incorretos",
         'error'
@@ -58,8 +63,8 @@ export default function Login() {
   const comprimento = Dimensions.get('window').height
 
   return (
-    <View style={{ backgroundColor: Color.CorFundo, height:comprimento }} >
-           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+    <View style={{ backgroundColor: Color.CorFundo, height: comprimento }} >
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <Image
           source={{
             uri: "https://raw.githubusercontent.com/DieizonOliveira/frontAdocao/refs/heads/main/public/logo2.png",
@@ -69,7 +74,7 @@ export default function Login() {
         <View style={styles.container}>
           <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>Informe seus Dados de Acesso</Text>
 
-          <View style={styles.containerInputs}>
+          <View style={[styles.containerInputs,]}>
             <Text style={styles.texto}>Email</Text>
             <Controller
               control={control}
@@ -98,7 +103,7 @@ export default function Login() {
 
 
                 <TextInput
-                  placeholder="*******"
+                  placeholder="********"
                   value={value}
                   onChangeText={onChange}
                   style={styles.inputs}
@@ -107,12 +112,13 @@ export default function Login() {
               )}
             />
           </View>
-          <View style={{ flex: 1, flexDirection: "row", alignItems: "center", alignContent: "space-between" }}>
+
+          <View style={{ flexDirection: "row", marginTop: 10, alignItems: "center", alignContent: "space-between" }}>
 
             <View style={{ flexDirection: "row", padding: 5 }}>
               <Controller
                 control={control}
-                name="manter"
+                name="salvar"
                 defaultValue={false}
 
                 render={({ field: { onChange, value } }) => (
@@ -125,22 +131,28 @@ export default function Login() {
                   />
                 )}
               />
-              <Text style={{ color: "#ffff", marginLeft: 5 }}>Manter conectado</Text>
+              <Text style={{ color: "#ffff", marginLeft: 5 }}>Salvar login</Text>
             </View>
 
             <Link href="./">
-              <Text style={{ color: Color.LetraCinza, fontWeight: "400" }}>Esqueci minha senha</Text>
+              <Text style={{ color: Color.LetraCinza, marginLeft: 20, fontWeight: "400" }}>Esqueci minha senha</Text>
             </Link>
 
           </View>
-
+          <View style={[{ alignItems: 'center' }]}>
+            <Link href="/(auth)/register">
+              <Text style={{ color: Color.Butao, marginLeft: 20, fontWeight: "400" }}>
+                Ainda não tenho cadastro
+              </Text>
+            </Link>
+          </View>
           <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
             <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Entrar</Text>
 
           </TouchableOpacity>
         </View>
 
-      
+
       </View>
 
 
@@ -156,14 +168,15 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Color.CardFundo,
     padding: 50,
-    height: "60%"
+    height: "60%",
+    gap: 20
   },
   texto: {
     color: "#ffff",
     fontWeight: "500"
   },
   containerInputs: {
-    flex: 1,
+    gap: 15,
     flexDirection: "column",
     justifyContent: "space-around",
     padding: 10

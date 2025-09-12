@@ -62,5 +62,6 @@ Join our community of developers creating universal apps.
 - npx expo install expo-file-system expo-image-manipulator
 - npm install sweetalert2
 - npm install browser-image-compression
+- npm install react-native-keychain
 ## Links
 -- API Adote.com https://api-adocao-git-main-dieizons-projects.vercel.app/
