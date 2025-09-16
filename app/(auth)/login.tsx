@@ -1,11 +1,13 @@
-import { Text, View, StyleSheet, Dimensions, Image, TextInput, Switch, TouchableOpacity } from "react-native";
-import { Link, router } from "expo-router";
 import { showAlert } from "@/components/swalAlert";
+import { Link, router } from "expo-router";
+import { Dimensions, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 
-import Color from "../../theme/color"
-import { useForm, Controller } from 'react-hook-form'
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
+import { useEffect } from "react";
+import { Controller, useForm } from 'react-hook-form';
+import * as keychain from 'react-native-keychain';
+import Color from "../../theme/color";
 
 type Input = {
   email: string,
@@ -14,7 +16,9 @@ type Input = {
 }
 
 export default function Login() {
-  const { control, handleSubmit, formState: { errors } } = useForm<Input>({
+  // const [loading, setLoading] =useState(true)
+  
+  const { control, handleSubmit, formState: { errors }, setValue } = useForm<Input>({
     defaultValues: {
       email: "",
       senha: "",
@@ -22,6 +26,28 @@ export default function Login() {
     }
   });
   const { login } = useAuth()
+
+  useEffect(()=>{
+const loadDadosLogin = async() =>{
+  try {
+    const credenciais = await keychain.getGenericPassword()
+    if (credenciais) {
+      console.log("Credenciais recuperadas", credenciais.username);
+      setValue('email', credenciais.username)
+      setValue('senha', credenciais.password)
+   
+    }
+  } catch (error) {
+    console.log("erro ao carregar credenciais", error);
+    
+  }
+  // finally{
+  //   setLoading(false)
+  // }
+}
+loadDadosLogin()
+  },[setValue])
+
 
   async function onSubmit(data: Input) {
     //console.log("dados do input", data);
@@ -32,18 +58,21 @@ export default function Login() {
       method: "POST",
       body: JSON.stringify({ email: data.email, senha: data.senha })
     });
+
     if (response.status === 200) {
+
       const dados = await response.json();
       //logaAdotante(dados) armazenar contexto
-     const credenciais ={
-      username: data.email,
-      password: data.senha
-     }
+    if (data.salvar) {
+       await keychain.setGenericPassword(data.email, data.senha)
+    }else{
+      await keychain.resetGenericPassword()
+    }
         
       
       showAlert("Login Realizado", "Seja bem-vindo(a) de volta.", 'success')
 
-      await login(dados,credenciais, data.salvar)
+      await login(dados, data.salvar)
 
 
       router.push("/");
@@ -134,7 +163,7 @@ export default function Login() {
               <Text style={{ color: "#ffff", marginLeft: 5 }}>Salvar login</Text>
             </View>
 
-            <Link href="./">
+            <Link href="/(auth)/recoveryPass">
               <Text style={{ color: Color.LetraCinza, marginLeft: 20, fontWeight: "400" }}>Esqueci minha senha</Text>
             </Link>
 
