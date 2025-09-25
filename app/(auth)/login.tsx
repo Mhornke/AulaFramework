@@ -29,21 +29,8 @@ export default function Login() {
 
   useEffect(()=>{
 const loadDadosLogin = async() =>{
-  try {
-    const credenciais = await keychain.getGenericPassword()
-    if (credenciais) {
-      console.log("Credenciais recuperadas", credenciais.username);
-      setValue('email', credenciais.username)
-      setValue('senha', credenciais.password)
-   
-    }
-  } catch (error) {
-    console.log("erro ao carregar credenciais", error);
-    
-  }
-  // finally{
-  //   setLoading(false)
-  // }
+ 
+ 
 }
 loadDadosLogin()
   },[setValue])
@@ -163,7 +150,7 @@ loadDadosLogin()
               <Text style={{ color: "#ffff", marginLeft: 5 }}>Salvar login</Text>
             </View>
 
-            <Link href="/(auth)/recoveryPass">
+            <Link href={`/(auth)/recoveryPass`}>
               <Text style={{ color: Color.LetraCinza, marginLeft: 20, fontWeight: "400" }}>Esqueci minha senha</Text>
             </Link>
 

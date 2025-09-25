@@ -4,7 +4,7 @@ import { Dimensions, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacit
 
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from 'react-hook-form';
 import * as keychain from 'react-native-keychain';
 import Color from "../../theme/color";
@@ -12,49 +12,55 @@ import { push } from "expo-router/build/global-state/routing";
 
 type Input = {
   email: string,
+  codigo: string,
+  novaSenha: string,
+  ValidaSenha: string
   
 
 }
 export default function RecoveryPass() {
 
+const [senhaInput, setSenhaInput] = useState("")
+const [repetirSenha, setRepetirSenha] = useState("")
+
+
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<Input>({
     defaultValues: {
       email: "",
-      
-
+      codigo:"",
+      novaSenha:"",
+      ValidaSenha:""
     }
   });
 
   async function onSubmit(data: Input) {
     //dados de refazer senha
+console.log(`emais do usuario ${data.email}`);
 
-    const response = await fetch(`${URL_Adocao}/adotantes/senha/solicitar-troca`, {
+    const response = await fetch(`${URL_Adocao}/adotantes/senha/trocar`, {
       headers: {
         "Content-Type": "application/json"
       },
       method: "POST",
-      body: JSON.stringify({ email: data.email})
+      body: JSON.stringify({ email: data.email, codigo:data.codigo, novaSenha:data.novaSenha})
     });
 
-    if (response.status === 200) {
+if (senhaInput == repetirSenha) {
 
-      const dados = await response.json();     
+  if (response.status === 200) {
 
-      showAlert("Recuperação de senha solicitado", 'success')    
-      router.push(
-        {
-          pathname:'/(auth)/newpass',
-          query:{ email: data.email}
-        },
-        '/(auth)/newpass'
-      )
-    } else {
+    const dados = await response.json();     
 
-      showAlert("Erro ao Recuperar senha",
-        "Email",
-        'error'
-      )
-    }
+    showAlert("Recuperação de senha solicitado", 'success')    
+    push("/")
+  } else {
+
+    showAlert("Erro ao Recuperar senha",
+      
+      'error'
+    )
+  }
+}
 
 
   }
@@ -79,22 +85,22 @@ export default function RecoveryPass() {
           style={{ width: 100, height: 100 }}
         />
         <View style={styles.container}>
-          <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>Informe seus Dados de Acesso</Text>
+          <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>Informe seus Dados de Recuperação</Text>
 
          
            
 
-            <Text style={styles.texto}>Email para recuperação</Text>
+            
             <Controller
               control={control}
-              name="email"
+              name="codigo"
 
               rules={{ required: 'E-mail obrigatorio' }}
               render={({ field: { onChange, value } }) => (
 
 
                 <TextInput
-                  placeholder="Seu e-mail"
+                  placeholder="Codigo de acesso"
                   value={value}
                   onChangeText={onChange}
                   style={styles.inputs}
@@ -102,9 +108,50 @@ export default function RecoveryPass() {
                 />
               )}
             />                          
+            <Controller
+              control={control}
+              name="novaSenha"
+
+              rules={{ required: 'E-mail obrigatorio' }}
+              render={({ field: { onChange, value } }) => (
+
+
+                <TextInput
+                  placeholder="Nova senha"
+                  value={value}
+                  onChangeText={(text) =>{
+                    onChange(text)
+                    setSenhaInput(text)
+                  }}
+                  style={styles.inputs}
+
+                />
+              )}
+            />                          
+            <Controller
+              control={control}
+              name="ValidaSenha"
+
+              rules={{ required: 'E-mail obrigatorio' }}
+              render={({ field: { onChange, value } }) => (
+
+
+                <TextInput
+                  placeholder="Repita nova senha"
+                  value={value}
+                  onChangeText={(text) =>{
+                    onChange(text)
+                    setRepetirSenha(text)
+                  }}
+                  style={styles.inputs}
+
+                />
+              )}
+            />                          
                   
+
              <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
-          <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Entrar</Text>
+          <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Alterar senha</Text>
 
         </TouchableOpacity>
         </View>
