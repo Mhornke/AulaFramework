@@ -1,6 +1,6 @@
 import { showAlert } from "@/components/swalAlert";
 import { Link, router } from "expo-router";
-import { Dimensions, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Dimensions, Platform, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
@@ -17,7 +17,7 @@ type Input = {
 
 export default function Login() {
   // const [loading, setLoading] =useState(true)
-  
+
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<Input>({
     defaultValues: {
       email: "",
@@ -25,15 +25,42 @@ export default function Login() {
       salvar: false
     }
   });
-  const { login } = useAuth()
+  const { login, loadSavedCredentials } = useAuth()
 
-  useEffect(()=>{
-const loadDadosLogin = async() =>{
- 
- 
-}
-loadDadosLogin()
-  },[setValue])
+  useEffect(() => {
+
+    const loadDadosLogin = async () => {
+
+      let email = "";
+      let senha = "";
+      let salvar = false
+
+      if (Platform.OS !== "web") {
+
+        try {
+          const credentials = await keychain.getGenericPassword();
+
+          if (credentials && credentials.username && credentials.password) {
+            email = credentials.username;
+            senha = credentials.password; 
+            salvar = true;
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados do Keychain:", error);
+        }
+      } else {
+        email = window.localStorage.getItem('savedEmail') || "";
+        salvar = email !== "";
+       
+          
+      }
+      setValue('email', email);
+      setValue('senha', senha);
+      setValue('salvar', salvar);
+      
+    }
+    loadDadosLogin()
+  }, [setValue, loadSavedCredentials])
 
 
   async function onSubmit(data: Input) {
@@ -50,17 +77,23 @@ loadDadosLogin()
 
       const dados = await response.json();
       //logaAdotante(dados) armazenar contexto
-    if (data.salvar) {
-       await keychain.setGenericPassword(data.email, data.senha)
-    }else{
-      await keychain.resetGenericPassword()
-    }
-        
-      
+      if (Platform.OS !== "web") {
+
+        if (data.salvar) {
+          await keychain.setGenericPassword(data.email, data.senha);
+        } else {
+          await keychain.resetGenericPassword()
+        }
+      }
+
+
       showAlert("Login Realizado", "Seja bem-vindo(a) de volta.", 'success')
 
-      await login(dados, data.salvar)
-
+      await login(
+        { id: dados.id, nome: dados.nome, email: data.email }, 
+        data.senha,
+        data.salvar
+      )
 
       router.push("/");
     } else {
@@ -147,7 +180,7 @@ loadDadosLogin()
                   />
                 )}
               />
-              <Text style={{ color: "#ffff", marginLeft: 5 }}>Salvar login</Text>
+              <Text style={{ color: "#ffff", marginLeft: 5 }}>Lembrar Email</Text>
             </View>
 
             <Link href={`/(auth)/recoveryPass`}>

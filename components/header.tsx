@@ -148,7 +148,7 @@ export default function Header() {
                           SetOpenMenu(false)
                           router.push('/cadastro')
                         }}>
-                        <Text style={styles.textoMenu}>Cadastrar Animal</Text>
+                        <Text style={styles.textoMenu}>Encontrei um Pet perdido</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
@@ -162,7 +162,7 @@ export default function Header() {
                           SetOpenMenu(false)
                           router.push('/(tabs)/ListaCadastroAnimais')
                         }}>
-                        <Text style={styles.textoMenu}>Meus Animais</Text>
+                        <Text style={styles.textoMenu}>Lista de Pets perdidos</Text>
                       </TouchableOpacity>
 
 
