@@ -89,6 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadUser = async () => {
       try {
         const userData = await AsyncStorage.getItem('user');
+
         if (userData) {
           setUser(JSON.parse(userData));
         }
@@ -108,6 +109,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (userData: User, senha: string, persist = false) => {
     setUser(userData);
+
+    await AsyncStorage.setItem("user", JSON.stringify(userData))
+
     await saveCredentials(userData.email, senha, persist)
 
     if (persist) {
@@ -117,7 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     await AsyncStorage.removeItem('user');
-    
+
     console.log('Usuário removido do storage');
     setUser(null);
   };

@@ -251,7 +251,7 @@ export default function Header() {
               </Link>
 
               <Link href="/(tabs)/cadastro">
-                <Text style={styles.textMenuDesktop}>Cadastrar Animal
+                <Text style={styles.textMenuDesktop}>Cadastrar Animal perdido
 
                 </Text>
               </Link>

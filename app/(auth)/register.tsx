@@ -33,7 +33,7 @@ export default function Cadastrado() {
   });
   const { login } = useAuth()
 
-  console.log(control);
+ 
 
 
 
@@ -59,7 +59,11 @@ export default function Cadastrado() {
 
     if (response.status === 201) {
       const dados = await response.json();
-      login(dados)
+      await login(
+        { id: dados.id, nome: dados.nome, email: data.email }, 
+        data.senha,
+        
+      )
 
       showAlert("cadastro Realizado com sucesso",
         "Seja bem vindo a nossa plataforma",
