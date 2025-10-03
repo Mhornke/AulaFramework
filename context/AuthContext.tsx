@@ -1,4 +1,3 @@
-// contexts/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as keychain from 'react-native-keychain';
@@ -8,37 +7,21 @@ interface User {
   id: string;
   nome: string;
   email: string;
+  token: string
 }
 
 interface AuthContextData {
   user: User | null;
-  login: (userData: User, senha: string, persist?: boolean) => Promise<void>;
+  token: string | null;
+  // Removido 'senha' do login, pois não será persistida.
+  login: (userData: User, persist?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
-  loadSavedCredentials: () => Promise<{ email: string, senha: string, salvar: boolean }>
+  // Removido 'senha' do retorno.
+  loadSavedCredentials: () => Promise<{ email: string, salvar: boolean }>
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
-
-const saveCredentials = async (email: string, senha: string, persist: boolean) => {
-  if (Platform.OS !== 'web') {
-
-    if (persist) {
-      await keychain.setGenericPassword(email, senha);
-    } else {
-      await keychain.resetGenericPassword();
-    }
-  } else {
-
-    if (persist) {
-      window.localStorage.setItem('savedEmail', email);
-    } else {
-      window.localStorage.removeItem('savedEmail');
-    }
-    // Garante que a senha nunca seja armazenada no web
-    window.localStorage.removeItem('savedPassword');
-  }
-};
 
 const clearAllLoginData = async () => {
   // Limpa o Keychain (Nativo)
@@ -55,48 +38,46 @@ const clearAllLoginData = async () => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadSavedCredentials = async (): Promise<{ email: string, senha: string, salvar: boolean }> => {
+  // Ajuste para não retornar senha, conforme solicitado.
+  const loadSavedCredentials = async (): Promise<{ email: string, salvar: boolean }> => {
     let email = "";
-    let senha = "";
     let salvar = false;
 
     if (Platform.OS !== 'web') {
       // NATIVO: Carrega do Keychain
       try {
         const credentials = await keychain.getGenericPassword();
-        if (credentials && credentials.username && credentials.password) {
+        // Se encontrar as credenciais (email + senha dummy), preenche o email e marca 'salvar'.
+        if (credentials && credentials.username) {
           email = credentials.username;
-          senha = credentials.password;
-          salvar = true;
+          salvar = true; // Indica que o e-mail foi carregado do armazenamento persistente
         }
       } catch (error) {
-        // Erros no nativo devem ser logados, mas não interrompem o app
         console.error("Erro ao carregar dados do Keychain:", error);
       }
     } else {
       // WEB: Carrega apenas o email do localStorage
       email = window.localStorage.getItem('savedEmail') || "";
+      // Na web, se o email existe, é considerado "salvo" para preenchimento.
       salvar = email !== "";
-      // Senha permanece vazia por segurança
     }
 
-    return { email, senha, salvar };
+    return { email, salvar };
   };
 
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const userData = await AsyncStorage.getItem('user');
+        // Tenta carregar a sessão permanente (user/token) do AsyncStorage
+        const userDataString = await AsyncStorage.getItem('user');
 
-        if (userData) {
-          setUser(JSON.parse(userData));
-        }
-
-        const credenciais = await keychain.getGenericPassword();
-        if (credenciais) {
-          console.log('Credenciais recuperadas:', credenciais.username);
+        if (userDataString) {
+          const userData: User = JSON.parse(userDataString)
+          setUser(userData);
+          setToken(userData.token)
         }
       } catch (error) {
         console.log('Erro ao carregar dados:', error);
@@ -107,27 +88,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loadUser();
   }, []);
 
-  const login = async (userData: User, senha: string, persist = false) => {
+  // Removido o argumento 'senha'
+  const login = async (userData: User, persist = false) => {
+    // 1. Atualiza o estado em memória (Sessão atual)
     setUser(userData);
+    setToken(userData.token)
 
-    await AsyncStorage.setItem("user", JSON.stringify(userData))
-
-    await saveCredentials(userData.email, senha, persist)
-
+    // 2. Lógica de Persistência da Sessão (Token/User no AsyncStorage)
     if (persist) {
+      // PERMANENTE: Salva o usuário completo (Token) para sobreviver a recargas/fechamento
       await AsyncStorage.setItem('user', JSON.stringify(userData));
+    } else {
+      // TEMPORÁRIO: Limpa qualquer sessão permanente anterior. A sessão só existe em memória.
+      await AsyncStorage.removeItem('user');
+    }
+
+    // 3. Lógica de Persistência de Credenciais (E-mail para Autopreenchimento)
+    if (Platform.OS !== 'web') {
+      // NATIVO: Keychain (Salva E-mail de forma segura, usando senha dummy)
+      if (persist) {
+        // Salva o email como 'username' e uma string fixa como 'password'
+        await keychain.setGenericPassword(userData.email, "EMAIL_ONLY_SAVED");
+      } else {
+        // Se não for persistir a sessão, reseta o email salvo no keychain
+        await keychain.resetGenericPassword();
+      }
+    } else {
+      // WEB: Salva o e-mail no localStorage (é temporário, mas serve para autopreenchimento)
+      window.localStorage.setItem('savedEmail', userData.email);
     }
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('user');
-
-    console.log('Usuário removido do storage');
+    await clearAllLoginData();
     setUser(null);
+    setToken(null); // Limpa o token no logout
+    console.log('Usuário e token removidos do storage');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, loadSavedCredentials }}>
+    <AuthContext.Provider value={{ user, login, token, logout, isLoading, loadSavedCredentials }}>
       {children}
     </AuthContext.Provider>
   );

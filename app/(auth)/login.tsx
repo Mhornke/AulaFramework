@@ -1,14 +1,12 @@
+import React, { useEffect, useState } from "react";
 import { showAlert } from "@/components/swalAlert";
 import { Link, router } from "expo-router";
 import { Dimensions, Platform, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
-
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
-import { useEffect } from "react";
 import { Controller, useForm } from 'react-hook-form';
-import * as keychain from 'react-native-keychain';
 import Color from "../../theme/color";
-
+import { FontAwesome } from "@expo/vector-icons";
 type Input = {
   email: string,
   senha: string,
@@ -16,7 +14,8 @@ type Input = {
 }
 
 export default function Login() {
-  // const [loading, setLoading] =useState(true)
+  // Estado para controlar a visibilidade da senha
+  const [showPassword, setShowPassword] = useState(false);
 
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<Input>({
     defaultValues: {
@@ -25,46 +24,22 @@ export default function Login() {
       salvar: false
     }
   });
+  // Desestruturação do useAuth para acesso às funções
   const { login, loadSavedCredentials } = useAuth()
 
   useEffect(() => {
-
     const loadDadosLogin = async () => {
+      // Usa a função do contexto para carregar o email e o estado de persistência.
+      const { email, salvar } = await loadSavedCredentials();
 
-      let email = "";
-      let senha = "";
-      let salvar = false
-
-      if (Platform.OS !== "web") {
-
-        try {
-          const credentials = await keychain.getGenericPassword();
-
-          if (credentials && credentials.username && credentials.password) {
-            email = credentials.username;
-            senha = credentials.password; 
-            salvar = true;
-          }
-        } catch (error) {
-          console.error("Erro ao carregar dados do Keychain:", error);
-        }
-      } else {
-        email = window.localStorage.getItem('savedEmail') || "";
-        salvar = email !== "";
-       
-          
-      }
       setValue('email', email);
-      setValue('senha', senha);
       setValue('salvar', salvar);
-      
     }
     loadDadosLogin()
   }, [setValue, loadSavedCredentials])
 
 
   async function onSubmit(data: Input) {
-    //console.log("dados do input", data);
     const response = await fetch(`${URL_Adocao}/adotantes/login`, {
       headers: {
         "Content-Type": "application/json"
@@ -76,37 +51,29 @@ export default function Login() {
     if (response.status === 200) {
 
       const dados = await response.json();
-      //logaAdotante(dados) armazenar contexto
-      if (Platform.OS !== "web") {
+      const tokenRecebido = dados.token
 
-        if (data.salvar) {
-          await keychain.setGenericPassword(data.email, data.senha);
-        } else {
-          await keychain.resetGenericPassword()
-        }
+      if (!tokenRecebido) {
+        showAlert("Erro de login", "Token de autenticação não recebido na resposta do servidor", "error")
+        return
       }
-
 
       showAlert("Login Realizado", "Seja bem-vindo(a) de volta.", 'success')
 
+      // Chamada do login (apenas userData e persist)
       await login(
-        { id: dados.id, nome: dados.nome, email: data.email }, 
-        data.senha,
+        { id: dados.id, nome: dados.nome, email: data.email, token: tokenRecebido },
         data.salvar
       )
 
       router.push("/");
     } else {
-
       showAlert("Erro ao Logar",
         "Email ou senha incorretos",
         'error'
       )
     }
-
-
   }
-
 
   const largura = Dimensions.get('window').width
   const comprimento = Dimensions.get('window').height
@@ -149,15 +116,28 @@ export default function Login() {
 
               rules={{ required: 'Senha obrigatorio' }}
               render={({ field: { onChange, value } }) => (
-
-
-                <TextInput
-                  placeholder="********"
-                  value={value}
-                  onChangeText={onChange}
-                  style={styles.inputs}
-
-                />
+                // Container para o campo de senha e o botão de alternância
+                <View style={{ position: 'relative' }}>
+                  <TextInput
+                    placeholder="********"
+                    value={value}
+                    onChangeText={onChange}
+                    // Controla a visibilidade com base no estado 'showPassword'
+                    secureTextEntry={!showPassword}
+                    style={styles.inputs}
+                  />
+                  {/* Botão de alternância da visibilidade */}
+                  <TouchableOpacity
+                    style={styles.toggleButton}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <FontAwesome
+                      name={showPassword ? 'eye' : 'eye-slash'}
+                      size={20}
+                      color={Color.LetraCinza}
+                    />
+                  </TouchableOpacity>
+                </View>
               )}
             />
           </View>
@@ -236,14 +216,20 @@ const styles = StyleSheet.create({
     color: Color.LetraCinza,
     borderRadius: 5,
     padding: 10,
+    paddingRight: 40, // Adiciona espaço à direita para o ícone
   },
   botao: {
     backgroundColor: Color.Butao,
     padding: 10,
     borderRadius: 5,
     alignItems: "center"
-  }
-
+  },
+  // Novo estilo para posicionar o botão de alternância
+  toggleButton: {
+    position: 'absolute',
+    right: 10,
+    top: '25%',
+    padding: 5,
+    zIndex: 1,
+  },
 })
-
-

@@ -40,7 +40,7 @@ export default function RecoveryPass() {
 
       const dados = await response.json();     
 
-      showAlert("Recuperação de senha solicitado", 'success')    
+      showAlert("Pedido para recuperação de senha enviado","Veja seu email", 'success')    
       router.push(
         {
           pathname:'/(auth)/newpass',
