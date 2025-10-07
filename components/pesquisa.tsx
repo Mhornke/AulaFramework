@@ -27,7 +27,7 @@ export default function Pesquisa() {
     <View style={styles.container}>
       <View style={styles.searchContainer}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: termo ? '#ffff' : Colors.LetraCinza }]}
           placeholder="Pesquisar..."
           value={termo}
           onChangeText={enviaPesquisa}

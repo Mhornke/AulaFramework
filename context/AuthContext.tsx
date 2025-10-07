@@ -18,7 +18,7 @@ interface AuthContextData {
   logout: () => Promise<void>;
   isLoading: boolean;
   // Removido 'senha' do retorno.
-  loadSavedCredentials: () => Promise<{ email: string, salvar: boolean }>
+  loadSavedCredentials: () => Promise<{ email: string, manter: boolean }>
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -42,18 +42,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Ajuste para não retornar senha, conforme solicitado.
-  const loadSavedCredentials = async (): Promise<{ email: string, salvar: boolean }> => {
+  const loadSavedCredentials = async (): Promise<{ email: string, manter: boolean }> => {
     let email = "";
-    let salvar = false;
+    let manter = false;
 
     if (Platform.OS !== 'web') {
       // NATIVO: Carrega do Keychain
       try {
         const credentials = await keychain.getGenericPassword();
-        // Se encontrar as credenciais (email + senha dummy), preenche o email e marca 'salvar'.
+       
         if (credentials && credentials.username) {
           email = credentials.username;
-          salvar = true; // Indica que o e-mail foi carregado do armazenamento persistente
+          manter = true; 
         }
       } catch (error) {
         console.error("Erro ao carregar dados do Keychain:", error);
@@ -61,11 +61,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       // WEB: Carrega apenas o email do localStorage
       email = window.localStorage.getItem('savedEmail') || "";
-      // Na web, se o email existe, é considerado "salvo" para preenchimento.
-      salvar = email !== "";
+      
+   
     }
 
-    return { email, salvar };
+    return { email, manter };
   };
 
   useEffect(() => {
@@ -88,9 +88,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loadUser();
   }, []);
 
-  // Removido o argumento 'senha'
+  
   const login = async (userData: User, persist = false) => {
-    // 1. Atualiza o estado em memória (Sessão atual)
+    
     setUser(userData);
     setToken(userData.token)
 

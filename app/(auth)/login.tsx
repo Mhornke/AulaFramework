@@ -10,7 +10,7 @@ import { FontAwesome } from "@expo/vector-icons";
 type Input = {
   email: string,
   senha: string,
-  salvar: boolean
+  manter: boolean
 }
 
 export default function Login() {
@@ -21,7 +21,7 @@ export default function Login() {
     defaultValues: {
       email: "",
       senha: "",
-      salvar: false
+      manter: false
     }
   });
   // Desestruturação do useAuth para acesso às funções
@@ -30,10 +30,10 @@ export default function Login() {
   useEffect(() => {
     const loadDadosLogin = async () => {
       // Usa a função do contexto para carregar o email e o estado de persistência.
-      const { email, salvar } = await loadSavedCredentials();
+      const { email, manter } = await loadSavedCredentials();
 
       setValue('email', email);
-      setValue('salvar', salvar);
+      setValue('manter', manter);
     }
     loadDadosLogin()
   }, [setValue, loadSavedCredentials])
@@ -63,7 +63,7 @@ export default function Login() {
       // Chamada do login (apenas userData e persist)
       await login(
         { id: dados.id, nome: dados.nome, email: data.email, token: tokenRecebido },
-        data.salvar
+        data.manter
       )
 
       router.push("/");
@@ -104,7 +104,7 @@ export default function Login() {
                   placeholder="Seu e-mail"
                   value={value}
                   onChangeText={onChange}
-                  style={styles.inputs}
+                  style={[styles.inputs, { color: value ? '#ffff' : Color.LetraCinza }]}
 
                 />
               )}
@@ -116,17 +116,16 @@ export default function Login() {
 
               rules={{ required: 'Senha obrigatorio' }}
               render={({ field: { onChange, value } }) => (
-                // Container para o campo de senha e o botão de alternância
                 <View style={{ position: 'relative' }}>
                   <TextInput
                     placeholder="********"
                     value={value}
                     onChangeText={onChange}
-                    // Controla a visibilidade com base no estado 'showPassword'
+
                     secureTextEntry={!showPassword}
-                    style={styles.inputs}
+                    style={[styles.inputs, { color: value ? '#ffff' : Color.LetraCinza }]}
                   />
-                  {/* Botão de alternância da visibilidade */}
+
                   <TouchableOpacity
                     style={styles.toggleButton}
                     onPress={() => setShowPassword(!showPassword)}
@@ -147,7 +146,7 @@ export default function Login() {
             <View style={{ flexDirection: "row", padding: 5 }}>
               <Controller
                 control={control}
-                name="salvar"
+                name="manter"
                 defaultValue={false}
 
                 render={({ field: { onChange, value } }) => (
@@ -160,7 +159,7 @@ export default function Login() {
                   />
                 )}
               />
-              <Text style={{ color: "#ffff", marginLeft: 5 }}>Lembrar Email</Text>
+              <Text style={{ color: "#ffff", marginLeft: 5 }}>Manter-me conectado</Text>
             </View>
 
             <Link href={`/(auth)/recoveryPass`}>
@@ -216,7 +215,7 @@ const styles = StyleSheet.create({
     color: Color.LetraCinza,
     borderRadius: 5,
     padding: 10,
-    paddingRight: 40, // Adiciona espaço à direita para o ícone
+    paddingRight: 40,
   },
   botao: {
     backgroundColor: Color.Butao,
@@ -224,11 +223,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center"
   },
-  // Novo estilo para posicionar o botão de alternância
+
   toggleButton: {
     position: 'absolute',
+    top: 5,
     right: 10,
-    top: '25%',
     padding: 5,
     zIndex: 1,
   },

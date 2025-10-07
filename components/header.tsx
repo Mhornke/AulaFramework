@@ -63,7 +63,7 @@ export default function Header() {
     texto: {
       color: "#fff",
       fontWeight: "700",
-      fontSize: 20, // padronizado para o nome da marca
+      fontSize: 20, 
       marginLeft: 4,
     },
 
@@ -77,7 +77,7 @@ export default function Header() {
     textoMenu: {
       color: "#fff",
       fontWeight: "500",
-      fontSize: 18, // padronizado para menu mobile
+      fontSize: 18, 
       marginBottom: 16,
       textAlign: "center",
     },
@@ -85,7 +85,7 @@ export default function Header() {
     textMenuDesktop: {
       color: "#fff",
       fontWeight: "500",
-      fontSize: 16, // padronizado para desktop/tablet
+      fontSize: 16,
       marginHorizontal: 10,
     },
   });

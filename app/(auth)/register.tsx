@@ -59,9 +59,13 @@ export default function Cadastrado() {
 
     if (response.status === 201) {
       const dados = await response.json();
+      const tokenRecebido = dados.token
+      if (!tokenRecebido) {
+        showAlert("Erro no cadastro", "O servidor não retornou um token de autenticação.", "error")
+      }
       await login(
-        { id: dados.id, nome: dados.nome, email: data.email }, 
-        data.senha,
+        { id: dados.id, nome: dados.nome, token: tokenRecebido, email: data.email }, 
+       false,
         
       )
 
