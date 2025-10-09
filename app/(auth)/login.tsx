@@ -45,7 +45,7 @@ export default function Login() {
         "Content-Type": "application/json"
       },
       method: "POST",
-      body: JSON.stringify({ email: data.email, senha: data.senha })
+      body: JSON.stringify({ email: data.email, senha: data.senha, persist:data.manter })
     });
 
     if (response.status === 200) {

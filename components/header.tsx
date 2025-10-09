@@ -36,6 +36,22 @@ export default function Header() {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    overlayDesktop: {
+      flex: 1,
+
+    },
+    sidebar: {
+      position: "absolute",
+      top: 74,
+      height: '100%',
+      width: 200,
+      backgroundColor: Color.CorFundo,
+      padding: 20,
+      right: 0,
+      gap: 20,
+      alignItems: 'center'
+
+    },
 
     sair: {
       color: 'red',
@@ -43,6 +59,7 @@ export default function Header() {
       fontSize: 16, // padronizado
       marginTop: 20,
       textAlign: 'center',
+
     },
 
     Header: {
@@ -63,7 +80,7 @@ export default function Header() {
     texto: {
       color: "#fff",
       fontWeight: "700",
-      fontSize: 20, 
+      fontSize: 20,
       marginLeft: 4,
     },
 
@@ -77,7 +94,7 @@ export default function Header() {
     textoMenu: {
       color: "#fff",
       fontWeight: "500",
-      fontSize: 18, 
+      fontSize: 18,
       marginBottom: 16,
       textAlign: "center",
     },
@@ -95,9 +112,9 @@ export default function Header() {
     SetOpenMenu(!openMenu);
   };
 
-  if (width < 1100) {
+  if (width <= 500) {
     return (
-      <View style={[styles.Header,{}]}>
+      <View style={[styles.Header, {}]}>
 
         <View style={styles.logo}>
           <Link href="/">
@@ -172,7 +189,7 @@ export default function Header() {
 
                       }}>
 
-                        <Text style={styles.sair}>Encerrar Sessão</Text>
+                        <Text style={styles.sair}>Sair</Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -212,16 +229,22 @@ export default function Header() {
 
     );
   } else {
+
+
+    // DESKTOP
+
+
+
     return (
-      <View style={{ backgroundColor: Color.CorFundo, alignItems: "center", paddingBottom:15, paddingTop:15 }}>
+      <View style={{ backgroundColor: Color.CorFundo, alignItems: "center", paddingBottom: 15, paddingTop: 15 }}>
 
         <View style={{
           width: '100%',
           maxWidth: 1200,
           alignItems: "center",
           justifyContent: 'space-between',
-
-          flexDirection: "row"
+          flexDirection: "row",
+          paddingHorizontal: 20
         }}>
 
           <View style={styles.logo}>
@@ -238,35 +261,67 @@ export default function Header() {
           </View>
 
           {user ? (
-            <View style={{ alignItems: "center", flexDirection: "row" }}>
-              <Text style={styles.textMenuDesktop}>Olá, {user.nome}</Text>
+            <View style={{ alignItems: "center", flexDirection: "row", gap: 10 }}>
+
               <Link href="/">
                 <Text style={styles.textMenuDesktop}>Início</Text>
               </Link>
-              <Link href="/pedidos">
-                <Text style={styles.textMenuDesktop}>Meus Pedidos de Adoção</Text>
-              </Link>
-              <Link href="/(tabs)/ListaCadastroAnimais">
-                <Text style={styles.textMenuDesktop}>Meus Animais</Text>
-              </Link>
-
-              <Link href="/(tabs)/cadastro">
-                <Text style={styles.textMenuDesktop}>Cadastrar Animal perdido
-
-                </Text>
-              </Link>
-              <TouchableOpacity onPress={sair}>
-                <Text
-                  style={{
-                    color: "red",
-                    fontWeight: "500",
-                    fontSize: 20,
-                    margin: 10,
-                  }}
-                >
-                  Encerrar Sessão
-                </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  
+                  router.push('/cadastro')
+                }}
+                style={{backgroundColor:Color.Butao, padding:5, borderRadius:5, alignItems:"center", marginRight:20}}>
+                <Text style={[styles.textMenuDesktop, {textAlign:'center'}]}>Encontrei um Pet perdido</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity onPress={clickMenu}>
+                <FontAwesome
+                  name={openMenu ? "times" : "bars"}
+                  size={30}
+                  color="white"
+                />
+              </TouchableOpacity>
+
+              <Modal visible={openMenu} transparent animationType="fade" >
+
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => SetOpenMenu(false)}
+                  style={styles.overlayDesktop}
+                ></TouchableOpacity>
+
+                <View style={styles.sidebar}>
+                  <Text style={styles.textMenuDesktop}>Olá, {user.nome}</Text>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      SetOpenMenu(false)
+                      router.push('/(tabs)/pedidos')
+                    }}>
+                    <Text style={styles.textMenuDesktop}>Meus Pedidos de Adoção</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      SetOpenMenu(false)
+                      router.push('/(tabs)/ListaCadastroAnimais')
+                    }}>
+                    <Text style={styles.textMenuDesktop}>Lista de Pets perdidos</Text>
+                  </TouchableOpacity>
+
+
+                  <TouchableOpacity onPress={() => {
+                    SetOpenMenu(false)
+                    sair()
+
+                  }}>
+
+                    <Text style={styles.sair}>Sair</Text>
+                  </TouchableOpacity>
+                </View>
+
+
+              </Modal>
             </View>
           ) : (
             <View style={{ alignItems: "center", flexDirection: "row" }}>
@@ -282,7 +337,7 @@ export default function Header() {
             </View>
           )}
         </View>
-      </View>
+      </View >
     );
   }
 }

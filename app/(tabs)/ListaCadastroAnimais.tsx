@@ -55,7 +55,12 @@ export default function ListaCadastro() {
       if (!user?.id) return;
 
       try {
-        const res = await fetch(`${URL_Adocao}/animais`);
+        const res = await fetch(`${URL_Adocao}/animais`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user?.token}`,
+          },
+        });
         if (res.ok) {
           const dados = await res.json();
           const filtrados = dados.filter((animal: Animal) => animal.userId === user.id);
@@ -87,7 +92,7 @@ export default function ListaCadastro() {
       });
 
       if (res.ok) {
-        
+
         showAlert("Sucesso", "Resposta enviada", 'success')
 
         setListaAnimais((prev) =>
@@ -106,12 +111,12 @@ export default function ListaCadastro() {
         });
       } else {
         console.error(await res.text());
-        
+
         showAlert("Erro", "Erro ao enviar resposta", 'error')
       }
     } catch (err) {
       console.error("Erro ao salvar resposta:", err);
-       showAlert("Erro", "Erro ao enviar resposta", 'error')
+      showAlert("Erro", "Erro ao enviar resposta", 'error')
     }
   };
 
@@ -133,7 +138,7 @@ export default function ListaCadastro() {
           )
         );
       } else {
-        
+
         showAlert("Erro", "erro ao alterar estatus", 'error')
       }
     } catch (error) {
