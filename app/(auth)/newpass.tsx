@@ -1,7 +1,7 @@
 import { showAlert } from "@/components/swalAlert";
 import { Link, router } from "expo-router";
 import { Dimensions, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
-
+import { FontAwesome } from "@expo/vector-icons";
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
 import { useEffect, useState } from "react";
@@ -15,52 +15,54 @@ type Input = {
   codigo: string,
   novaSenha: string,
   ValidaSenha: string
-  
+
 
 }
 export default function RecoveryPass() {
+ 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
 
-const [senhaInput, setSenhaInput] = useState("")
-const [repetirSenha, setRepetirSenha] = useState("")
-
-
-  const { control, handleSubmit, formState: { errors }, setValue } = useForm<Input>({
+  const { control, handleSubmit, formState: { errors }, getValues } = useForm<Input>({
     defaultValues: {
       email: "",
-      codigo:"",
-      novaSenha:"",
-      ValidaSenha:""
+      codigo: "",
+      novaSenha: "",
+      ValidaSenha: ""
     }
   });
 
   async function onSubmit(data: Input) {
     //dados de refazer senha
-console.log(`emais do usuario ${data.email}`);
+    console.log(`emais do usuario ${data.email}`);
+    
 
-    const response = await fetch(`${URL_Adocao}/adotantes/senha/trocar`, {
-      headers: {
-        "Content-Type": "application/json"
-      },
-      method: "POST",
-      body: JSON.stringify({ email: data.email, codigo:data.codigo, novaSenha:data.novaSenha})
-    });
-
-if (senhaInput == repetirSenha) {
-
-  if (response.status === 200) {
-
-    const dados = await response.json();     
-
-    showAlert("Recuperação de senha solicitado", 'success')    
-    push("/")
-  } else {
-
-    showAlert("Erro ao Recuperar senha",
+   
+      const response = await fetch(`${URL_Adocao}/adotantes/senha/trocar`, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST",
+        body: JSON.stringify({ email: data.email, codigo: data.codigo, novaSenha: data.novaSenha })
+      });
+  
       
-      'error'
-    )
-  }
-}
+  
+        if (response.status === 200) {
+  
+          const dados = await response.json();
+  
+          showAlert("Recuperação de senha solicitado", 'success')
+          push("/")
+        } else {
+  
+          showAlert("Erro ao Recuperar senha", 'verifique o token novamente ou ensira uma senha valida', 'error'
+  
+            
+          )
+        }
+    
+       
 
 
   }
@@ -72,12 +74,12 @@ if (senhaInput == repetirSenha) {
 
 
 
-    
+
     <View style={{
       backgroundColor: Color.CorFundo, height: comprimento
-    , justifyContent:"center"
+      , justifyContent: "center"
     }} >
-      <View style={{  alignItems: "center", justifyContent: "center" }}>
+      <View style={{ alignItems: "center", justifyContent: "center" }}>
         <Image
           source={{
             uri: "https://raw.githubusercontent.com/DieizonOliveira/frontAdocao/refs/heads/main/public/logo2.png",
@@ -87,77 +89,106 @@ if (senhaInput == repetirSenha) {
         <View style={styles.container}>
           <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>Informe seus Dados de Recuperação</Text>
 
-         
+
+
+
+
+          <Controller
+            control={control}
+            name="codigo"
+
+            rules={{ required: 'E-mail obrigatorio' }}
+            render={({ field: { onChange, value } }) => (
+
+
+              <TextInput
+                placeholder="Codigo de acesso"
+                value={value}
+                onChangeText={onChange}
+                style={[styles.inputs, { color: value ? '#ffff' : Color.LetraCinza }]}
+
+              />
+            )}
+          />
+          <Text style={[styles.texto,{marginVertical:10}]}>Nova senha</Text>
+          <Controller
+            control={control}
+            name="novaSenha"
+
+            rules={{ required: 'E-mail obrigatorio' }}
+            render={({ field: { onChange, value } }) => (
+
+
+              <TextInput
+                placeholder="***********"
+                value={value}
+                secureTextEntry={!showPassword}
+                onChangeText={(text) => {
+                  onChange(text)
+                  
+                }}
+                style={[styles.inputs,{ color: value ? '#ffff' : Color.LetraCinza } ]}
+
+              />
+
+            )}
+
+          />
+          <TouchableOpacity
+            style={styles.toggleButton}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <FontAwesome
+              name={showPassword ? 'eye' : 'eye-slash'}
+              size={20}
+              color={Color.LetraCinza}
+            />
+          </TouchableOpacity>
+          <Text style={styles.texto}>Repetir senha</Text>
+          <Controller
+            control={control}
+            name="ValidaSenha"
+
+            rules={{ required: 'É obrigatorio repetir a senha',
+              validate: (value) =>
+                value === getValues("novaSenha") || "Senhas não correspondem"
+             }}
+             render={({ field: { onChange, value } }) => (
+              <TextInput
+                placeholder="***********"
+                value={value}
+                secureTextEntry={!showPassword2}
+                onChangeText={onChange} // Não precisa mais do setRepetirSenha
+                style={[styles.inputs, { color: value ? '#ffff' : Color.LetraCinza }]}
+              />
+            )}
+
            
 
-            
-            <Controller
-              control={control}
-              name="codigo"
-
-              rules={{ required: 'E-mail obrigatorio' }}
-              render={({ field: { onChange, value } }) => (
-
-
-                <TextInput
-                  placeholder="Codigo de acesso"
-                  value={value}
-                  onChangeText={onChange}
-                  style={styles.inputs}
-
-                />
-              )}
-            />                          
-            <Controller
-              control={control}
-              name="novaSenha"
-
-              rules={{ required: 'E-mail obrigatorio' }}
-              render={({ field: { onChange, value } }) => (
+          />
+          <TouchableOpacity
+            style={styles.toggleButton2}
+            onPress={() => setShowPassword2(!showPassword2)}
+          >
+            <FontAwesome
+              name={showPassword2 ? 'eye' : 'eye-slash'}
+              size={20}
+              color={Color.LetraCinza}
+            />
+          </TouchableOpacity>
+         
 
 
-                <TextInput
-                  placeholder="Nova senha"
-                  value={value}
-                  onChangeText={(text) =>{
-                    onChange(text)
-                    setSenhaInput(text)
-                  }}
-                  style={styles.inputs}
+      {errors.ValidaSenha && (
+  <Text style={styles.errorText}>{errors.ValidaSenha.message}</Text>
 
-                />
-              )}
-            />                          
-            <Controller
-              control={control}
-              name="ValidaSenha"
+)}
+          <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
+            <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Alterar senha</Text>
 
-              rules={{ required: 'E-mail obrigatorio' }}
-              render={({ field: { onChange, value } }) => (
-
-
-                <TextInput
-                  placeholder="Repita nova senha"
-                  value={value}
-                  onChangeText={(text) =>{
-                    onChange(text)
-                    setRepetirSenha(text)
-                  }}
-                  style={styles.inputs}
-
-                />
-              )}
-            />                          
-                  
-
-             <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
-          <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Alterar senha</Text>
-
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       </View>
-
-
     </View >
 
 
@@ -171,7 +202,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Color.CardFundo,
     padding: 50,
-    justifyContent:"center",
+    justifyContent: "center",
     gap: 20
   },
   texto: {
@@ -196,7 +227,27 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: "center"
-  }
+  },
+  toggleButton: {
+    position: 'absolute',
+    right: 60,
+    top:220,
+    padding: 5,
+    zIndex: 1,
+  },
+  toggleButton2: {
+    position: 'absolute',
+    right: 60,
+    top:320,
+    padding: 5,
+    zIndex: 1,
+  },
+  errorText: {
 
+    color: '#FF5A5F', 
+    fontSize: 14,
+    marginTop: 5,
+    alignSelf: 'center', 
+  }
 })
 

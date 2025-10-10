@@ -2,13 +2,12 @@ import { showAlert } from "@/components/swalAlert";
 import { Link, router } from "expo-router";
 import { Dimensions, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 
-import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
-import { useEffect } from "react";
+
 import { Controller, useForm } from 'react-hook-form';
-import * as keychain from 'react-native-keychain';
+
 import Color from "../../theme/color";
-import { push } from "expo-router/build/global-state/routing";
+
 
 type Input = {
   email: string,
@@ -97,7 +96,7 @@ export default function RecoveryPass() {
                   placeholder="Seu e-mail"
                   value={value}
                   onChangeText={onChange}
-                  style={styles.inputs}
+                  style={[styles.inputs, { color: value ? '#ffff' : Color.LetraCinza }]}
 
                 />
               )}
