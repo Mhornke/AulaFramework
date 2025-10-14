@@ -105,6 +105,12 @@ export default function Header() {
       fontSize: 16,
       marginHorizontal: 10,
     },
+    BotaoCloseModel:{
+      position:"absolute",
+      right:0,
+      top:-0
+
+    }
   });
 
 
@@ -112,7 +118,7 @@ export default function Header() {
     SetOpenMenu(!openMenu);
   };
 
-  if (width <= 500) {
+  if (width <= 600) {
     return (
       <View style={[styles.Header, {}]}>
 
@@ -135,21 +141,33 @@ export default function Header() {
               name={openMenu ? "times" : "bars"}
               size={30}
               color="white"
+
             />
           </TouchableOpacity>
 
           <Modal visible={openMenu} transparent animationType="fade">
+
             <TouchableOpacity
               activeOpacity={1}
               onPress={() => SetOpenMenu(false)}
               style={styles.overlay}
             >
+
+                <TouchableOpacity onPress={clickMenu} style={{position:'absolute', right:15,top:21}}>
+                  <FontAwesome
+                    name={openMenu ? "times" : "bars"}
+                    size={30}
+                    color="white"
+
+                  />
+                </TouchableOpacity>
               <View >
                 <TouchableOpacity
                   activeOpacity={1}
                   style={styles.menu}
                   onPress={() => { }}
                 >
+
                   {user ? (
                     <View>
                       <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
@@ -268,12 +286,19 @@ export default function Header() {
               </Link>
               <TouchableOpacity
                 onPress={() => {
-                  
+
                   router.push('/cadastro')
                 }}
-                style={{backgroundColor:Color.Butao, padding:5, borderRadius:5, alignItems:"center", marginRight:20}}>
-                <Text style={[styles.textMenuDesktop, {textAlign:'center'}]}>Encontrei um Pet perdido</Text>
+                style={{ backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center",}}>
+                <Text style={[styles.textMenuDesktop, { textAlign: 'center' }]}>Encontrei um Pet perdido</Text>
               </TouchableOpacity>
+
+               <TouchableOpacity onPress={() =>{
+                router.push('/(tabs)/Comunidade')
+               }}
+               >
+               <Text style={styles.textMenuDesktop}>Comunidade</Text> 
+               </TouchableOpacity>
 
               <TouchableOpacity onPress={clickMenu}>
                 <FontAwesome
@@ -308,6 +333,8 @@ export default function Header() {
                     }}>
                     <Text style={styles.textMenuDesktop}>Lista de Pets perdidos</Text>
                   </TouchableOpacity>
+
+                  
 
 
                   <TouchableOpacity onPress={() => {
