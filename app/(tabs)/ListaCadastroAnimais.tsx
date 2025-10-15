@@ -151,7 +151,7 @@ export default function ListaCadastro() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.titulo}>Meus animais</Text>
+      <Text style={styles.titulo}>Animais encontrados</Text>
 
       {listaAnimais.length > 0 ? (
         listaAnimais.map((animal) =>
