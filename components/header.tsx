@@ -183,6 +183,12 @@ export default function Header() {
                           SetOpenMenu(false)
                           router.push('/cadastro')
                         }}>
+                         <TouchableOpacity onPress={() =>{
+                router.push('/(tabs)/Comunidade')
+               }}
+               >
+               <Text style={styles.textMenuDesktop}>Comunidade</Text> 
+               </TouchableOpacity>
                         <Text style={styles.textoMenu}>Encontrei um Pet perdido</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
