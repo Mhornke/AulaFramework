@@ -1,6 +1,6 @@
 // screens/ComunidadeScreen.js
-import React from 'react';
-import { View, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity, TextInput } from 'react-native';
 import PostCard from '@/components/cardPost';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -26,19 +26,33 @@ const DADOS_POSTS = [
     comments: 15,
     timestamp: '5h atrás',
   },
-  
+
 ];
 
+
 export default function ComunidadeScreen() {
+  const [iconMore, setIconMore] = useState(false)
+
+
   return (
     <View style={styles.container}>
-      
-      <TouchableOpacity style={styles.createPostButton}>
-        <Text style={styles.createPostText}>Crie uma nova publicação...</Text>
+   
+      <TextInput style={[styles.createPostButton, styles.createPostText]}
+        placeholder='Crie uma nova Publicação...'>
+      </TextInput>
+
+      <TouchableOpacity
+        style={styles.iconMore}
+        onPress={() => {
+          setIconMore(true)
+        }}
+      >
         <FontAwesome name="plus-square-o" size={28} color="#007BFF" />
+        <View style={[styles.ModelIconMore, { display: iconMore ? 'none' : 'flex' }]}>
+          Foto
+        </View>
       </TouchableOpacity>
 
-      
       <FlatList
         data={DADOS_POSTS}
         renderItem={({ item }) => <PostCard {...item} />}
@@ -52,7 +66,7 @@ export default function ComunidadeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F2F5', 
+    backgroundColor: '#F0F2F5',
   },
   createPostButton: {
     backgroundColor: '#FFFFFF',
@@ -70,4 +84,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
   },
+  iconMore: {
+    position: "absolute",
+    top: "3%",
+    right: 30
+  },
+  ModelIconMore: {
+    backgroundColor: 'red',
+    width: 100,
+    position: "relative"
+  }
 });

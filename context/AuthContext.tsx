@@ -76,11 +76,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (userData: User, persist: boolean = false) => {
     setUser(userData);
 
-    if (persist) {
+   
       await AsyncStorage.setItem('user', JSON.stringify(userData));
-    } else {
-      await AsyncStorage.removeItem('user');
-    }
+   
 
     if (Platform.OS !== 'web') {
       if (persist) {
