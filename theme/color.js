@@ -3,6 +3,7 @@ const Colors = {
     LetraCinza:"#9CA3AF",
     Butao:"#2563EB",
     CardFundo:"#1F2937",
-    inputCor:"#374151"
+    inputCor:"#374151",
+    BrancoMaisNemTanto: "#fffff0"
     };
     export default Colors;

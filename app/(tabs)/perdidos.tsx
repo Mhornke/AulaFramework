@@ -1,24 +1,24 @@
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 
 import React, { useEffect, useRef, useState } from "react";
-import CardII from "../../components/cardAnimalNormal";
+import CardIIII from "../../components/cardAnimalPerdido";
 import CardIII from "../../components/cardAnimalNormalAdotado"
 
 
 import Carrossel from "../../components/carrossel";
 import Footer from "../../components/footer";
 import Pesquisa from "../../components/pesquisa";
-import { AnimalI } from "../../utils/types/animias";
+import { AnimalII } from "../../utils/types/animiasPerdidos";
 
 import { FontAwesome } from "@expo/vector-icons";
 import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
 import { router } from "expo-router";
 import { Route } from "expo-router/build/Route";
-
+import dadosAnimais from '@/dadosAnimaisPerdidos.json'
 
 export default function Perdidos() {
-    const [animais, setAnimais] = useState<AnimalI[]>([])
-    const [animaisDestaque, setAnimaisDestaque] = useState<AnimalI[]>([])
+    const [animais, setAnimais] = useState<AnimalII[]>([])
+    const [animaisDestaque, setAnimaisDestaque] = useState<AnimalII[]>([])
     const [quantVisivelAdotados, setQuantVisivelAdotados] = useState(4)
     const scrollViewRef = useRef<ScrollView>(null)
 
@@ -89,60 +89,57 @@ export default function Perdidos() {
         async function buscaDados() {
 
             try {
-                // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
-                const response = await fetch(`${URL_Adocao}/animais`)
-                const dados = await response.json()
-                console.log(response);
-                console.log(response);
+                // // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
+                // const response = await fetch(`${URL_Adocao}/animais`)
+                // const dados = await response.json()
+                // console.log(response);
+                // console.log(response);
 
-                setAnimais(dados)
-
-            } catch (error) {
-                console.log("erro ao buscar dados", error);
-
-            }
-        }
-
-        async function buscaDadosDestaque() {
-
-            try {
-                const response = await fetch(`${URL_GestaoPet}/animais/destaque`)
-                const dados = await response.json()
-                console.log(response);
-                console.log(response);
-                const destaques = dados.filter((animal: AnimalI) => animal.destaque === true)
-                setAnimaisDestaque(destaques)
+                setAnimais(dadosAnimais.animaisPerdidos)
 
             } catch (error) {
                 console.log("erro ao buscar dados", error);
 
             }
         }
+
+        // async function buscaDadosDestaque() {
+
+        //     try {
+        //         const response = await fetch(`${URL_GestaoPet}/animais/destaque`)
+        //         const dados = await response.json()
+        //         console.log(response);
+        //         console.log(response);
+        //         const destaques = dados.filter((animal: AnimalII) => animal.destaque === true)
+        //         setAnimaisDestaque(destaques)
+
+        //     } catch (error) {
+        //         console.log("erro ao buscar dados", error);
+
+        //     }
+        // }
         buscaDados()
-        buscaDadosDestaque()
+        // buscaDadosDestaque()
     }, []);
 
-    const animaisDisponiveis = animais.filter(animais => animais.status === true)
-    const animaisAdotados = animais.filter(animais => animais.status === false)
+   
+    const animalEntregue = dadosAnimais.animaisPerdidos.filter(
+  (animal) => animal.disponivel === true
+);
 
-    const listaAnimais = animaisDisponiveis.map((animal) => (
-        <>
-        
-        {/* <Text style={{fontSize:22,fontWeight:'700', color:"red", }}>PROCURA-SE</Text> */}
-        
-        <CardII key={animal.id} data={animal as AnimalI} />
-        </>
+const listaAnimaisEncontrados = animalEntregue
+  .slice(0, quantVisivelAdotados)
+  .map((animal) => (
+    <CardIII key={animal.id} data={animal as AnimalII} />
+  ));
+const animalPerdido = dadosAnimais.animaisPerdidos.filter(
+  (animal) => animal.disponivel === false
+);
 
+const listaAnimais = animalPerdido.map((animal) => (
+  <CardIIII key={animal.id} data={animal as AnimalII} />
+));
 
-    )
-    )
-    const listaAnimaisAdotados = animaisAdotados.slice(0, quantVisivelAdotados).map((animal) => (
-
-        <CardIII key={animal.id} data={animal as AnimalI} />
-
-
-    )
-    )
 
 
     if (!animais) return <Text>Carregando...</Text>;
@@ -230,7 +227,7 @@ export default function Perdidos() {
                             </Text>
 
                             <View style={{ flexWrap: "wrap", flexDirection: "row", gap: 100, justifyContent: "center" }}>
-                                {listaAnimaisAdotados}
+                                {listaAnimaisEncontrados}
 
                             </View>
                             <TouchableOpacity
