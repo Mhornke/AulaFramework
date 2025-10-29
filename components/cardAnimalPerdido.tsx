@@ -53,7 +53,7 @@ export default function CardIIII({ data }: { data: AnimalII }) {
           }}
         >
           <Text style={styles.Text}>
-            <FontAwesome name="paw" size={16} /> {data.especie}
+            <FontAwesome name="paw" size={16} /> {data.especie.nome}
           </Text>
           <Text style={styles.Text}>
             <FontAwesome name="venus-mars" size={16} /> {data.sexo}

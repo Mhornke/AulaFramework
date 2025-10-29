@@ -13,7 +13,8 @@ export default function Card({ data }: { data: AnimalI }) {
       <TouchableOpacity
         onPress={() => {
           router.push("/perdidos")
-        }}>
+        }}
+        style={{width:"100%"}}>
         <Text style={{ color: "red", margin: 20, textAlign: "center", fontWeight: "700" }}>Animais Perdidos</Text>
         <View style={styles.container}>
           <Image
@@ -55,7 +56,7 @@ export default function Card({ data }: { data: AnimalI }) {
             <Link href={`/datails/${data.id}?destaque=${data.destaque}`} asChild>
               <TouchableOpacity>
                 <Text style={styles.botaoTexto}>
-                  <FontAwesome name="heart" size={16} /> Adotar
+                  <FontAwesome name="plus-circle" size={16} /> Saber mais
                 </Text>
               </TouchableOpacity>
             </Link>

@@ -67,6 +67,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F0F2F5',
+    maxWidth:1200,
+   
   },
   createPostButton: {
     backgroundColor: '#FFFFFF',

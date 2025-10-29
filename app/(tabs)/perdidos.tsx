@@ -3,22 +3,15 @@ import { Dimensions, Image, ScrollView, StyleSheet, Text, View, TouchableOpacity
 import React, { useEffect, useRef, useState } from "react";
 import CardIIII from "../../components/cardAnimalPerdido";
 import CardIII from "../../components/cardAnimalNormalAdotado"
-
-
 import Carrossel from "../../components/carrossel";
 import Footer from "../../components/footer";
-import Pesquisa from "../../components/pesquisa";
 import { AnimalII } from "../../utils/types/animiasPerdidos";
-
 import { FontAwesome } from "@expo/vector-icons";
 import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
-import { router } from "expo-router";
-import { Route } from "expo-router/build/Route";
 import dadosAnimais from '@/dadosAnimaisPerdidos.json'
 
 export default function Perdidos() {
     const [animais, setAnimais] = useState<AnimalII[]>([])
-    const [animaisDestaque, setAnimaisDestaque] = useState<AnimalII[]>([])
     const [quantVisivelAdotados, setQuantVisivelAdotados] = useState(4)
     const scrollViewRef = useRef<ScrollView>(null)
 
@@ -89,13 +82,13 @@ export default function Perdidos() {
         async function buscaDados() {
 
             try {
-                // // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
-                // const response = await fetch(`${URL_Adocao}/animais`)
-                // const dados = await response.json()
-                // console.log(response);
-                // console.log(response);
+                // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
+                const response = await fetch(`${URL_Adocao}/animais`)
+                const dados = await response.json()
+                console.log(response);
+                console.log(response);
 
-                setAnimais(dadosAnimais.animaisPerdidos)
+                setAnimais(dados)
 
             } catch (error) {
                 console.log("erro ao buscar dados", error);
@@ -103,28 +96,14 @@ export default function Perdidos() {
             }
         }
 
-        // async function buscaDadosDestaque() {
-
-        //     try {
-        //         const response = await fetch(`${URL_GestaoPet}/animais/destaque`)
-        //         const dados = await response.json()
-        //         console.log(response);
-        //         console.log(response);
-        //         const destaques = dados.filter((animal: AnimalII) => animal.destaque === true)
-        //         setAnimaisDestaque(destaques)
-
-        //     } catch (error) {
-        //         console.log("erro ao buscar dados", error);
-
-        //     }
-        // }
+       
         buscaDados()
-        // buscaDadosDestaque()
+       
     }, []);
 
    
-    const animalEntregue = dadosAnimais.animaisPerdidos.filter(
-  (animal) => animal.disponivel === true
+    const animalEntregue = animais.filter(
+  (animal) => animal.status === false
 );
 
 const listaAnimaisEncontrados = animalEntregue
@@ -132,8 +111,8 @@ const listaAnimaisEncontrados = animalEntregue
   .map((animal) => (
     <CardIII key={animal.id} data={animal as AnimalII} />
   ));
-const animalPerdido = dadosAnimais.animaisPerdidos.filter(
-  (animal) => animal.disponivel === false
+const animalPerdido = animais.filter(
+  (animal) => animal.status === true
 );
 
 const listaAnimais = animalPerdido.map((animal) => (

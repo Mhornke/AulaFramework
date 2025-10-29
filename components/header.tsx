@@ -105,10 +105,10 @@ export default function Header() {
       fontSize: 16,
       marginHorizontal: 10,
     },
-    BotaoCloseModel:{
-      position:"absolute",
-      right:0,
-      top:-0
+    BotaoCloseModel: {
+      position: "absolute",
+      right: 0,
+      top: -0
 
     }
   });
@@ -153,14 +153,14 @@ export default function Header() {
               style={styles.overlay}
             >
 
-                <TouchableOpacity onPress={clickMenu} style={{position:'absolute', right:15,top:21}}>
-                  <FontAwesome
-                    name={openMenu ? "times" : "bars"}
-                    size={30}
-                    color="white"
+              <TouchableOpacity onPress={clickMenu} style={{ position: 'absolute', right: 15, top: 21 }}>
+                <FontAwesome
+                  name={openMenu ? "times" : "bars"}
+                  size={30}
+                  color="white"
 
-                  />
-                </TouchableOpacity>
+                />
+              </TouchableOpacity>
               <View >
                 <TouchableOpacity
                   activeOpacity={1}
@@ -183,12 +183,15 @@ export default function Header() {
                           SetOpenMenu(false)
                           router.push('/cadastro')
                         }}>
-                         <TouchableOpacity onPress={() =>{
-                router.push('/(tabs)/Comunidade')
-               }}
-               >
-               <Text style={styles.textMenuDesktop}>Comunidade</Text> 
-               </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/Comunidade')
+                        }}
+                        >
+                          <Text style={styles.textoMenu}>Comunidade</Text>
+                        </TouchableOpacity>
+
                         <Text style={styles.textoMenu}>Encontrei um Pet perdido</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -295,16 +298,16 @@ export default function Header() {
 
                   router.push('/cadastro')
                 }}
-                style={{ backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center",}}>
+                style={{ backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", }}>
                 <Text style={[styles.textMenuDesktop, { textAlign: 'center' }]}>Encontrei um Pet perdido</Text>
               </TouchableOpacity>
 
-               <TouchableOpacity onPress={() =>{
+              <TouchableOpacity onPress={() => {
                 router.push('/(tabs)/Comunidade')
-               }}
-               >
-               <Text style={styles.textMenuDesktop}>Comunidade</Text> 
-               </TouchableOpacity>
+              }}
+              >
+                <Text style={styles.textMenuDesktop}>Comunidade</Text>
+              </TouchableOpacity>
 
               <TouchableOpacity onPress={clickMenu}>
                 <FontAwesome
@@ -340,7 +343,7 @@ export default function Header() {
                     <Text style={styles.textMenuDesktop}>Lista de Pets perdidos</Text>
                   </TouchableOpacity>
 
-                  
+
 
 
                   <TouchableOpacity onPress={() => {

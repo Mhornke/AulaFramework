@@ -18,15 +18,15 @@ import { URL_Adocao } from "@/utils/url";
 import { showAlert } from "@/components/swalAlert";
 
 export default function DetalhesPerdido() {
-  const [data, setData] = useState<any>();
+  // const [data, setdados] = useState<any>();
   const [dados, setDados] = useState<any>()
   const { id } = useLocalSearchParams();
   const { width } = Dimensions.get("window");
   const { user } = useAuth();
 
   useEffect(() => {
-    const encontrado = dadosAnimais.animaisPerdidos.find(a => a.id == Number(id));
-    setData(encontrado);
+    // const encontrado = dadosAnimais.animaisPerdidos.find(a => a.id == Number(id));
+    // setdados(encontrado);
 
 
     async function BuscaDados() {
@@ -38,38 +38,69 @@ export default function DetalhesPerdido() {
     }
     BuscaDados()
   }, [id]);
-  console.log(`dados do json ${data}`);
+  console.log(`dados do json ${dados}`);
 
-  if (!data) return <Text style={styles.loading}>Carregando...</Text>;
+  if (!dados) return <Text style={styles.loading}>Carregando...</Text>;
 
-  const fotosParaCarrossel = data.fotos
-    ? [{ id: -1, codigoFoto: data.foto, descricao: "Foto principal" }, ...(data.fotos ?? [])]
-    : data.fotos ?? [];
+  const fotosParaCarrossel = dados.fotos
+    ? [{ id: -1, codigoFoto: dados.foto, descricao: "Foto principal" }, ...(dados.fotos ?? [])]
+    : dados.fotos ?? [];
 
-  const handleContato = () => {
+  const handleContatoWhatsapp = () => {
 
     if (!dados.user?.fone) {
       showAlert("Telefone não disponível", "O usuário não informou um número de contato.");
       return;
     }
     const phoneNumber = dados.user.fone.replace(/\D/g, "");
-    let message =''
+    let message = ''
 
-    if (data.status == "PROCURA-SE") {
-      const message = encodeURIComponent(`Ola! vi o anuncio sobre o animal perdido `)
+    if (dados.status == "PROCURA-SE") {
+      message = encodeURIComponent(`Ola! vi o anuncio sobre o animal perdido `)
 
     } else {
-      const message = encodeURIComponent(`Ola! vi o anuncio sobre o animal encontrado `)
+      message = encodeURIComponent(`Ola! vi o anuncio sobre o animal encontrado `)
     }
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
-    
-    Linking.openURL(`tel:${whatsappUrl}`);
+
+    Linking.openURL(whatsappUrl);
   };
-console.log(dados.user);
+  const handleContato = () => {
+    if (!dados.user?.fone) {
+      showAlert("Telefone não disponível", "O usuário não informou um número de contato.");
+      return;
+    }
+    // Apenas limpa o número e usa o protocolo tel:
+    const phoneNumber = dados.user.fone.replace(/\D/g, "");
+    Linking.openURL(`tel:${phoneNumber}`);
+  };
 
- 
+  const handleEmail = () => {
+    if (!dados.user?.email) {
+      showAlert("E-mail não disponível", "O usuário não informou um e-mail de contato.");
+      return;
+    }
 
-  
+    
+    let subject = '';
+    let body = '';
+
+    if (dados.status == "PROCURA-SE") {
+      subject = encodeURIComponent(`Interesse no animal perdido: ${dados.nome}`);
+      body = encodeURIComponent(`Olá! Vi o anúncio sobre o animal perdido (${dados.nome}) e gostaria de mais informações.`);
+    } else {
+      subject = encodeURIComponent(`Interesse no animal encontrado: ${dados.nome}`);
+      body = encodeURIComponent(`Olá! Vi o anúncio sobre o animal encontrado (${dados.nome}) e gostaria de mais informações.`);
+    }
+
+    // Abre o app de e-mail
+    Linking.openURL(`mailto:${dados.user.email}?subject=${subject}&body=${body}`);
+  };
+  console.log(dados.user.email);
+
+
+
+
   return (
     <ScrollView>
 
@@ -78,30 +109,44 @@ console.log(dados.user);
         <CarrosselFotos data={fotosParaCarrossel} />
 
         <View style={styles.infoContainer}>
-          <Text style={styles.nome}>{data.nome}</Text>
-          <Text style={styles.status}>{data.status}</Text>
-          <Text style={styles.descricao}>{data.descricao}</Text>
+          <Text style={styles.nome}>{dados.nome}</Text>
+          <Text style={styles.status}>{dados.status}</Text>
+          <Text style={styles.descricao}>{dados.descricao}</Text>
 
           <View style={styles.detalhes}>
             <Text style={styles.info}>
               <FontAwesome name="paw" size={16} color="white" /> Espécie:{" "}
-              <Text style={styles.valor}>{data.especie}</Text>
+              <Text style={styles.valor}>{dados.especie.nome}</Text>
             </Text>
             <Text style={styles.info}>
               <FontAwesome name="venus-mars" size={16} color="white" /> Sexo:{" "}
-              <Text style={styles.valor}>{data.sexo}</Text>
+              <Text style={styles.valor}>{dados.sexo}</Text>
             </Text>
             <Text style={styles.info}>
               <Entypo name="resize-full-screen" size={16} color="white" /> Porte:{" "}
-              <Text style={styles.valor}>{data.porte}</Text>
+              <Text style={styles.valor}>{dados.porte}</Text>
             </Text>
           </View>
 
           {user ? (
-            <TouchableOpacity style={styles.botao} onPress={handleContato}>
-              <FontAwesome name="phone" size={22} color="#fff" />
-              <Text style={styles.botaoTexto}>Entrar em contato</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }} >
+              <TouchableOpacity style={styles.botao} onPress={handleContato}>
+                <FontAwesome name="phone" size={22} color="#fff" />
+                <Text style={styles.botaoTexto}>Entrar em contato</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.botao} onPress={handleContatoWhatsapp}>
+                <FontAwesome name="whatsapp" size={22} color="#fff" />
+                <Text style={styles.botaoTexto}>Entrar em contato</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.botao} onPress={handleEmail}>
+                <FontAwesome name="envelope" size={22} color="#fff" />
+                <Text style={styles.botaoTexto}>Entrar em contato</Text>
+              </TouchableOpacity>
+
+            </View>
+
           ) : (
             <Link href="/(auth)/login" asChild>
               <TouchableOpacity style={styles.botaoLogin}>
@@ -109,6 +154,7 @@ console.log(dados.user);
               </TouchableOpacity>
             </Link>
           )}
+
         </View>
       </View>
     </ScrollView>
