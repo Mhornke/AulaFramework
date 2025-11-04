@@ -1,6 +1,6 @@
 // screens/ComunidadeScreen.js
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Text, TouchableOpacity, TextInput } from 'react-native';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import PostCard from '@/components/cardPost';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -35,40 +35,48 @@ export default function ComunidadeScreen() {
 
 
   return (
+    <ScrollView>
+
+    
     <View style={styles.container}>
-   
-      <TextInput style={[styles.createPostButton, styles.createPostText]}
-        placeholder='Crie uma nova Publicação...'>
-      </TextInput>
 
-      <TouchableOpacity
-        style={styles.iconMore}
-        onPress={() => {
-          setIconMore(true)
-        }}
-      >
-        <FontAwesome name="plus-square-o" size={28} color="#007BFF" />
-        <View style={[styles.ModelIconMore, { display: iconMore ? 'none' : 'flex' }]}>
-          Foto
-        </View>
-      </TouchableOpacity>
 
-      <FlatList
-        data={DADOS_POSTS}
-        renderItem={({ item }) => <PostCard {...item} />}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={{ maxWidth: 1200 }}>
+
+        <TextInput style={[styles.createPostButton, styles.createPostText]}
+          placeholder='Crie uma nova Publicação...'>
+        </TextInput>
+
+        <TouchableOpacity
+          style={styles.iconMore}
+          onPress={() => {
+            setIconMore(true)
+          }}
+        >
+          <FontAwesome name="plus-square-o" size={28} color="#007BFF" />
+          <View style={[styles.ModelIconMore, { display: iconMore ? 'none' : 'flex' }]}>
+            Foto
+          </View>
+        </TouchableOpacity>
+
+        <FlatList
+          data={DADOS_POSTS}
+          renderItem={({ item }) => <PostCard {...item} />}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+      
     </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F0F2F5',
-    maxWidth:1200,
-   
+  container: {    
+    justifyContent: "center",
+    alignItems: "center"
+
   },
   createPostButton: {
     backgroundColor: '#FFFFFF',

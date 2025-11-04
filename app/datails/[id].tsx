@@ -17,6 +17,7 @@ import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 import CarrosselFotos from "../../components/carrosselFotos";
 import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
 import { Colors } from "react-native/Libraries/NewAppScreen";
+import { showAlert } from "@/components/swalAlert";
 
 export default function Detalhes() {
   const [data, setData] = useState<AnimalI>();
@@ -83,7 +84,7 @@ export default function Detalhes() {
         body: JSON.stringify(novoPedido),
       });
       if (response.ok) {
-        alert("Pedido enviado com sucesso!");
+        showAlert("Pedido enviado com sucesso!", "Seu pedido Logo sera respondi", "success");
         setPedidoEnviado(true);
         setTexto("");
       } else {
