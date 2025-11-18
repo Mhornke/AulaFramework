@@ -16,6 +16,7 @@ import { showAlert } from "@/components/swalAlert";
 import { dadosMensagem } from "@/dadosMensagem"
 import Mensagem from "@/components/listaMensagem";
 import { ChatMensagem } from "@/utils/types/mensagem";
+import { FontAwesome } from "@expo/vector-icons";
 // Interfaces
 interface Pedido {
   id: number;
@@ -52,6 +53,9 @@ export default function ListaCadastro() {
   const [listaMensagem, setListaMensagem] = useState<ChatMensagem[]>([]);
   const [listaAnimais, setListaAnimais] = useState<Animal[]>([]);
   const [respostasEditadas, setRespostasEditadas] = useState<{ [id: number]: string }>({});
+  const [openEditDescricao, setOpenEditDescricao] = useState<Record<number, boolean>>({})
+ const [conteudoEditDescricao, setConteudoEditDescricao] = useState<Record<number, string>>({})
+
 
   useEffect(() => {
     const buscarAnimais = async () => {
@@ -130,7 +134,48 @@ export default function ListaCadastro() {
       showAlert("Erro", "Erro ao enviar resposta", 'error')
     }
   };
+  function OpenEditDescricao(animalId: number, descricaoAtual: string) {
+    setOpenEditDescricao(prev => {
+      const isOpening = !prev[animalId];
+      if (isOpening) {
+        // Se estiver abrindo, pré-preencha com a descrição atual do animal
+        setConteudoEditDescricao(prevContent => ({ ...prevContent, [animalId]: descricaoAtual || '' }));
+      }
+      return {
+        ...prev,
+        [animalId]: isOpening
+      };
+    });
+  }
+  const AtualizaInputDescricao = (animalId: number, text: string) => {
+    setConteudoEditDescricao(prev => ({ ...prev, [animalId]: text }));
+  };
 
+  const EnviarEditDescricao = async (animalId: number) => {
+    const novoConteudo = conteudoEditDescricao[animalId];
+
+    if (!novoConteudo || novoConteudo.trim().length === 0) {
+      showAlert("Atenção", "A descrição não pode ser vazia.", "warning");
+      return;
+    }
+    // await fetch
+
+    setListaAnimais(prev =>
+      prev.map(animal =>
+        animal.id === animalId ? { ...animal, descricao: novoConteudo } : animal
+      )
+    );
+
+    showAlert("Descrição Alterada", "", "success");
+    setOpenEditDescricao(prev => ({ ...prev, [animalId]: false }));
+
+    setConteudoEditDescricao(prev => {
+      const novo = { ...prev };
+      delete novo[animalId];
+      return novo;
+    });
+  };
+  
   const StatusAdocao = async (animalId: number) => {
     try {
       const response = await fetch(`${URL_Adocao}/animais/${animalId}/adotar`, {
@@ -167,6 +212,7 @@ export default function ListaCadastro() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+
       <Text style={styles.titulo}>Lista de Encontrados ou Perdidos</Text>
 
       {listaAnimais.length > 0 ? (
@@ -180,6 +226,51 @@ export default function ListaCadastro() {
               <Text style={styles.data}>
                 <Text style={styles.label}>Data:</Text> {new Date(animal.createdAt).toLocaleDateString()}
               </Text>
+
+              <View style={{ borderWidth: 1, borderColor: "#cccc", marginBottom: 10, minHeight: 55, borderRadius: 5, padding: 15, marginRight: 5, backgroundColor: "#ebebebff" }}>
+
+                <Text style={{ fontWeight: "500", display: openEditDescricao[animal.id] ? "none" : "flex" }}>{animal.descricao}</Text>
+
+                <View style={{
+                  display: openEditDescricao[animal.id] ? "flex" : "none",
+                  gap: 5
+                }}>
+                  <TextInput
+                    style={{
+                      height: 200, borderRadius: 5,
+                      borderWidth: 1, borderColor: "#cccc",
+                      padding: 10,
+                      backgroundColor: "#ffff",
+                      outlineStyle: "none" as any
+                    }}
+                    value={conteudoEditDescricao[animal.id] ?? ""}
+
+                    onChangeText={(text) => AtualizaInputDescricao(animal.id, text)}
+
+                    placeholder="Alterar Descrição..."
+                    placeholderTextColor="#888"
+                    multiline
+                    textAlignVertical="top"
+                    underlineColorAndroid="transparent"
+
+                  />
+                  <TouchableOpacity style={{
+                    padding: 10, borderRadius: 5, alignItems: "center",
+                    backgroundColor: Colors.Butao
+                  }}
+                    onPress={() => EnviarEditDescricao(animal.id)}
+                  >
+                    <Text style={{ color: "#ffff", fontWeight: "500" }}>Enviar</Text>
+                  </TouchableOpacity>
+
+                </View>
+                <TouchableOpacity
+                  onPress={() => OpenEditDescricao(animal.id, animal.descricao || '')}
+                  style={{ position: "absolute", right: 15 }}>
+                  <FontAwesome name="edit" size={20} color={Colors.Butao} />
+                </TouchableOpacity>
+
+              </View>
               <View style={styles.statusRow}>
                 <Text style={styles.label}>Status: </Text>
                 <Text style={{ color: animal.status ? "red" : "green", fontWeight: "bold" }}>
@@ -206,18 +297,61 @@ export default function ListaCadastro() {
             // Layout Tablet/Desktop (horizontal)
             <View key={animal.id} style={styles.cardDesktop}>
 
-              <View style={[styles.infoContainer, {borderWidth:1, borderColor:"#cccc", width: "100%",  }]}>
+              <View style={[styles.infoContainer, { borderWidth: 1, borderColor: "#cccc", width: "100%", }]}>
                 <Image source={{ uri: animal.foto }} style={styles.imagemDesktop}
                   resizeMode='contain' />
 
-                <View style={{ flex: 1, width: "100%", height: "100%", marginLeft:10, marginTop:10 }}>
-                  <View style={{ flex: 0.3}}>
+                <View style={{ flex: 1, width: "100%", height: "100%", marginLeft: 10, marginTop: 10 }}>
+                  <View style={{ flex: 0.3 }}>
 
                     <Text style={styles.nomeAnimal}>🐾 {animal.nome}</Text>
                   </View>
 
-                  <View style={{ flex: 1, borderWidth:1, borderColor:"#cccc",borderRadius:5, padding:10, marginRight:5, backgroundColor:"#ebebebff" }}>
-                    <Text style={{fontWeight:"500"}}>{animal.descricao}</Text>
+                  <View style={{ flex: 1, borderWidth: 1, borderColor: "#cccc", borderRadius: 5, padding: 10, marginRight: 5, backgroundColor: "#ebebebff" }}>
+
+                    <Text style={{ fontWeight: "500", display: openEditDescricao[animal.id] ? "none" : "flex" }}>{animal.descricao}</Text>
+
+
+                    <View style={{ display: openEditDescricao[animal.id] ? "flex" : "none" }}>
+
+                      <TextInput
+                        style={{
+                          borderRadius: 5,
+                          borderWidth: 1, borderColor: "#cccc",
+                          padding: 10,
+                          backgroundColor: "#ffff",
+                          outlineStyle: "none" as any
+                        }}
+
+                        value={conteudoEditDescricao[animal.id] ?? animal.descricao}
+                      onChangeText={(text) => AtualizaInputDescricao(animal.id, text)}
+
+
+
+
+                        placeholderTextColor="#888"
+                        multiline
+                        textAlignVertical="top"
+                        underlineColorAndroid="transparent"
+
+                      />
+
+                      <TouchableOpacity style={{
+                        padding: 10, borderRadius: 5, alignItems: "center",
+                        backgroundColor: Colors.Butao
+                      }}
+                        onPress={() => EnviarEditDescricao(animal.id)}
+                      >
+                        <Text style={{ color: "#ffff", fontWeight: "500" }}>Enviar</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity
+                      onPress={() => OpenEditDescricao(animal.id,  animal.descricao)}
+                      style={{ position: "absolute", right: 15 }}>
+                      <FontAwesome name="edit" size={20} color={Colors.Butao} />
+                    </TouchableOpacity>
+
                   </View>
 
                   <View style={{ width: "100%", justifyContent: 'space-between', flexDirection: "row" }}>
@@ -275,10 +409,17 @@ export default function ListaCadastro() {
 // Estilos
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    flexGrow: 1,
     padding: 16,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: "100%",
 
+    // Para web (opcional)
+    alignSelf: "center",
+    maxWidth: 1200,
   },
+
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
@@ -319,12 +460,12 @@ const styles = StyleSheet.create({
 
   },
   infoContainer: {
-    alignItems:"center",
+    alignItems: "center",
     flexDirection: "row",
-    marginBottom:50,
-    borderRadius:5,
-    height:200,
-    
+    marginBottom: 50,
+    borderRadius: 5,
+    height: 200,
+
   },
   nomeAnimal: {
     fontSize: 20,
