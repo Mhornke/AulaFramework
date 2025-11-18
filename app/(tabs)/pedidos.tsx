@@ -42,7 +42,7 @@ export default function PedidosPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // 🔒 Se não estiver autenticado, redireciona para login
+    
     if (!isLoading && !isAuthenticated) {
       router.push("/login");
     }
@@ -58,7 +58,7 @@ export default function PedidosPage() {
           `${URL_Adocao}/pedidos?userId=${user.id}`,
         ];
 
-        // 🔑 Envia o token no cabeçalho de ambas as requisições
+        
         const [resInteressados, resPedidos] = await Promise.all([
           fetch(urls[0], {
             headers: { Authorization: `Bearer ${user.token}` },

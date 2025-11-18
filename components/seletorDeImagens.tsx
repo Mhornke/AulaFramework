@@ -1,15 +1,15 @@
-// components/SeletorDeImagem.tsx
-import React from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { Platform, Alert, Text, TouchableOpacity } from "react-native";
-import Colors from "@/theme/color";
+import { Platform, Alert } from "react-native";
 
-// O componente agora retorna o objeto 'asset' inteiro do ImagePicker
-export function SeletorDeImagem({
-  onSelecionada,
-}: {
+export interface SeletorDeImagemRef {
+  abrirGaleria: () => void;
+}
+
+export const SeletorDeImagem = forwardRef<SeletorDeImagemRef, {
   onSelecionada: (asset: ImagePicker.ImagePickerAsset) => void;
-}) {
+}>(({ onSelecionada }, ref) => {
+  
   const selecionarImagem = async () => {
     if (Platform.OS !== "web") {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -21,8 +21,7 @@ export function SeletorDeImagem({
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      // Na web, precisamos pedir o Base64 para poder processá-lo depois
-      base64: Platform.OS === 'web', 
+      base64: Platform.OS === 'web',
       allowsEditing: true,
       quality: 1,
     });
@@ -31,13 +30,14 @@ export function SeletorDeImagem({
       return;
     }
 
-    // Retorna o asset 'bruto' para o componente pai
     onSelecionada(result.assets[0]);
   };
 
-  return (
-    <TouchableOpacity onPress={selecionarImagem} style={{ padding: 10, backgroundColor: Colors.Butao, borderRadius: 5 }}>
-      <Text style={{ color: "#fff" }}>+ adicionar Fotos</Text>
-    </TouchableOpacity>
-  );
-}
+  // expõe a função selecionarImagem para o componente pai
+  useImperativeHandle(ref, () => ({
+    abrirGaleria: selecionarImagem
+  }));
+
+  // NÃO renderiza nada!
+  return null;
+});

@@ -20,7 +20,7 @@ export default function CardIIII({ data }: { data: AnimalII }) {
           padding: 3,
         }}
       >
-        {data.status}
+      Procura-se
       </Text>
 
       <Image

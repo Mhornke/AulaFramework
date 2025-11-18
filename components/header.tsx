@@ -192,7 +192,7 @@ export default function Header() {
                           <Text style={styles.textoMenu}>Comunidade</Text>
                         </TouchableOpacity>
 
-                        <Text style={styles.textoMenu}>Encontrei um Pet perdido</Text>
+                        <Text style={styles.textoMenu}>Perdeu ou Encontrou</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
@@ -204,9 +204,9 @@ export default function Header() {
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
-                          router.push('/(tabs)/ListaCadastroAnimais')
+                          router.push('/(tabs)/listaPerdidosEncontrados')
                         }}>
-                        <Text style={styles.textoMenu}>Lista de Pets perdidos</Text>
+                        <Text style={styles.textoMenu}>Lista de Pets que Perdeu ou encontrou </Text>
                       </TouchableOpacity>
 
 
@@ -299,7 +299,7 @@ export default function Header() {
                   router.push('/cadastro')
                 }}
                 style={{ backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", }}>
-                <Text style={[styles.textMenuDesktop, { textAlign: 'center' }]}>Encontrei um Pet perdido</Text>
+                <Text style={[styles.textMenuDesktop, { textAlign: 'center' }]}>Perdeu ou Encontrou</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => {
@@ -338,7 +338,7 @@ export default function Header() {
                   <TouchableOpacity
                     onPress={() => {
                       SetOpenMenu(false)
-                      router.push('/(tabs)/ListaCadastroAnimais')
+                      router.push('/(tabs)/listaPerdidosEncontrados')
                     }}>
                     <Text style={styles.textMenuDesktop}>Lista de Pets perdidos</Text>
                   </TouchableOpacity>

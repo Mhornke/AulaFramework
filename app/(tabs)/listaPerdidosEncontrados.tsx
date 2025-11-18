@@ -13,7 +13,9 @@ import Colors from "../../theme/color";
 import { useAuth } from "../../context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
 import { showAlert } from "@/components/swalAlert";
-
+import { dadosMensagem } from "@/dadosMensagem"
+import Mensagem from "@/components/chat";
+import { ChatMensagem } from "@/utils/types/mensagem";
 // Interfaces
 interface Pedido {
   id: number;
@@ -46,7 +48,7 @@ interface Animal {
 export default function ListaCadastro() {
   const { width, height } = Dimensions.get("window");
   const { user, isLoading } = useAuth();
-
+const [listaMensagen, setListaMensagem]= useState<ChatMensagem>()
   const [listaAnimais, setListaAnimais] = useState<Animal[]>([]);
   const [respostasEditadas, setRespostasEditadas] = useState<{ [id: number]: string }>({});
 
@@ -73,8 +75,13 @@ export default function ListaCadastro() {
       }
     };
 
-    if (!isLoading) buscarAnimais();
+    async function BuscaMensagem() {
+      setListaMensagem(dadosMensagem)
+    }
+    if (!isLoading) buscarAnimais(), BuscaMensagem();
   }, [user, isLoading]);
+
+
 
   const AreaResposta = (pedidoId: number, texto: string) => {
     setRespostasEditadas((prev) => ({ ...prev, [pedidoId]: texto }));
@@ -149,9 +156,14 @@ export default function ListaCadastro() {
 
   const isMobile = width < 600;
 
+const listaMensagens = chatsUsuarios.map(chat => (
+  <Chat key={chat.id} chat={chat} />
+));
+
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.titulo}>Animais encontrados</Text>
+      <Text style={styles.titulo}>Lista de Encontrados ou Perdidos</Text>
 
       {listaAnimais.length > 0 ? (
         listaAnimais.map((animal) =>
@@ -159,56 +171,30 @@ export default function ListaCadastro() {
             // Layout Mobile (vertical)
             <View key={animal.id} style={styles.cardMobile}>
               <Text style={styles.nomeAnimal}>🐾 {animal.nome}</Text>
-              <Image source={{ uri: animal.foto }} style={styles.imagemMobile} />
+              <Image source={{ uri: animal.foto }} style={styles.imagemMobile}
+                resizeMode='contain' />
               <Text style={styles.data}>
                 <Text style={styles.label}>Data:</Text> {new Date(animal.createdAt).toLocaleDateString()}
               </Text>
               <View style={styles.statusRow}>
                 <Text style={styles.label}>Status: </Text>
                 <Text style={{ color: animal.status ? "red" : "green", fontWeight: "bold" }}>
-                  {animal.status ? "Disponível" : "Adotado"}
+                  {animal.status ? "Perdido" : "Tutor encontrado"}
                 </Text>
                 {animal.status && (
                   <TouchableOpacity onPress={() => StatusAdocao(animal.id)} style={styles.botaoAdotarMobile}>
-                    <Text style={styles.botaoTexto}>Marcar como adotado</Text>
+                    <Text style={styles.botaoTexto}>Encontrou seu tutor</Text>
                   </TouchableOpacity>
                 )}
               </View>
 
-              <Text style={styles.label}>Pedidos:</Text>
-              {animal.pedidos && animal.pedidos.length > 0 ? (
-                animal.pedidos.map((pedido) => (
-                  <View key={pedido.id} style={styles.pedidoContainer}>
-                    <Text style={styles.label}>Usuário:</Text>
-                    <Text style={styles.texto}>{pedido.userId}</Text>
-
-                    <Text style={[styles.label, { marginTop: 8 }]}>Mensagem:</Text>
-                    <Text style={styles.texto}>{pedido.descricao}</Text>
-
-                    <Text style={[styles.label, { marginTop: 8 }]}>Resposta:</Text>
-
-                    {pedido.resposta ? (
-                      <View style={styles.respostaBox}>
-                        <Text style={styles.respostaTexto}>{pedido.resposta}</Text>
-                      </View>
-                    ) : (
-                      <>
-                        <TextInput
-                          multiline
-                          placeholder="Digite sua resposta"
-                          value={respostasEditadas[pedido.id] ?? ""}
-                          onChangeText={(text) => AreaResposta(pedido.id, text)}
-                          style={styles.input}
-                        />
-                        <TouchableOpacity onPress={() => EnviaResposta(pedido.id)} style={styles.botao}>
-                          <Text style={styles.botaoTexto}>Enviar</Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
-                  </View>
-                ))
+              <Text style={styles.label}>Mensagens:</Text>
+              {chatsUsuarios.length > 0 ? (                
+                  listaMensagens         
+             
+                
               ) : (
-                <Text style={styles.texto}>Nenhum pedido no momento.</Text>
+                <Text style={styles.texto}>Nenhuma mensagem no momento.</Text>
               )}
             </View>
           ) : (
