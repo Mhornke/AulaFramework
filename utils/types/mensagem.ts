@@ -4,7 +4,7 @@ export interface ChatMensagem {
 
     id: number
     mensagem: string
-    foto: Fotos
+    foto: string
     createdAt: string
     user: User
 }

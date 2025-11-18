@@ -14,7 +14,7 @@ import { useAuth } from "../../context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
 import { showAlert } from "@/components/swalAlert";
 import { dadosMensagem } from "@/dadosMensagem"
-import Mensagem from "@/components/chat";
+import Mensagem from "@/components/listaMensagem";
 import { ChatMensagem } from "@/utils/types/mensagem";
 // Interfaces
 interface Pedido {
@@ -48,7 +48,8 @@ interface Animal {
 export default function ListaCadastro() {
   const { width, height } = Dimensions.get("window");
   const { user, isLoading } = useAuth();
-const [listaMensagen, setListaMensagem]= useState<ChatMensagem>()
+  // Adicione [] para dizer que é uma LISTA de mensagens
+  const [listaMensagem, setListaMensagem] = useState<ChatMensagem[]>([]);
   const [listaAnimais, setListaAnimais] = useState<Animal[]>([]);
   const [respostasEditadas, setRespostasEditadas] = useState<{ [id: number]: string }>({});
 
@@ -78,7 +79,10 @@ const [listaMensagen, setListaMensagem]= useState<ChatMensagem>()
     async function BuscaMensagem() {
       setListaMensagem(dadosMensagem)
     }
-    if (!isLoading) buscarAnimais(), BuscaMensagem();
+    if (!isLoading) {
+      buscarAnimais();
+      BuscaMensagem()
+    };
   }, [user, isLoading]);
 
 
@@ -156,9 +160,9 @@ const [listaMensagen, setListaMensagem]= useState<ChatMensagem>()
 
   const isMobile = width < 600;
 
-const listaMensagens = chatsUsuarios.map(chat => (
-  <Chat key={chat.id} chat={chat} />
-));
+  const listaMensagens = dadosMensagem.map(chat => (
+    <Mensagem key={chat.id} data={chat} />
+  ));
 
 
   return (
@@ -181,6 +185,7 @@ const listaMensagens = chatsUsuarios.map(chat => (
                 <Text style={{ color: animal.status ? "red" : "green", fontWeight: "bold" }}>
                   {animal.status ? "Perdido" : "Tutor encontrado"}
                 </Text>
+
                 {animal.status && (
                   <TouchableOpacity onPress={() => StatusAdocao(animal.id)} style={styles.botaoAdotarMobile}>
                     <Text style={styles.botaoTexto}>Encontrou seu tutor</Text>
@@ -189,10 +194,10 @@ const listaMensagens = chatsUsuarios.map(chat => (
               </View>
 
               <Text style={styles.label}>Mensagens:</Text>
-              {chatsUsuarios.length > 0 ? (                
-                  listaMensagens         
-             
-                
+              {dadosMensagem.length > 0 ? (
+                listaMensagens
+
+
               ) : (
                 <Text style={styles.texto}>Nenhuma mensagem no momento.</Text>
               )}
@@ -200,60 +205,63 @@ const listaMensagens = chatsUsuarios.map(chat => (
           ) : (
             // Layout Tablet/Desktop (horizontal)
             <View key={animal.id} style={styles.cardDesktop}>
-              <Image source={{ uri: animal.foto }} style={styles.imagemDesktop} />
-              <View style={styles.infoContainer}>
-                <Text style={styles.nomeAnimal}>🐾 {animal.nome}</Text>
-                <Text style={styles.data}>
-                  <Text style={styles.label}>Data:</Text> {new Date(animal.createdAt).toLocaleDateString()}
-                </Text>
-                <View style={styles.statusRow}>
-                  <Text style={styles.label}>Status: </Text>
-                  <Text style={{ color: animal.status ? "red" : "green", fontWeight: "bold" }}>
-                    {animal.status ? "Disponível" : "Adotado"}
-                  </Text>
-                  {animal.status && (
-                    <TouchableOpacity onPress={() => StatusAdocao(animal.id)} style={styles.botaoAdotarDesktop}>
-                      <Text style={styles.botaoTexto}>Marcar como adotado</Text>
-                    </TouchableOpacity>
-                  )}
+
+              <View style={[styles.infoContainer, {borderWidth:1, borderColor:"#cccc", width: "100%",  }]}>
+                <Image source={{ uri: animal.foto }} style={styles.imagemDesktop}
+                  resizeMode='contain' />
+
+                <View style={{ flex: 1, width: "100%", height: "100%", marginLeft:10, marginTop:10 }}>
+                  <View style={{ flex: 0.3}}>
+
+                    <Text style={styles.nomeAnimal}>🐾 {animal.nome}</Text>
+                  </View>
+
+                  <View style={{ flex: 1, borderWidth:1, borderColor:"#cccc",borderRadius:5, padding:10, marginRight:5, backgroundColor:"#ebebebff" }}>
+                    <Text style={{fontWeight:"500"}}>{animal.descricao}</Text>
+                  </View>
+
+                  <View style={{ width: "100%", justifyContent: 'space-between', flexDirection: "row" }}>
+
+                    <View style={{ flexDirection: "row", left: 10 }}>
+                      <Text style={styles.label}>Status: </Text>
+
+                      <Text style={{ color: animal.status ? "red" : "green", fontWeight: "bold" }}>
+                        {animal.status ? "Perdido" : "Tutor encontrado"}
+                      </Text>
+                    </View>
+
+                    <View style={{ right: 10 }}>
+                      <Text style={styles.data}>
+                        <Text style={styles.label}>Data:</Text> {new Date(animal.createdAt).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
 
-                <Text style={[styles.label, { marginTop: 10 }]}>Pedidos:</Text>
-                {animal.pedidos && animal.pedidos.length > 0 ? (
-                  animal.pedidos.map((pedido) => (
-                    <View key={pedido.id} style={styles.pedidoContainer}>
-                      <Text style={styles.label}>Usuário:</Text>
-                      <Text style={styles.texto}>{pedido.userId}</Text>
 
-                      <Text style={[styles.label, { marginTop: 8 }]}>Mensagem:</Text>
-                      <Text style={styles.texto}>{pedido.descricao}</Text>
 
-                      <Text style={[styles.label, { marginTop: 8 }]}>Resposta:</Text>
 
-                      {pedido.resposta ? (
-                        <View style={styles.respostaBox}>
-                          <Text style={styles.respostaTexto}>{pedido.resposta}</Text>
-                        </View>
-                      ) : (
-                        <>
-                          <TextInput
-                            multiline
-                            placeholder="Digite sua resposta"
-                            value={respostasEditadas[pedido.id] ?? ""}
-                            onChangeText={(text) => AreaResposta(pedido.id, text)}
-                            style={styles.input}
-                          />
-                          <TouchableOpacity onPress={() => EnviaResposta(pedido.id)} style={styles.botao}>
-                            <Text style={styles.botaoTexto}>Enviar</Text>
-                          </TouchableOpacity>
-                        </>
-                      )}
-                    </View>
-                  ))
+              </View>
+              <View>
+
+              </View>
+              {animal.status && (
+                <TouchableOpacity onPress={() => StatusAdocao(animal.id)} style={styles.botaoAdotarMobile}>
+                  <Text style={styles.botaoTexto}>Encontrou seu tutor?</Text>
+                </TouchableOpacity>
+              )}
+              <View style={{ width: "100%" }}>
+
+                <Text style={styles.label}>Mensagens:</Text>
+                {dadosMensagem.length > 0 ? (
+                  listaMensagens
+
+
                 ) : (
-                  <Text style={styles.texto}>Nenhum pedido no momento.</Text>
+                  <Text style={styles.texto}>Nenhuma mensagem no momento.</Text>
                 )}
               </View>
+
             </View>
           )
         )
@@ -269,6 +277,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     padding: 16,
+
   },
   titulo: {
     fontSize: 28,
@@ -280,7 +289,7 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 16,
     borderRadius: 12,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#ffff",
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "#ddd",
@@ -293,23 +302,29 @@ const styles = StyleSheet.create({
   },
   // Desktop Card
   cardDesktop: {
-    flexDirection: "row",
+    flexDirection: "column",
+    alignItems: "center",
     width: "100%",
     padding: 16,
     borderRadius: 12,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#ffff",
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#cccc",
   },
   imagemDesktop: {
-    width: 150,
+    flex: 0.4,
     height: 150,
-    borderRadius: 8,
-    marginRight: 16,
+
+
   },
   infoContainer: {
-    flex: 1,
+    alignItems:"center",
+    flexDirection: "row",
+    marginBottom:50,
+    borderRadius:5,
+    height:200,
+    
   },
   nomeAnimal: {
     fontSize: 20,
