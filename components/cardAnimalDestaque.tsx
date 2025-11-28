@@ -31,7 +31,7 @@ export default function Card({ data }: { data: AnimalPerdidoI }) {
               style={{ width: "100%", height: 400 }}
             />
           ) : (
-            <View style={{ width: "100%", height: 400, backgroundColor: "#ccc", justifyContent: "center", alignItems: "center" }}>
+            <View style={{ width: "100%", height: 400, backgroundColor: "#ccc", justifyContent: "center", }}>
               <Text style={{ color: "#555" }}>Sem foto disponível</Text>
             </View>
           )}
@@ -41,7 +41,7 @@ export default function Card({ data }: { data: AnimalPerdidoI }) {
           <View style={styles.containerTextInfoLarge}>
 
             <View style={[styles.tegs, { flexDirection: "row", paddingHorizontal: 5, gap: 2 }]}>
-              <FontAwesome name="paw" size={16} />
+              <FontAwesome name="paw" size={16} color={Colors.Butao}/>
               <Text style={styles.Text}>
                 {data.especie?.nome}
               </Text>
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   Text: {
     marginLeft: 5,
-    color: Colors.Preto,
+    color: Colors.CorLetraSecundaria,
     fontWeight: "500"
 
   },

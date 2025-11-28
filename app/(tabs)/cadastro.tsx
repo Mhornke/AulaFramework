@@ -21,28 +21,31 @@ import { router } from 'expo-router';
 import CarrosselPreview from '@/components/carrocelPreview';
 import { CriaAnimalPerdidoDTO } from '@/utils/types/animalPerdidoDTO';
 import ConverteData from '@/utils/converteData';
-import { MaskedTextInput } from "react-native-mask-text";
-
-
+// import { MaskedTextInput } from "react-native-mask-text";
+import DateTimePicker from "react-native-ui-datepicker";
+import dayjs from "dayjs";
+import { AnimalPerdidoI } from '@/utils/types/animiasPerdidos';
 
 export default function Cadastrado() {
   const [name, setName] = useState('');
   const lenName = name.length
-  const [tipoAnuncio, setTipoAnucio] = useState<'ENCONTREI' | 'PERDI'>('PERDI');
-
+  const [tipoAnuncio, setTipoAnuncio] = useState<'ENCONTREI' | 'PERDI'>('ENCONTREI');
+  const [show, setShow] = useState(false);
+  const [date, setDate] = useState<Date | null>(null);
   const [especies, setEspecies] = useState<{ id: string; nome: string }[]>([]);
   const [especieId, setEspecieId] = useState<string | null>(null);
-
+const [animaisPerdidos, setDadosAnimalPerdido] = useState<AnimalPerdidoI[]>([])
   const [localizacao, setLocalizacao] = useState('');
   const lenLocal = localizacao.length
 
   const [contato, setContato] = useState('');
   const lenContato = contato.length
   const [description, setDescription] = useState('');
-  const [dataVisto, setDataVisto] = useState('');
-  const lenDataVisto = dataVisto.length
+
+
   const lenDescription = description.length
   // const [gender, setGender] = useState<'Macho' | 'Femea'>('Macho');
+  console.log(show);
 
 
 
@@ -51,11 +54,43 @@ export default function Cadastrado() {
 
   const [outrasFotosPreview, setOutrasFotosPreview] = useState<string[]>([]);
   const [outrasFotosFiles, setOutrasFotosFiles] = useState<{ uri: string; name: string; type: string }[]>([]);
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { width } = Dimensions.get('window');
   const IsLayoutMl = width > 800
 
+  console.log(outrasFotosPreview);
+  console.log(outrasFotosFiles);
+  console.log(tipoAnuncio);
+  console.log("usuario ide existe:", user?.id);
 
+  useEffect(() => {
+  if (isLoading) return;        // só roda depois de carregar
+  if (!user) return;            // evita disparo antes de popular
+
+  if (!user?.token) {
+    showAlert("Atenção", "Você precisa estar logado...", "question")
+      .then(confirmarLogin => {
+        if (confirmarLogin) router.push("/(auth)/login");
+        else router.push('/');
+      });
+  }
+}, [isLoading, user]);
+  function toDate(value: any): Date | null {
+    if (!value) return null;
+
+    if (value instanceof Date) return value;
+
+    // dayjs() tem a propriedade "toDate"
+    if (value.toDate) return value.toDate();
+
+    // timestamps (number)
+    if (typeof value === "number") return new Date(value);
+
+    // strings de data
+    if (typeof value === "string") return new Date(value);
+
+    return null;
+  }
 
 
   // NOVA FUNÇÃO DE PROCESSAMENTO DE IMAGEM
@@ -143,6 +178,17 @@ export default function Cadastrado() {
         alert("erro ao buscar especies")
       }
     }
+    // async function BuscaAnimaisPerdidos() {
+    //   try {
+    //     const response = await fetch(`${URL_Adocao}/animais-perdidos`)
+    //     const dados = await response.json()
+    //     const dadosPorUsuario = dados.filte((c) => c.user.id == dados.adotanteId)
+    //     setDadosAnimalPerdido(dadosPorUsuario)
+    //   } catch (error) {
+    //     alert("erro ao buscar Animais Perdidos")
+    //   }
+    // }
+    // BuscaAnimaisPerdidos()
     getEspecies()
   }, [])
 
@@ -166,20 +212,35 @@ export default function Cadastrado() {
     setOutrasFotosFiles([]);
   }
 
+  // LOG PARA VER RESPOSTA COMPLETA
+  async function lerResposta(response: Response) {
+    const cloned = response.clone();
+    const text = await cloned.text();
 
+    console.log("Status:", response.status);
+    console.log("Resposta RAW:", text);
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
   async function handleSubmit(): Promise<void> {
-    if (!user || !user.token) {
-      showAlert("Erro", "Sessão expirada ou usuário não logado.", "error");
-      return;
-    }
-    if (!especieId) {
+    // console.log("data enviada", date);
 
-      showAlert("Verificar os campos obrigatorios",
-        "Foto principal e campo Espécie obrigatorios ",
-        'warning'
-      )
-      return;
-    }
+    // if (!user || !user.token) {
+    //   showAlert("Erro", "Sessão expirada ou usuário não logado.", "error");
+    //   return;
+    // }
+    // if (!especieId) {
+
+    //   showAlert("Verificar os campos obrigatorios",
+    //     "Foto principal e campo Espécie obrigatorios ",
+    //     'warning'
+    //   )
+    //   return;
+    // }
 
     try {
       Swal.fire(
@@ -200,65 +261,75 @@ export default function Cadastrado() {
           uploadParaCloudinary(file)
         )
       );
-    const dataConvertida = dataVisto ? ConverteData(dataVisto) : null;
+     console.log("Link da foto ",urlsAdicionais);
 
-      if (dataVisto && !dataConvertida) {
-  throw new Error("Data inválida"); 
-}
+      
 
-      const adotanteId = user.id
+
+      const adotanteId = user?.id
       const novoAnimal: CriaAnimalPerdidoDTO = {
-        nome: name,
+        nome: name || "Sem nome",
         descricao: description,
         tipoAnuncio: tipoAnuncio,
         localizacao: localizacao,
-        dataEncontrado: dataConvertida ,
+        dataEncontrado: date ? date.toLocaleDateString('pt-BR') : null,
         contato: contato,
         especieId: Number(especieId),
-        adotanteId: adotanteId
+        adotanteId: adotanteId!
       };
-
+      console.log("📩 BODY ENVIADO AO BACKEND:", novoAnimal);
       console.log(novoAnimal);
-      console.log(user.token);
+      console.log(user?.token);
+      console.log("Data enviada pro backend:", novoAnimal.dataEncontrado);
 
       // Envio para sua API
       const response = await fetch(`${URL_Adocao}/animais-perdidos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${user.token}`
+          "Authorization": `Bearer ${user?.token}`
         },
         body: JSON.stringify(novoAnimal),
       });
+const resposta = await lerResposta(response);
+      // const responseData = await response.json();
+      // const animalIdSalvo = responseData.id;
 
+      // console.log(`id do animal retornado pra foto ${animalIdSalvo}`);
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro no cadastro");
+       console.error("❌ BACKEND ERROU:", resposta);
+      throw new Error(resposta.message || "Erro no cadastro");
       }
 
-      const responseData = await response.json();
-      const animalIdSalvo = responseData.id;
 
-      console.log(`id do animal retornado pra foto ${animalIdSalvo}`);
+console.log("✅ BACKEND SUCESSO:", resposta);
+    const animalIdSalvo = resposta.id;
+    console.log("ID do animal:", animalIdSalvo);
 
       if (urlsAdicionais.length > 0) {
+console.log("entrou no if de urlAdicionais");
+
         const responsesFotos = await Promise.all(
+
           urlsAdicionais.map(fotoUrl =>
             fetch(`${URL_Adocao}/fotos`, {
               method: "POST",
-
               headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${user.token}`
+                "Authorization": `Bearer ${user?.token}`
               },
               body: JSON.stringify({
-                descricao: `Foto Extra do ${animalIdSalvo.nome}`,
+                descricao: `Foto Extra${animalIdSalvo}`,
                 codigoFoto: fotoUrl,
-                animalId: animalIdSalvo,
+                animalPerdidoId: animalIdSalvo,
               }),
+              
             })
           )
         );
+      
+        console.log(responsesFotos);
+        
         const algumaRequisicaoFalhou = responsesFotos.some(res => !res.ok);
         if (algumaRequisicaoFalhou) {
           // Se pelo menos uma falhou, lançamos um erro para parar o processo
@@ -277,11 +348,11 @@ export default function Cadastrado() {
         showCancelButton: true,
         confirmButtonColor: "green",
         cancelButtonColor: "red",
-        confirmButtonText: "Nãp, Quero ficar!!",
-        cancelButtonText: "Sim, Desejo ir!!"
+        confirmButtonText:"Sim, Desejo ir!!",
+        cancelButtonText: "Não, Desejo ficar!!"
       })
 
-      if (resultAlert.isConfirmed) {
+      if (!resultAlert.isConfirmed) {
         limparFormulario()
       } else {
         router.replace('/');
@@ -384,7 +455,11 @@ export default function Cadastrado() {
               {/* Coluna 1 - Nome e Espécie */}
               <View style={styles.column}>
                 <View style={styles.inputContainer}>
+                  <View style={{flexDirection:"row"}}>
+
                   <Text style={[styles.label,]}>Nome ou Raça</Text>
+                  <Text style={[styles.label,{color:"red"}]}>*</Text>
+                  </View>
 
                   <TextInput
                     style={[styles.input, { color: lenName ? "#fff" : Colors.LetraCinza }]}
@@ -402,29 +477,49 @@ export default function Cadastrado() {
                     </View>
 
                     <View style={styles.radioGroup}>
+                      {/* ENCONTREI */}
                       <TouchableOpacity
-                        style={[styles.radioButton, tipoAnuncio === 'PERDI' && styles.radioButtonSelected,
-
-
+                        style={[
+                          styles.radioButton,
+                          tipoAnuncio === 'ENCONTREI' && styles.radioButtonSelected
                         ]}
-                        onPress={() => setTipoAnucio('PERDI')}
+                        onPress={() => setTipoAnuncio('ENCONTREI')}
                       >
-                        <Text style={[styles.radioText,
-                        { color: tipoAnuncio === 'PERDI' ? '#ffff' : 'black' }]}>Encontrado</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.radioButton, tipoAnuncio === 'ENCONTREI' && styles.radioButtonSelected]}
-                        onPress={() => setTipoAnucio('ENCONTREI')}
-                      >
-                        <Text style={[styles.radioText,
-                        { color: tipoAnuncio === 'ENCONTREI' ? '#fff' : 'black' }]}>Perdido</Text>
+                        <Text
+                          style={[
+                            styles.radioText,
+                            { color: tipoAnuncio === 'ENCONTREI' ? '#fff' : 'black' }
+                          ]}
+                        >
+                          Encontrado
+                        </Text>
                       </TouchableOpacity>
 
+                      {/* PERDI */}
+                      <TouchableOpacity
+                        style={[
+                          styles.radioButton,
+                          tipoAnuncio === 'PERDI' && styles.radioButtonSelected
+                        ]}
+                        onPress={() => setTipoAnuncio('PERDI')}
+                      >
+                        <Text
+                          style={[
+                            styles.radioText,
+                            { color: tipoAnuncio === 'PERDI' ? '#fff' : 'black' }
+                          ]}
+                        >
+                          Perdido
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
                 </View>
                 <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Espécie</Text>
+                  <View style={{ flexDirection: "row" }}>
+                    <Text style={styles.label}>Espécie</Text>
+                    <Text style={{ color: "red", fontWeight: "800" }}>*</Text>
+                  </View>
                   <RNPickerSelect
                     onValueChange={(value) => setEspecieId(value)}
                     items={especiesOptions}
@@ -450,8 +545,10 @@ export default function Cadastrado() {
 
                   />
                 </View>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Ultima data visto</Text>
+
+                {/* <View style={styles.inputContainer}>
+                  
+                  {/* <Text style={styles.label}>Ultima data visto</Text>
                   <MaskedTextInput
                     mask="99/99/9999"
                     style={[styles.input, { color: lenDataVisto ? "#fff" : Colors.LetraCinza }]}
@@ -461,7 +558,41 @@ export default function Cadastrado() {
                     keyboardType='numeric'
 
                   />
+                </View> */}
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Última data vista</Text>
+
+                  <TouchableOpacity
+                    style={{
+                      borderWidth: 1,
+                      padding: 10,
+                      borderRadius: 5
+                    }}
+                    onPress={() => setShow(true)}
+                  >
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <Text style={{ color: date ? Colors.Preto : Colors.LetraCinza }}>
+                        {date ? date.toLocaleDateString('pt-BR') : "dd/mm/aaaa"}
+                      </Text>
+                      <FontAwesome name='angle-down' size={18} color={"black"} />
+                    </View>
+                  </TouchableOpacity>
+
+                  {show && (
+                    <DateTimePicker
+                      mode="single"
+                      date={date || new Date()}
+                      onChange={(params) => {
+                        setDate(toDate(params.date));
+                        setShow(false);
+                      }}
+                    />
+                  )}
+
+
                 </View>
+
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Ultima localização visto</Text>
                   <TextInput
@@ -478,64 +609,14 @@ export default function Cadastrado() {
                   </View>
                 </View>
 
-                {/* <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Tamanho</Text>
-                    <View style={styles.radioGroup}>
-                      <TouchableOpacity
-                        style={[styles.radioButton, size === 'Pequeno' && styles.radioButtonSelected]}
-                        onPress={() => setSize('Pequeno')}
-                      >
-                        <Text style={styles.radioText}>Pequeno</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.radioButton, size === 'Medio' && styles.radioButtonSelected]}
-                        onPress={() => setSize('Medio')}
-                      >
-                        <Text style={styles.radioText}>Médio</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.radioButton, size === 'Grande' && styles.radioButtonSelected]}
-                        onPress={() => setSize('Grande')}
-                      >
-                        <Text style={styles.radioText}>Grande</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View> */}
+
               </View>
 
-              {/* Coluna 3 - Sexo */}
-              {/* <View style={styles.column}>
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Sexo</Text>
-                    <View style={styles.radioGroup}>
-                      <View style={styles.radioOption}>
-                        <RadioButton
-                          value="Macho"
-                          status={gender === 'Macho' ? 'checked' : 'unchecked'}
-                          onPress={() => setGender('Macho')}
-                          color="#4CAF50"
-                        />
-                        <Text style={styles.radioText}>Macho</Text>
-                      </View>
-                      <View style={styles.radioOption}>
-                        <RadioButton
-                          value="Femea"
-                          status={gender === 'Femea' ? 'checked' : 'unchecked'}
-                          onPress={() => setGender('Femea')}
-                          color="#4CAF50"
-                        />
-                        <Text style={styles.radioText}>Fêmea</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View> */}
+
 
             </View>
 
           </View>
-
-
-          {/* Botão de cadastro */}
 
         </View>
       </View>

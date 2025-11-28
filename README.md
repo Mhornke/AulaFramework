@@ -64,6 +64,7 @@ Join our community of developers creating universal apps.
 - npm install browser-image-compression
 - npm install react-native-keychain
 - npm install react-native-mask-text
+- npm install react-native-ui-datepicker dayjs
 
 ## Links
 -- API Adote.com https://api-adocao-git-main-dieizons-projects.vercel.app/

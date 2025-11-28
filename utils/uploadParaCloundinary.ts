@@ -1,62 +1,63 @@
-
-
 export const uploadParaCloudinary = async (
-    file: { uri: string; name: string; type: string }
+    file: { uri: string; name?: string; type?: string }
 ): Promise<string> => {
 
-    console.log("Iniciando upload para Cloudinary. Dados recebidos:", file);
+    console.log("📸 Iniciando upload para Cloudinary. Dados recebidos:", file);
 
     const formData = new FormData();
 
-    // ====================== LÓGICA CORRIGIDA ======================
-    // Verificamos se a propriedade 'uri' dentro do objeto é uma string Base64.
-    if (file && file.uri && file.uri.startsWith('data:image')) {
-        // ✅ CORRETO: Se for, extraímos e enviamos APENAS a string Base64.
-        console.log("URI em Base64 detectada. Enviando a string de dados diretamente.");
-        formData.append('file', file.uri);
-    } else {
-        // Para outros casos (ex: uri é 'file://...'), tratamos como um arquivo normal.
-        console.log("URI de arquivo detectada. Anexando como objeto de arquivo.");
-        formData.append('file', {
+    // Nome seguro caso não venha do Expo/ImagePicker
+    const safeName = file.name || `foto_${Date.now()}.jpg`;
+    const safeType = file.type || "image/jpeg";
+
+    // ====================== BASE64 ======================
+    if (file.uri && file.uri.startsWith("data:image")) {
+        console.log("🟣 Detectado Base64. Enviando string Base64 diretamente.");
+        formData.append("file", file.uri);
+    } 
+    // ====================== FILE URI (REACT NATIVE) ======================
+    else if (file.uri && file.uri.startsWith("file://")) {
+        console.log("🟢 Detectado arquivo local (file://). Enviando como arquivo.");
+        formData.append("file", {
             uri: file.uri,
-            name: file.name,
-            type: file.type,
+            type: safeType,
+            name: safeName,
         } as any);
+    } 
+    else {
+        console.log("⚠ URl recebida não é Base64 nem file:// — valor recebido:", file.uri);
+        throw new Error("Formato de imagem inválido para upload.");
     }
 
-    // Adiciona o preset de upload (essencial para autenticação)
-    formData.append('upload_preset', "pet_upload"); // ☜ Substitua
- 
-// ======================= LOG DE VERIFICAÇÃO (VERSÃO REACT NATIVE) =======================
-console.log("--- Verificando o conteúdo interno do FormData (para debug) ---");
-// ATENÇÃO: _parts é uma propriedade interna para fins de debug no React Native
-// e não deve ser usada em código de produção.
-// Usamos JSON.stringify para formatar a saída e torná-la legível.
-console.log(JSON.stringify((formData as any)._parts, null, 2));
-console.log("----------------------------------------------------------------------");
-// ====================================================================================
+    formData.append("upload_preset", "pet_upload");
 
 
-    const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/dqyohnesd/image/upload`; // ☜ Substitua
+    // 🔍 DEBUG: INSPECIONAR O FORMDATA
+    console.log("------ Conteúdo do FormData._parts ------");
+    console.log(JSON.stringify((formData as any)._parts, null, 2));
+    console.log("----------------------------------------");
+
+
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dqyohnesd/image/upload";
 
     try {
         const response = await fetch(CLOUDINARY_URL, {
-            method: 'POST',
+            method: "POST",
             body: formData,
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Erro retornado pelo Cloudinary:", errorData);
-            throw new Error(`Falha no upload: ${errorData.error.message}`);
+            console.error("❌ Erro do Cloudinary:", data);
+            throw new Error(data.error?.message || "Falha no upload");
         }
 
-        const data = await response.json();
-        console.log("Upload para Cloudinary bem-sucedido! URL:", data.secure_url);
+        console.log("✅ Upload bem-sucedido! URL:", data.secure_url);
         return data.secure_url;
 
     } catch (error) {
-        console.error("Erro na função de upload:", error);
+        console.error("🔥 ERRO no upload:", error);
         throw error;
     }
 };

@@ -39,37 +39,14 @@ export default function Carrossel({ data }: Props) {
   const itemAtual = data[indexAtual];
 
   return (
-    <View style={styles.container}>
-      {/* Botão esquerdo */}
-      <TouchableOpacity
-        style={[styles.arrowButton, styles.leftArrow]}
-        onPress={handlePrev}
-        disabled={indexAtual === 0}
-      >
-        <Ionicons
-          name="chevron-back"
-          size={24}
-          color={indexAtual === 0 ? "#ccc" : "#000"}
-        />
-      </TouchableOpacity>
+    <View style={styles.container}>      
 
       {/* Card central */}
       <View style={{ alignItems: "center",width:"99%" }}>
         <Card data={itemAtual} />
       </View>
 
-      {/* Botão direito */}
-      <TouchableOpacity
-        style={[styles.arrowButton, styles.rightArrow]}
-        onPress={handleNext}
-        disabled={indexAtual === data.length - 1}
-      >
-        <Ionicons
-          name="chevron-forward"
-          size={24}
-          color={indexAtual === data.length - 1 ? "#ccc" : "#000"}
-        />
-      </TouchableOpacity>
+      
     </View>
   );
 }

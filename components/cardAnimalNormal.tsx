@@ -2,7 +2,7 @@ import { Link } from "expo-router";
 import { Image, StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import Color from "../theme/color";
 import { AnimalI } from "../utils/types/animias";
-import { FontAwesome,MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 
 export default function CardII({ data }: { data: AnimalI }) {
 

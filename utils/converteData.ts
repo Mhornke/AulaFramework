@@ -11,5 +11,21 @@ export default function ConverteData(dataString: string): Date | null {
 
   if (dia < 1 || dia > ultimoDiaMes) return null;
 
+  function formatarDataPTBR(dataISO: string): string {
+  const data = new Date(dataISO);
+
+  if (isNaN(data.getTime())) return "-"; // Caso data inválida
+
+  return data.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    // Se quiser hora:
+    // hour: "2-digit",
+    // minute: "2-digit",
+  });
+}
+
+formatarDataPTBR()
   return new Date(ano, mes - 1, dia);
 }

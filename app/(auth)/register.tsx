@@ -72,7 +72,7 @@ export default function Cadastrado() {
 
       )
 
-      showAlert("cadastro Realizado com sucesso",
+      showAlert("Cadastro Realizado com Sucesso",
         "Seja bem vindo a nossa plataforma",
         'success'
       )

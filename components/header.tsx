@@ -14,7 +14,9 @@ import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
 import Color from "../theme/color";
 import { useAuth } from "../context/AuthContext";
-
+import DeleteUserButton from "./deleteUser";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import DownBarAnimada from "./giraNoticias";
 export default function Header() {
   const [openMenu, SetOpenMenu] = useState(false);
   const { width, height } = Dimensions.get("window");
@@ -54,7 +56,7 @@ export default function Header() {
     },
 
     sair: {
-      color: 'red',
+      color: Color.Butao,
       fontWeight: '500',
       fontSize: 16, // padronizado
       marginTop: 20,
@@ -135,7 +137,7 @@ export default function Header() {
           <Text style={styles.texto}>.Com </Text>
         </View>
 
-        <View>
+        <View >
           <TouchableOpacity onPress={clickMenu}>
             <FontAwesome
               name={openMenu ? "times" : "bars"}
@@ -178,22 +180,29 @@ export default function Header() {
                         }}>
                         <Text style={styles.textoMenu}>Início</Text>
                       </TouchableOpacity>
+                      <TouchableOpacity onPress={() => {
+                        SetOpenMenu(false)
+                        router.push('/Comunidade')
+                      }}
+                      >
+                        <Text style={styles.textoMenu}>Comunidade</Text>
+                      </TouchableOpacity>
+
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
                           router.push('/cadastro')
                         }}>
 
-                        <TouchableOpacity onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/Comunidade')
-                        }}
-                        >
-                          <Text style={styles.textoMenu}>Comunidade</Text>
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: "row", gap: 10, borderWidth: 1, borderColor: Color.Preto, backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", marginBottom: 15, justifyContent: "center" }}>
+                          <FontAwesome name="exclamation-triangle" size={20} color="#e5fc62ff" style={{
 
-                        <Text style={styles.textoMenu}>Perdeu ou Encontrou</Text>
+                          }} />
+                          <Text style={{ fontWeight: "500", color: "white", fontSize: 20 }}>Perdeu ou Encontrou</Text>
+                        </View>
+
                       </TouchableOpacity>
+
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
@@ -218,9 +227,27 @@ export default function Header() {
 
                         <Text style={styles.sair}>Sair</Text>
                       </TouchableOpacity>
+                      <View style={{ position: "absolute", bottom: -300, left: 96 }}>
+
+                        <DeleteUserButton />
+                      </View>
                     </View>
                   ) : (
                     <View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          SetOpenMenu(false)
+                          router.push('/cadastro')
+                        }}>
+
+                        <View style={{ flexDirection: "row", gap: 10, borderWidth: 1, borderColor: Color.Preto, backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", marginBottom: 30 }}>
+                          <FontAwesome name="exclamation-triangle" size={20} color="#e5fc62ff" style={{
+
+                          }} />
+                          <Text style={{ fontWeight: "500", color: "white", fontSize: 20 }}>Perdeu ou Encontrou</Text>
+                        </View>
+
+                      </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
                           SetOpenMenu(false)
@@ -263,18 +290,23 @@ export default function Header() {
 
 
     return (
-      <View style={{ backgroundColor: Color.CorFundo, alignItems: "center", paddingBottom: 15, paddingTop: 15 }}>
+      <View style={{
+        backgroundColor: Color.CorFundo
+        , borderBottomWidth: 0.5,
+        borderBottomColor: "#ccccc",
+        paddingBottom: 15,
+        alignItems: "center",
+        paddingTop: 15,
+        width: "100%"
+      }}>
 
         <View style={{
-          width: '100%',
+          width: "100%",
           maxWidth: 1200,
           alignItems: "center",
-          justifyContent: 'space-between',
           flexDirection: "row",
-          paddingHorizontal: 20
         }}>
-
-          <View style={styles.logo}>
+          <View style={[styles.logo, { marginLeft: 10 }]}>
             <Link href="/">
               <Image
                 source={{
@@ -284,29 +316,39 @@ export default function Header() {
               />
             </Link>
             <Text style={styles.texto}>Adote</Text>
+
             <Text style={styles.texto}>.Com </Text>
           </View>
 
+          <View style={{ flexDirection: "row", marginLeft: "auto", marginRight: 50 }}>
+
+            <TouchableOpacity
+              onPress={() => {
+
+                router.push('/cadastro')
+              }}
+              style={{ backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", }}>
+              <Text style={[styles.textMenuDesktop, { textAlign: 'center' }]}>Perdeu ou Encontrou</Text>
+            </TouchableOpacity>
+          </View>
+
           {user ? (
-            <View style={{ alignItems: "center", flexDirection: "row", gap: 10 }}>
+            <View style={{ marginRight: 10, flexDirection: "row", gap: 30, alignItems: "center" }}>
 
-              <Link href="/">
-                <Text style={styles.textMenuDesktop}>Início</Text>
-              </Link>
-              <TouchableOpacity
-                onPress={() => {
-
-                  router.push('/cadastro')
-                }}
-                style={{ backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", }}>
-                <Text style={[styles.textMenuDesktop, { textAlign: 'center' }]}>Perdeu ou Encontrou</Text>
-              </TouchableOpacity>
+              <View style={{}}>
+                <Link href="/">
+                  <FontAwesome name="home" size={30} color="white" />
+                </Link>
+              </View>
 
               <TouchableOpacity onPress={() => {
                 router.push('/(tabs)/Comunidade')
               }}
               >
-                <Text style={styles.textMenuDesktop}>Comunidade</Text>
+                <View style={{ flexDirection: "row" }}>
+                  <FontAwesome name="users" size={24} color="white" />
+
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={clickMenu}>
@@ -324,7 +366,6 @@ export default function Header() {
                   onPress={() => SetOpenMenu(false)}
                   style={styles.overlayDesktop}
                 ></TouchableOpacity>
-
                 <View style={styles.sidebar}>
                   <Text style={styles.textMenuDesktop}>Olá, {user.nome}</Text>
 
@@ -354,8 +395,14 @@ export default function Header() {
 
                     <Text style={styles.sair}>Sair</Text>
                   </TouchableOpacity>
+                  <View style={{position:"absolute", bottom:150}}>
+                  <DeleteUserButton />
+                  </View>
+               
                 </View>
-
+                <View style={{}}>
+                  <DownBarAnimada/>
+                </View>
 
               </Modal>
             </View>

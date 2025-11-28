@@ -5,6 +5,7 @@ const Colors = {
     CardFundo:"#1F2937",
     inputCor:"#374151",
     BrancoMaisNemTanto: "#fffff0",
-    Preto:"#303030ff"
+    Preto:"#303030ff",
+    CorLetraSecundaria:"#65676b"
     };
     export default Colors;

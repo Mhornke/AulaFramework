@@ -50,9 +50,15 @@ export default function DetalhesPerdido() {
 
   if (loading || !dados) return <ActivityIndicator style={styles.loading} size="large" color={Color.Butao} />;
 
-  const fotosParaCarrossel = dados.fotos
-    ? [{ id: -1, codigoFoto: dados.fotos, descricao: "Foto principal" }, ...(dados.fotos ?? [])]
-    : dados.fotos ?? [];
+ const fotosParaCarrossel = (dados.fotos ?? [])
+  .filter(f => f.codigoFoto && f.codigoFoto.trim() !== "") // remove fotos vazias
+  .map(f => ({
+    ...f,
+    codigoFoto: f.codigoFoto.startsWith("http") 
+      ? f.codigoFoto 
+      : `${URL_Adocao}/fotos/${f.codigoFoto}` // garante URL completa
+  }));
+
 
   // --- LÓGICA DE CONTATO E CHAT (Mantida Original) ---
   const handleContatoWhatsapp = () => {
@@ -79,61 +85,65 @@ export default function DetalhesPerdido() {
   };
 
   const enviarMensagemInicial = async () => {
-    try {
-      if (!user) {
-        showAlert("Atenção", "Faça login para enviar mensagens.");
-        return;
-      }
-      const destinatarioId = dados.adotanteId;
-      const remetenteId = String(user.id);
-
-      if (!destinatarioId) {
-        showAlert("Erro", "Autor não identificado.");
-        return;
-      }
-      if (destinatarioId === remetenteId) {
-        showAlert("Atenção", "Você é o autor deste anúncio.");
-        return;
-      }
-
-      const body = {
-        animalId: Number(id),
-        destinatarioId: String(destinatarioId),
-        conteudo: "Olá! Vi o anúncio e gostaria de conversar.",
-      };
-
-      const response = await fetch(`${URL_Adocao}/mensagens`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`
-        },
-        body: JSON.stringify(body)
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        showAlert("Erro", result.erro || "Erro ao enviar.");
-        return;
-      }
-
-      const chatId = result?.chat?.id || result?.mensagem?.chatId || result?.chatId;
-      if (chatId) {
-        router.push({
-          pathname: "/mensagens/[chatId]",
-          params: { chatId: String(chatId) },
-        });
-      }
-    } catch (error) {
-      console.log(error);
-      showAlert("Erro", "Falha na conexão.");
+  try {
+    if (!user) {
+      showAlert("Atenção", "Faça login para enviar mensagens.");
+      return;
     }
-  };
 
-  // --- RENDERIZAÇÃO ---
+    const destinatarioId = dados.adotanteId;
+    const remetenteId = String(user.id);
+
+    if (!destinatarioId) {
+      showAlert("Erro", "Autor não identificado.");
+      return;
+    }
+
+    
+    if (destinatarioId === remetenteId) {
+      
+      router.push("/(tabs)/listaPerdidosEncontrados"); 
+      return;
+    }
+
+    
+    const body = {
+      animalId: Number(id),
+      destinatarioId: String(destinatarioId),
+      conteudo: "Olá! Vi o anúncio e gostaria de conversar.",
+    };
+
+    const response = await fetch(`${URL_Adocao}/mensagens`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      showAlert("Erro", result.erro || "Erro ao enviar.");
+      return;
+    }
+
+    const chatId = result?.chat?.id || result?.mensagem?.chatId || result?.chatId;
+    if (chatId) {
+      router.push({
+        pathname: "/mensagens/[chatId]",
+        params: { chatId: String(chatId) },
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    showAlert("Erro", "Falha na conexão.");
+  }
+};
+
+
   
-  // Configuração visual da etiqueta de status
   const isPerdido = dados.tipoAnuncio === 'PERDI';
   const statusColor = isPerdido ? "#e74c3c" : "#f1c40f"; // Vermelho ou Amarelo
   const statusText = isPerdido ? "PROCURA-SE" : "ENCONTRADO";
@@ -141,10 +151,10 @@ export default function DetalhesPerdido() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       
-      {/* Container Centralizado (Estilo Feed) */}
+      
       <View style={[styles.cardContainer, { marginHorizontal: isMobile ? 10 : 0 }]}>
         
-        {/* 1. Cabeçalho do Post (Quem postou) */}
+       
         <View style={styles.headerPost}>
             <View style={styles.userInfo}>
                 {/* Avatar Genérico */}
@@ -184,12 +194,10 @@ export default function DetalhesPerdido() {
             </View>
             {/* Se tiver data encontrado/visto, pode mostrar aqui */}
             {dados.localizacao && (
-                <View style={styles.detailItem}>
-                    <Entypo name="location-pin" size={16} color={Color.Butao} />
-                    <Text style={styles.detailText}>{dados.localizacao}</Text>
-                    <View style={{marginLeft: 5}}>
+                <View style={styles.detailItem}>          
+                  
                          <AbrirNoMapa endereco={dados.localizacao} />
-                    </View>
+               
                 </View>
             )}
         </View>
