@@ -12,6 +12,7 @@ import { AnimalI } from "../../utils/types/animias";
 
 import { FontAwesome } from "@expo/vector-icons";
 import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
+import { useAuth } from "@/context/AuthContext";
 
 
 export default function Home() {
@@ -19,12 +20,13 @@ export default function Home() {
     const [animaisDestaque, setAnimaisDestaque] = useState<AnimalI[]>([])
     const [quantVisivelAdotados, setQuantVisivelAdotados] = useState(4)
     const scrollViewRef = useRef<ScrollView>(null)
-
+const {user} = useAuth()
     const scrollParaTopo = () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     };
     console.log(animais);
     const { width } = Dimensions.get('window')
+console.log(user?.token);
 
 
     const styles = StyleSheet.create({
@@ -89,39 +91,25 @@ export default function Home() {
             try {
                 // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
                 const response = await fetch(`${URL_Adocao}/animais`)
+                const responseI = await fetch(`${URL_Adocao}/animais-perdidos`)
                 const dados = await response.json()
-                console.log(response);
-                console.log(response);
+                const dadosI = await responseI.json()
 
                 setAnimais(dados)
-
+                setAnimaisDestaque(dadosI)
             } catch (error) {
                 console.log("erro ao buscar dados", error);
 
             }
         }
 
-        async function buscaDadosDestaque() {
 
-            try {
-                const response = await fetch(`${URL_GestaoPet}/animais/destaque`)
-                const dados = await response.json()
-                console.log(response);
-                console.log(response);
-                const destaques = dados.filter((animal: AnimalI) => animal.destaque === true)
-                setAnimaisDestaque(destaques)
-
-            } catch (error) {
-                console.log("erro ao buscar dados", error);
-
-            }
-        }
         buscaDados()
-        buscaDadosDestaque()
+
     }, []);
 
-    const animaisDisponiveis = animais.filter(animais => animais.status === true)
-    const animaisAdotados = animais.filter(animais => animais.status === false)
+    const animaisDisponiveis = animais.filter(animais => animais.disponivel === true)
+    const animaisAdotados = animais.filter(animais => animais.disponivel === false)
 
     const listaAnimais = animaisDisponiveis.map((animal) => (
 
@@ -146,16 +134,13 @@ export default function Home() {
         return (
             <>
                 <ScrollView ref={scrollViewRef}
-                showsVerticalScrollIndicator={false}>
+                    showsVerticalScrollIndicator={false}>
 
                     <Pesquisa />
                     <View>
-                    </View>
-                    <Text style={styles.containerText}>
-
-
                         <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
-                    </Text>
+                    </View>
+
                     {animaisDestaque.length > 0 ? (
                         <View style={{ alignItems: "center", marginTop: 20 }}>
 
@@ -183,18 +168,18 @@ export default function Home() {
                     showsVerticalScrollIndicator={false}
                     ref={scrollViewRef}
                 >
-                    <View style={styles.contentWrapper}>
-                        <Pesquisa />
-                        <View style={styles.containerText}>
+                    <View style={[styles.contentWrapper, {}]}>
 
-                            <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
+                        <View style={{ flex: 1,  }}>
+                            <Pesquisa />
                         </View>
-
                         {animaisDestaque.length > 0 ? (
-
-                            <View style={{ alignItems: "center", marginTop: 20 }}>
+                            
+                            <View style={{ alignItems: "center", justifyContent:"center", flex: 10 }}>
+                                <Text>Nos ajude a encontrar -</Text>
 
                                 <Carrossel data={animaisDestaque} />
+
                             </View>
 
                         ) : (
@@ -211,7 +196,14 @@ export default function Home() {
                         )
                         }
 
-                        <View style={styles.cardTable}>
+                        <View style={[styles.cardTable,
+                        {
+                            flexDirection: "column",                           
+                            paddingTop: 50,
+                            
+                        }]}>
+                            <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
+
                             {listaAnimais}
                         </View>
 
@@ -232,7 +224,9 @@ export default function Home() {
                             </TouchableOpacity>
                         </View>
                     </View>
+                    
                     <Footer />
+                   
                 </ScrollView>
                 <TouchableOpacity style={styles.botaoFlutuante} onPress={scrollParaTopo}>
                     <FontAwesome name="arrow-up" size={15} color="#fff" />

@@ -8,6 +8,10 @@ const Footer = () => {
   return (
     <View style={styles.footerContainer}>
       {/* Play Store */}     
+      <View style={{flexDirection:"row", alignItems:"center", justifyContent:"space-around", width:'100%',
+        marginBottom:50
+      }}>
+
         <TouchableOpacity onPress={() => Linking.openURL("https://github.com/Mhornke/AulaFramework/releases/tag/v1.0.0")}>
           <Image
             source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" }}
@@ -15,6 +19,19 @@ const Footer = () => {
             resizeMode="contain"
           />
         </TouchableOpacity>
+        
+        <TouchableOpacity onPress={() => Linking.openURL("https://adote-com-admin2-0-zo3r.vercel.app/")}
+          style={{flexDirection:"row", alignItems:"center"}}
+          >
+         
+          <Text style={{color:"#fff", fontWeight:"600"}}>Seja um parceiro</Text>
+          <Image
+            source={{ uri: "https://png.pngtree.com/png-clipart/20250110/original/pngtree-hand-painted-cat-paw-and-human-hand-png-free-material-png-image_5454475.png" }}
+            style={{width:50, height:50}}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      </View>
       
 
 
@@ -55,14 +72,14 @@ export default Footer;
 const styles = StyleSheet.create({
   footerContainer: {
     backgroundColor: Colors.CorFundo,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    justifyContent:"center",
     alignItems: "center",
+   padding:60
   },
   playStore: {
     width: 150,
     height: 50,
-    marginBottom: 15,
+    
   },
   socialContainer: {
     flexDirection: "row",

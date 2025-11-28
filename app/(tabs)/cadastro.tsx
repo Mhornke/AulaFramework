@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, TextInput, Dimensions, TouchableOpacity
   , Image, StyleSheet, Alert, ScrollView, Platform
 } from 'react-native';
 import Swal from "sweetalert2"
-
+import { FontAwesome } from '@expo/vector-icons';
 
 import Colors from '../../theme/color';
 import { useAuth } from '../../context/AuthContext';
@@ -13,33 +13,50 @@ import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
 import imageCompression from 'browser-image-compression';
 import { uploadParaCloudinary } from '@/utils/uploadParaCloundinary';
-import { SeletorDeImagem } from '../../components/seletorDeImagens';
+import { SeletorDeImagem, SeletorDeImagemRef } from '@/components/seletorDeImagens';
 import { showAlert } from '@/components/swalAlert';
 import { ImagePickerAsset } from 'expo-image-picker';
 import RNPickerSelect from 'react-native-picker-select';
-import { RadioButton } from 'react-native-paper';
 import { router } from 'expo-router';
+import CarrosselPreview from '@/components/carrocelPreview';
+import { CriaAnimalPerdidoDTO } from '@/utils/types/animalPerdidoDTO';
+import ConverteData from '@/utils/converteData';
+import { MaskedTextInput } from "react-native-mask-text";
+
 
 
 export default function Cadastrado() {
   const [name, setName] = useState('');
+  const lenName = name.length
+  const [tipoAnuncio, setTipoAnucio] = useState<'ENCONTREI' | 'PERDI'>('PERDI');
 
   const [especies, setEspecies] = useState<{ id: string; nome: string }[]>([]);
   const [especieId, setEspecieId] = useState<string | null>(null);
 
-  const [size, setSize] = useState<'Pequeno' | 'Medio' | 'Grande'>('Medio');
-  const [age, setAge] = useState('');
+  const [localizacao, setLocalizacao] = useState('');
+  const lenLocal = localizacao.length
+
+  const [contato, setContato] = useState('');
+  const lenContato = contato.length
   const [description, setDescription] = useState('');
-  const [gender, setGender] = useState<'Macho' | 'Femea'>('Macho');
+  const [dataVisto, setDataVisto] = useState('');
+  const lenDataVisto = dataVisto.length
+  const lenDescription = description.length
+  // const [gender, setGender] = useState<'Macho' | 'Femea'>('Macho');
 
 
-  const [imagemPreview, setImagemPreview] = useState<string | null>(null); // local preview
-  const [fotoPrincipalFile, setFotoPrincipalFile] = useState<{ uri: string; name: string; type: string } | null>(null);
+
+  const seletorRef = useRef<SeletorDeImagemRef>(null);
+
 
   const [outrasFotosPreview, setOutrasFotosPreview] = useState<string[]>([]);
   const [outrasFotosFiles, setOutrasFotosFiles] = useState<{ uri: string; name: string; type: string }[]>([]);
   const { user } = useAuth();
   const { width } = Dimensions.get('window');
+  const IsLayoutMl = width > 800
+
+
+
 
   // NOVA FUNÇÃO DE PROCESSAMENTO DE IMAGEM
   async function processarImagemSelecionada(asset: ImagePickerAsset) {
@@ -136,23 +153,26 @@ export default function Cadastrado() {
 
     // Limpa os campos de texto
     setName('');
-    setAge('');
+    // setAge('');
     setDescription('');
 
     // Reseta os seletores para o valor padrão
     setEspecieId(null);
-    setSize('Medio'); // Coloque aqui o valor padrão que você definiu
-    setGender('Macho'); // Coloque aqui o valor padrão
+    // setSize('Medio'); // Coloque aqui o valor padrão que você definiu
+    // setGender('Macho'); // Coloque aqui o valor padrão
 
-    // Limpa os estados das imagens (previews e arquivos de upload)
-    setImagemPreview(null);
-    setFotoPrincipalFile(null);
+
     setOutrasFotosPreview([]);
     setOutrasFotosFiles([]);
   }
-  async function handleSubmit(): Promise<void> {
 
-    if (!fotoPrincipalFile || !especieId) {
+
+  async function handleSubmit(): Promise<void> {
+    if (!user || !user.token) {
+      showAlert("Erro", "Sessão expirada ou usuário não logado.", "error");
+      return;
+    }
+    if (!especieId) {
 
       showAlert("Verificar os campos obrigatorios",
         "Foto principal e campo Espécie obrigatorios ",
@@ -173,31 +193,40 @@ export default function Cadastrado() {
         }
       )
 
-      const fotoPrincipalUrl = await uploadParaCloudinary(fotoPrincipalFile);
+
 
       const urlsAdicionais = await Promise.all(
         outrasFotosFiles.map((file) =>
           uploadParaCloudinary(file)
         )
       );
+    const dataConvertida = dataVisto ? ConverteData(dataVisto) : null;
 
+      if (dataVisto && !dataConvertida) {
+  throw new Error("Data inválida"); 
+}
 
-      const novoAnimal = {
+      const adotanteId = user.id
+      const novoAnimal: CriaAnimalPerdidoDTO = {
         nome: name,
-        idade: Number(age),
-        sexo: gender,
-        foto: fotoPrincipalUrl,
         descricao: description,
-        porte: size,
+        tipoAnuncio: tipoAnuncio,
+        localizacao: localizacao,
+        dataEncontrado: dataConvertida ,
+        contato: contato,
         especieId: Number(especieId),
-        userId: user!.id
+        adotanteId: adotanteId
       };
 
+      console.log(novoAnimal);
+      console.log(user.token);
+
       // Envio para sua API
-      const response = await fetch(`${URL_Adocao}/animais`, {
+      const response = await fetch(`${URL_Adocao}/animais-perdidos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`
         },
         body: JSON.stringify(novoAnimal),
       });
@@ -210,12 +239,18 @@ export default function Cadastrado() {
       const responseData = await response.json();
       const animalIdSalvo = responseData.id;
 
+      console.log(`id do animal retornado pra foto ${animalIdSalvo}`);
+
       if (urlsAdicionais.length > 0) {
         const responsesFotos = await Promise.all(
           urlsAdicionais.map(fotoUrl =>
             fetch(`${URL_Adocao}/fotos`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${user.token}`
+              },
               body: JSON.stringify({
                 descricao: `Foto Extra do ${animalIdSalvo.nome}`,
                 codigoFoto: fotoUrl,
@@ -232,14 +267,14 @@ export default function Cadastrado() {
           throw new Error('Erro ao salvar as imagens adicionais no banco de dados.');
         }
       }
-      
+
       Swal.close()
 
       const resultAlert = await Swal.fire({
         title: 'Cadastrado com sucesso',
-        text:"Deseja ir para pagina inicial?",
-        icon:'success',
-        showCancelButton:true,
+        text: "Deseja ir para pagina inicial?",
+        icon: 'success',
+        showCancelButton: true,
         confirmButtonColor: "green",
         cancelButtonColor: "red",
         confirmButtonText: "Nãp, Quero ficar!!",
@@ -248,11 +283,11 @@ export default function Cadastrado() {
 
       if (resultAlert.isConfirmed) {
         limparFormulario()
-      }else{
+      } else {
         router.replace('/');
       }
-      
-      
+
+
 
     } catch (error) {
       console.error("Erro completo:", error);
@@ -270,51 +305,39 @@ export default function Cadastrado() {
     value: item.id.toString(),
   }));
 
+  function removerFotoindex(index: number) {
+    setOutrasFotosPreview(prev => prev.filter((_, i) => i !== index))
+    setOutrasFotosFiles(prev => prev.filter((_, i) => i !== index))
+  }
 
-  if (width > 600) {
-    return (
-      <ScrollView>
-      <View style={styles.containerLarge}>
+  return (
+    <ScrollView>
+      <View style={{ alignItems: "center", marginBottom: 30 }}>
         <Text style={styles.title}>Cadastro de Animal</Text>
 
-        <View >
+        <View style={{ borderWidth: 1, borderColor: "#ccc", width: 400 }}>
 
           <View style={styles.galeriaContainer}>
-            {imagemPreview && (
-              <Image source={{ uri: imagemPreview }} style={styles.galeriaImage} />
-            )}
 
-            {outrasFotosPreview.map((uri, index) => (
-              <Image key={index} source={{ uri }} style={styles.galeriaImage} />
-            ))}
 
-          </View>
+            <CarrosselPreview fotosUri={outrasFotosPreview}
+              onRemoverFoto={removerFotoindex} />
 
-          <View style={{ flexDirection: "row", justifyContent: 'center', gap: 20, marginBottom: 10 }}>
             <View>
-              <Text style={styles.label}>Imagem principal:</Text>
+              <TouchableOpacity
+                onPress={() => seletorRef.current?.abrirGaleria()}>
+
+                <FontAwesome name="image" size={20} color="#007BFF" />
+              </TouchableOpacity>
 
               <SeletorDeImagem
+                ref={seletorRef}
                 onSelecionada={async (asset) => {
-                  // 1. Mostra o preview imediatamente
-                  setImagemPreview(asset.uri);
-                  // 2. Processa a imagem (comprime se necessário)
-                  const resultado = await processarImagemSelecionada(asset);
-                  if (resultado) {
-                    // 3. Guarda o arquivo pronto para o upload
-                    setFotoPrincipalFile(resultado.processedFile);
-                  }
-                }}
-              />
-
-
-
-            </View>
-            <View>
-              <Text style={styles.label}>Imagens adicionais:</Text>
-              <SeletorDeImagem
-                onSelecionada={async (asset) => {
-                  setOutrasFotosPreview((prev) => [...prev, asset.uri]);
+                  const previewUri =
+                    Platform.OS === "web"
+                      ? `data:image/jpeg;base64,${asset.base64}`
+                      : asset.uri;
+                  setOutrasFotosPreview((prev) => [...prev, previewUri]);
                   const resultado = await processarImagemSelecionada(asset);
                   if (resultado) {
                     setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
@@ -326,292 +349,199 @@ export default function Cadastrado() {
 
 
             </View>
+          </View>
+          <View style={{ alignItems: "center", marginTop: 20, marginBottom: 5 }}>
+
+            <Text style={{ fontWeight: "600", fontSize: 12, color: "red" }}>É obrigatorio o preenchimento dos campos marcados com ' * '</Text>
+          </View>
+
+          <View style={{ width: '100%', padding: 15 }} >
+            <View style={{ flexDirection: "row" }}>
+
+              <Text style={styles.label}>Descrição</Text>
+              <Text style={{ color: "red" }}>*</Text>
+            </View>
+            <TextInput
+              style={{
+                height: 100,
+                width: "100%",
+                backgroundColor: Colors.inputCor,
+                color: lenDescription ? "#fff" : Colors.LetraCinza,
+                padding: 10,
+                borderRadius: 5
+              }}
+              placeholder="Digite uma descrição do animal"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+            />
+          </View>
+
+          <View >
+
+            {/* Linha 2 - Dados Básicos */}
+            <View style={styles.row}>
+              {/* Coluna 1 - Nome e Espécie */}
+              <View style={styles.column}>
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.label,]}>Nome ou Raça</Text>
+
+                  <TextInput
+                    style={[styles.input, { color: lenName ? "#fff" : Colors.LetraCinza }]}
+                    placeholder="Digite o nome do animal"
+                    value={name}
+                    onChangeText={setName}
+                  />
+                </View>
+                <View>
+                  <View style={styles.inputContainer}>
+
+                    <View style={{ flexDirection: "row" }}>
+                      <Text style={styles.label}>Tipo de Anúncio</Text>
+                      <Text style={[styles.label, { color: "red" }]}>*</Text>
+                    </View>
+
+                    <View style={styles.radioGroup}>
+                      <TouchableOpacity
+                        style={[styles.radioButton, tipoAnuncio === 'PERDI' && styles.radioButtonSelected,
+
+
+                        ]}
+                        onPress={() => setTipoAnucio('PERDI')}
+                      >
+                        <Text style={[styles.radioText,
+                        { color: tipoAnuncio === 'PERDI' ? '#ffff' : 'black' }]}>Encontrado</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.radioButton, tipoAnuncio === 'ENCONTREI' && styles.radioButtonSelected]}
+                        onPress={() => setTipoAnucio('ENCONTREI')}
+                      >
+                        <Text style={[styles.radioText,
+                        { color: tipoAnuncio === 'ENCONTREI' ? '#fff' : 'black' }]}>Perdido</Text>
+                      </TouchableOpacity>
+
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Espécie</Text>
+                  <RNPickerSelect
+                    onValueChange={(value) => setEspecieId(value)}
+                    items={especiesOptions}
+                    placeholder={{ label: 'Selecione uma espécie...', value: null }}
+                    style={{
+                      inputWeb: styles.input,
+                      inputAndroid: styles.input,
+                      inputIOS: styles.input,
+                    }}
+                    value={especieId}
+                  />
+                </View>
+
+
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Contato</Text>
+                  <TextInput
+                    style={[styles.input, { color: lenContato ? "#fff" : Colors.LetraCinza }]}
+                    placeholder="Digite Numero telefonico ou email!! "
+                    value={contato}
+                    onChangeText={setContato}
+
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Ultima data visto</Text>
+                  <MaskedTextInput
+                    mask="99/99/9999"
+                    style={[styles.input, { color: lenDataVisto ? "#fff" : Colors.LetraCinza }]}
+                    placeholder="dd/mm/aaaa"
+                    value={dataVisto}
+                    onChangeText={(t) => setDataVisto(t)}
+                    keyboardType='numeric'
+
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Ultima localização visto</Text>
+                  <TextInput
+                    style={[styles.input, { color: lenLocal ? "#fff" : Colors.LetraCinza }]}
+                    placeholder="Onde foi visto pela ultima vez? "
+                    value={localizacao}
+                    onChangeText={setLocalizacao}
+
+                  />
+                  <View style={{ top: 25 }} >
+                    <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                      <Text style={styles.buttonText}>Cadastrar Animal</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Tamanho</Text>
+                    <View style={styles.radioGroup}>
+                      <TouchableOpacity
+                        style={[styles.radioButton, size === 'Pequeno' && styles.radioButtonSelected]}
+                        onPress={() => setSize('Pequeno')}
+                      >
+                        <Text style={styles.radioText}>Pequeno</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.radioButton, size === 'Medio' && styles.radioButtonSelected]}
+                        onPress={() => setSize('Medio')}
+                      >
+                        <Text style={styles.radioText}>Médio</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.radioButton, size === 'Grande' && styles.radioButtonSelected]}
+                        onPress={() => setSize('Grande')}
+                      >
+                        <Text style={styles.radioText}>Grande</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View> */}
+              </View>
+
+              {/* Coluna 3 - Sexo */}
+              {/* <View style={styles.column}>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Sexo</Text>
+                    <View style={styles.radioGroup}>
+                      <View style={styles.radioOption}>
+                        <RadioButton
+                          value="Macho"
+                          status={gender === 'Macho' ? 'checked' : 'unchecked'}
+                          onPress={() => setGender('Macho')}
+                          color="#4CAF50"
+                        />
+                        <Text style={styles.radioText}>Macho</Text>
+                      </View>
+                      <View style={styles.radioOption}>
+                        <RadioButton
+                          value="Femea"
+                          status={gender === 'Femea' ? 'checked' : 'unchecked'}
+                          onPress={() => setGender('Femea')}
+                          color="#4CAF50"
+                        />
+                        <Text style={styles.radioText}>Fêmea</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View> */}
+
+            </View>
 
           </View>
 
 
-          {/* Linha 2 - Dados Básicos */}
-          <View style={styles.row}>
-            {/* Coluna 1 - Nome e Espécie */}
-            <View style={styles.column}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Nome do Animal</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Digite o nome do animal"
-                  value={name}
-                  onChangeText={setName}
-                />
-              </View>
+          {/* Botão de cadastro */}
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Espécie</Text>
-                <RNPickerSelect
-                  onValueChange={(value) => setEspecieId(value)}
-                  items={especiesOptions}
-                  placeholder={{ label: 'Selecione uma espécie...', value: null }}
-                  style={{
-                    inputWeb: styles.input,
-                    inputAndroid: styles.input,
-                    inputIOS: styles.input,
-                  }}
-                  value={especieId}
-                />
-              </View>
-            </View>
-
-            {/* Coluna 2 - Idade e Tamanho */}
-            <View style={styles.column}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Idade</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Digite a idade do animal"
-                  value={age}
-                  onChangeText={setAge}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Tamanho</Text>
-                <View style={styles.radioGroup}>
-                  <TouchableOpacity
-                    style={[styles.radioButton, size === 'Pequeno' && styles.radioButtonSelected]}
-                    onPress={() => setSize('Pequeno')}
-                  >
-                    <Text style={styles.radioText}>Pequeno</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.radioButton, size === 'Medio' && styles.radioButtonSelected]}
-                    onPress={() => setSize('Medio')}
-                  >
-                    <Text style={styles.radioText}>Médio</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.radioButton, size === 'Grande' && styles.radioButtonSelected]}
-                    onPress={() => setSize('Grande')}
-                  >
-                    <Text style={styles.radioText}>Grande</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-
-            {/* Coluna 3 - Sexo */}
-            <View style={styles.column}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Sexo</Text>
-                <View style={styles.radioGroup}>
-                  <View style={styles.radioOption}>
-                    <RadioButton
-                      value="Macho"
-                      status={gender === 'Macho' ? 'checked' : 'unchecked'}
-                      onPress={() => setGender('Macho')}
-                      color="#4CAF50"
-                    />
-                    <Text style={styles.radioText}>Macho</Text>
-                  </View>
-                  <View style={styles.radioOption}>
-                    <RadioButton
-                      value="Femea"
-                      status={gender === 'Femea' ? 'checked' : 'unchecked'}
-                      onPress={() => setGender('Femea')}
-                      color="#4CAF50"
-                    />
-                    <Text style={styles.radioText}>Fêmea</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-        <View style={{ width: "90%" }}>
-          <Text style={styles.label}>Descrição</Text>
-          <TextInput
-            style={[styles.input, { height: 100 }]}
-            placeholder="Digite uma descrição do animal"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-          />
-        </View>
-
-        {/* Botão de cadastro */}
-        <View >
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Cadastrar Animal</Text>
-          </TouchableOpacity>
         </View>
       </View>
-      </ScrollView>
-    );
-  } else {
+    </ScrollView>
+  );
 
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-
-        <Text style={styles.title}>Cadastro de Animal</Text>
-
-
-        <View >
-
-          <View style={styles.galeriaContainer}>
-            {imagemPreview && (
-              <Image source={{ uri: imagemPreview }} style={styles.galeriaImage} />
-            )}
-
-            {outrasFotosPreview.map((uri, index) => (
-              <Image key={index} source={{ uri }} style={styles.galeriaImage} />
-            ))}
-
-          </View>
-
-          <View style={{ flexDirection: "row", justifyContent: 'center', gap: 20, marginBottom: 10 }}>
-            <View>
-              <Text style={styles.label}>Imagem principal:</Text>
-
-              <SeletorDeImagem
-                onSelecionada={async (asset) => {
-                  // 1. Mostra o preview imediatamente
-                  setImagemPreview(asset.uri);
-                  // 2. Processa a imagem (comprime se necessário)
-                  const resultado = await processarImagemSelecionada(asset);
-                  if (resultado) {
-                    // 3. Guarda o arquivo pronto para o upload
-                    setFotoPrincipalFile(resultado.processedFile);
-                  }
-                }}
-              />
-
-
-
-            </View>
-            <View>
-              <Text style={styles.label}>Imagens adicionais:</Text>
-              <SeletorDeImagem
-                onSelecionada={async (asset) => {
-                  setOutrasFotosPreview((prev) => [...prev, asset.uri]);
-                  const resultado = await processarImagemSelecionada(asset);
-                  if (resultado) {
-                    setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
-                  }
-                }}
-              />
-
-
-
-
-            </View>
-
-          </View>
-        </View>
-
-        {/* Campo para nome */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Nome do Animal</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite o nome do animal"
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-
-        {/* Campo para espécie */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Espécie</Text>
-          <RNPickerSelect
-            onValueChange={(value) => setEspecieId(value)}
-            items={especiesOptions}
-            placeholder={{ label: 'Selecione uma espécie...', value: null }}
-            style={{
-              inputWeb: styles.input,
-              inputAndroid: styles.input,
-              inputIOS: styles.input,
-            }}
-            value={especieId}
-          />
-        </View>
-
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Idade</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite a idade do animal"
-            value={age}
-            onChangeText={setAge}
-            keyboardType="numeric"
-          />
-        </View>
-
-        {/* Seleção de tamanho */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Tamanho</Text>
-          <View style={styles.radioGroup}>
-            <TouchableOpacity
-              style={[styles.radioButton, size === 'Pequeno' && styles.radioButtonSelected]}
-              onPress={() => setSize('Pequeno')}
-            >
-              <Text style={styles.radioText}>Pequeno</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.radioButton, size === 'Medio' && styles.radioButtonSelected]}
-              onPress={() => setSize('Medio')}
-            >
-              <Text style={styles.radioText}>Médio</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.radioButton, size === 'Grande' && styles.radioButtonSelected]}
-              onPress={() => setSize('Grande')}
-            >
-              <Text style={styles.radioText}>Grande</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Seleção de sexo */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Sexo</Text>
-          <View style={styles.radioGroup}>
-            <View style={styles.radioOption}>
-              <RadioButton
-                value="Macho"
-                status={gender === 'Macho' ? 'checked' : 'unchecked'}
-                onPress={() => setGender('Macho')}
-                color="#4CAF50"
-              />
-              <Text style={styles.radioText}>Macho</Text>
-            </View>
-            <View style={styles.radioOption}>
-              <RadioButton
-                value="Femea"
-                status={gender === 'Femea' ? 'checked' : 'unchecked'}
-                onPress={() => setGender('Femea')}
-                color="#4CAF50"
-              />
-              <Text style={styles.radioText}>Fêmea</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Descrição</Text>
-          <TextInput
-            style={[styles.input, { height: 100 }]}
-            placeholder="Digite uma descrição do animal"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-          />
-        </View>
-        {/* Botão de cadastro */}
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Cadastrar Animal</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    );
-  }
 };
 const styles = StyleSheet.create({
 
@@ -703,8 +633,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   radioButtonSelected: {
-    borderRadius: 1,
+    borderRadius: 5,
     backgroundColor: Colors.Butao,
+
 
   },
   radioOption: {
@@ -750,8 +681,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   galeriaImage: {
-    width: 100,
-    height: 100,
+    width: "100%",
+    height: 400,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',

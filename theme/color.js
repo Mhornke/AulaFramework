@@ -4,6 +4,7 @@ const Colors = {
     Butao:"#2563EB",
     CardFundo:"#1F2937",
     inputCor:"#374151",
-    BrancoMaisNemTanto: "#fffff0"
+    BrancoMaisNemTanto: "#fffff0",
+    Preto:"#303030ff"
     };
     export default Colors;

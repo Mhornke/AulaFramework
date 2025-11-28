@@ -5,13 +5,12 @@ import CardIIII from "../../components/cardAnimalPerdido";
 import CardIII from "../../components/cardAnimalNormalAdotado"
 import Carrossel from "../../components/carrossel";
 import Footer from "../../components/footer";
-import { AnimalII } from "../../utils/types/animiasPerdidos";
+import { AnimalPerdidoI } from "@/utils/types/animiasPerdidos";
 import { FontAwesome } from "@expo/vector-icons";
-import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
-import dadosAnimais from '@/dadosAnimaisPerdidos.json'
+import { URL_Adocao } from "@/utils/url";
 
 export default function Perdidos() {
-    const [animais, setAnimais] = useState<AnimalII[]>([])
+    const [animais, setAnimais] = useState<AnimalPerdidoI[]>([])
     const [quantVisivelAdotados, setQuantVisivelAdotados] = useState(4)
     const scrollViewRef = useRef<ScrollView>(null)
 
@@ -70,6 +69,7 @@ export default function Perdidos() {
         contentWrapper: {
             width: '100%',
             maxWidth: 1200,
+            flex:1,
             alignSelf: 'center',
             paddingHorizontal: 20,
         },
@@ -83,7 +83,7 @@ export default function Perdidos() {
 
             try {
                 // const response = await fetch(`https://api-adocao-git-main-dieizons-projects.vercel.app/animais`)
-                const response = await fetch(`${URL_Adocao}/animais`)
+                const response = await fetch(`${URL_Adocao}/animais-perdidos`)
                 const dados = await response.json()
                 console.log(response);
                 console.log(response);
@@ -103,20 +103,20 @@ export default function Perdidos() {
 
    
     const animalEntregue = animais.filter(
-  (animal) => animal.status === false
+  (animal) => animal.encontrado === true
 );
 
 const listaAnimaisEncontrados = animalEntregue
   .slice(0, quantVisivelAdotados)
   .map((animal) => (
-    <CardIII key={animal.id} data={animal as AnimalII} />
+    <CardIII key={animal.id} data={animal as AnimalPerdidoI} />
   ));
 const animalPerdido = animais.filter(
-  (animal) => animal.status === true
+  (animal) => animal.encontrado === false
 );
 
 const listaAnimais = animalPerdido.map((animal) => (
-  <CardIIII key={animal.id} data={animal as AnimalII} />
+  <CardIIII key={animal.id} data={animal as AnimalPerdidoI} />
 ));
 
 
@@ -131,7 +131,7 @@ const listaAnimais = animalPerdido.map((animal) => (
                 showsVerticalScrollIndicator={false}>
 
                     {/* <Pesquisa /> */}
-                    <View>
+                    <View >
                     </View>
                     
                         <Text style={[styles.text, {fontSize:23, fontWeight:'700'}]}>Animais perdidos</Text>
@@ -161,11 +161,14 @@ const listaAnimais = animalPerdido.map((animal) => (
 
         return (
             < >
-                <ScrollView keyboardShouldPersistTaps='handled'
+                <ScrollView 
                     showsVerticalScrollIndicator={false}
                     ref={scrollViewRef}
+                    style={{
+                       
+                    }}
                 >
-                    <View style={[styles.contentWrapper,{top:40}]}>    
+                    <View style={[styles.contentWrapper,{top:40,  }]}>    
                         {/* Alterar a barra de pesquisa no back end */}
                         {/* <Pesquisa /> */}
                         <View style={styles.containerText}>
@@ -217,11 +220,14 @@ const listaAnimais = animalPerdido.map((animal) => (
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <Footer />
-                </ScrollView>
+                   
+
+                    <Footer  />
+                  
                 <TouchableOpacity style={styles.botaoFlutuante} onPress={scrollParaTopo}>
                     <FontAwesome name="arrow-up" size={15} color="#fff" />
                 </TouchableOpacity>
+                </ScrollView>
             </>
         );
 

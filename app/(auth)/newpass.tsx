@@ -1,6 +1,6 @@
 import { showAlert } from "@/components/swalAlert";
 import { Link, router } from "expo-router";
-import { Dimensions, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, StyleSheet, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
@@ -72,7 +72,9 @@ export default function RecoveryPass() {
 
   return (
 
-
+<ScrollView
+     contentContainerStyle={{ flexGrow: 1 }}
+    > 
 
 
     <View style={{
@@ -195,7 +197,7 @@ export default function RecoveryPass() {
 
 
 
-
+</ScrollView>
   );
 }
 const styles = StyleSheet.create({

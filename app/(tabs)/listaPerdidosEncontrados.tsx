@@ -13,530 +13,548 @@ import Colors from "../../theme/color";
 import { useAuth } from "../../context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
 import { showAlert } from "@/components/swalAlert";
-import { dadosMensagem } from "@/dadosMensagem"
 import Mensagem from "@/components/listaMensagem";
-import { ChatMensagem } from "@/utils/types/mensagem";
 import { FontAwesome } from "@expo/vector-icons";
-// Interfaces
-interface Pedido {
-  id: number;
-  descricao: string;
-  resposta?: string;
-  animalId: number;
-  userId: string;
-}
-
-interface Animal {
-  id: number;
-  nome: string;
-  idade: number;
-  sexo: string;
-  foto: string;
-  descricao: string;
-  status: boolean;
-  porte: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  destaque: boolean;
-  pedidos?: Pedido[];
-  especie: {
-    id: number;
-    nome: string;
-  };
-}
+import { AnimalPerdidoI } from "@/utils/types/animiasPerdidos";
+import { Link } from "expo-router"; // Importante para navegar para o chat
 
 export default function ListaCadastro() {
-  const { width, height } = Dimensions.get("window");
+  const { width } = Dimensions.get("window");
   const { user, isLoading } = useAuth();
-  // Adicione [] para dizer que é uma LISTA de mensagens
-  const [listaMensagem, setListaMensagem] = useState<ChatMensagem[]>([]);
-  const [listaAnimais, setListaAnimais] = useState<Animal[]>([]);
-  const [respostasEditadas, setRespostasEditadas] = useState<{ [id: number]: string }>({});
-  const [openEditDescricao, setOpenEditDescricao] = useState<Record<number, boolean>>({})
- const [conteudoEditDescricao, setConteudoEditDescricao] = useState<Record<number, string>>({})
 
+  const [listaAnimais, setListaAnimais] = useState<AnimalPerdidoI[]>([]);
+
+  // Estados de edição
+  const [openEditDescricao, setOpenEditDescricao] = useState<Record<number, boolean>>({});
+  const [conteudoEditDescricao, setConteudoEditDescricao] = useState<Record<number, string>>({});
 
   useEffect(() => {
     const buscarAnimais = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !user?.token) return;
 
       try {
-        const res = await fetch(`${URL_Adocao}/animais`, {
+        // Chama a rota /meus-animais que já traz os CHATS e FOTOS via 'include'
+        const res = await fetch(`${URL_Adocao}/animais-perdidos/meus-animais`, {
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${user?.token}`,
+            "Authorization": `Bearer ${user.token}`,
           },
         });
+
         if (res.ok) {
           const dados = await res.json();
-          const filtrados = dados.filter((animal: Animal) => animal.userId === user.id);
-          setListaAnimais(filtrados);
+          setListaAnimais(dados);
         } else {
           console.error("Erro ao buscar animais:", res.statusText);
         }
       } catch (err) {
-        console.error("Erro ao buscar animais:", err);
+        console.error("Erro de conexão:", err);
       }
     };
 
-    async function BuscaMensagem() {
-      setListaMensagem(dadosMensagem)
-    }
     if (!isLoading) {
       buscarAnimais();
-      BuscaMensagem()
-    };
+    }
   }, [user, isLoading]);
 
+  // --- Funções Auxiliares ---
+  async function DeletarChat(chatId: string, animalId: number) {
+    const confirmacao = await showAlert(
+      'Apagar conversa?',
+      "Todas as mensagens desse chat serão apagadas permanentemente.",
+      'question'
+    );
 
-
-  const AreaResposta = (pedidoId: number, texto: string) => {
-    setRespostasEditadas((prev) => ({ ...prev, [pedidoId]: texto }));
-  };
-
-  const EnviaResposta = async (pedidoId: number) => {
-    const resposta = respostasEditadas[pedidoId];
-    if (!resposta?.trim()) return alert("Digite uma resposta antes de salvar.");
+    if (!confirmacao) return;
 
     try {
-      const res = await fetch(`${URL_Adocao}/pedidos/${pedidoId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resposta }),
+      // Chama a rota que cria no backend (plural ou singular conforme sua rota)
+      const response = await fetch(`${URL_Adocao}/mensagens/chat/${chatId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.token}`
+        }
       });
 
-      if (res.ok) {
+      if (response.ok) {
+        // Atualiza o estado removendo apenas o chat específico da lista do animal
+        setListaAnimais(prev => prev.map(animal => {
+          if (animal.id === animalId) {
+            // Filtra os chats removendo o deletado
+            const chatsAtualizados = (animal as any).chats.filter((c: any) => c.id !== chatId);
+            return { ...animal, chats: chatsAtualizados };
+          }
+          return animal;
+        }));
 
-        showAlert("Sucesso", "Resposta enviada", 'success')
-
-        setListaAnimais((prev) =>
-          prev.map((animal) => ({
-            ...animal,
-            pedidos: animal.pedidos?.map((pedido) =>
-              pedido.id === pedidoId ? { ...pedido, resposta } : pedido
-            ),
-          }))
-        );
-
-        setRespostasEditadas((prev) => {
-          const novo = { ...prev };
-          delete novo[pedidoId];
-          return novo;
-        });
+        showAlert("Sucesso", "Conversa apagada.", "success");
       } else {
-        console.error(await res.text());
-
-        showAlert("Erro", "Erro ao enviar resposta", 'error')
+        showAlert("Erro", "Não foi possível apagar a conversa.", "error");
       }
-    } catch (err) {
-      console.error("Erro ao salvar resposta:", err);
-      showAlert("Erro", "Erro ao enviar resposta", 'error')
+    } catch (error) {
+      console.error(error);
+      showAlert("Erro", "Erro de conexão.", "error");
     }
-  };
-  function OpenEditDescricao(animalId: number, descricaoAtual: string) {
-    setOpenEditDescricao(prev => {
-      const isOpening = !prev[animalId];
-      if (isOpening) {
-        // Se estiver abrindo, pré-preencha com a descrição atual do animal
-        setConteudoEditDescricao(prevContent => ({ ...prevContent, [animalId]: descricaoAtual || '' }));
-      }
-      return {
-        ...prev,
-        [animalId]: isOpening
-      };
-    });
   }
   const AtualizaInputDescricao = (animalId: number, text: string) => {
     setConteudoEditDescricao(prev => ({ ...prev, [animalId]: text }));
   };
 
+  function OpenEditDescricao(animalId: number, descricaoAtual: string) {
+    setOpenEditDescricao(prev => {
+      const isOpening = !prev[animalId];
+      if (isOpening) {
+        setConteudoEditDescricao(prevContent => ({ ...prevContent, [animalId]: descricaoAtual || '' }));
+      }
+      return { ...prev, [animalId]: isOpening };
+    });
+  }
+  async function DeletarAnimal(animalId: number) {
+    // 1. Pergunta se o usuário tem certeza (Segurança)
+    const confirmacao = await showAlert(
+      'Tem certeza que deseja deletar o poste?',
+      "Você não poderá reverter isso!",
+      'question'
+    );
+
+    if (!confirmacao) return;
+
+    try {
+      // 2. Correção da URL (Adicionada a barra /)
+      const response = await fetch(`${URL_Adocao}/animais-perdidos/${animalId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.token}`
+        }
+      });
+
+      if (response.ok) {
+        // 3. Atualiza a lista no Front-end removendo o item (sem chamar a API de novo)
+        setListaAnimais((prev) => prev.filter((animal) => animal.id !== animalId));
+
+        showAlert("Sucesso", "Animal excluído com sucesso!", "success");
+
+        // Se precisar fechar algum modal de edição aberto desse animal:
+        setOpenEditDescricao(prev => {
+          const newState = { ...prev };
+          delete newState[animalId];
+          return newState;
+        });
+
+      } else {
+        const erroData = await response.json(); // Adicionado await
+        console.error(erroData);
+        showAlert("Erro", "Não foi possível excluir o animal.", "error");
+      }
+    } catch (error) {
+      console.error(error);
+      showAlert("Erro", "Erro de conexão com o servidor.", "error");
+    }
+
+
+  }
   const EnviarEditDescricao = async (animalId: number) => {
     const novoConteudo = conteudoEditDescricao[animalId];
 
+    // 1. Validação básica
     if (!novoConteudo || novoConteudo.trim().length === 0) {
       showAlert("Atenção", "A descrição não pode ser vazia.", "warning");
       return;
     }
-    // await fetch
 
-    setListaAnimais(prev =>
-      prev.map(animal =>
-        animal.id === animalId ? { ...animal, descricao: novoConteudo } : animal
-      )
-    );
-
-    showAlert("Descrição Alterada", "", "success");
-    setOpenEditDescricao(prev => ({ ...prev, [animalId]: false }));
-
-    setConteudoEditDescricao(prev => {
-      const novo = { ...prev };
-      delete novo[animalId];
-      return novo;
-    });
-  };
-  
-  const StatusAdocao = async (animalId: number) => {
     try {
-      const response = await fetch(`${URL_Adocao}/animais/${animalId}/adotar`, {
+      // 2. Chamada ao Backend (PATCH)
+      const response = await fetch(`${URL_Adocao}/animais-perdidos/${animalId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.token}`
         },
-        body: JSON.stringify({ status: false }),
+        body: JSON.stringify({ descricao: novoConteudo }), // Envia apenas o campo alterado
       });
-      if (response.ok) {
 
-        showAlert("Estatus Alterado com sucesso", "Agradeçemos por arrumar um lar ao nossos amiguinos", 'success')
-        setListaAnimais((prev) =>
-          prev.map((animal) =>
-            animal.id === animalId ? { ...animal, status: false } : animal
+      if (response.ok) {
+        // 3. Sucesso: Atualiza o estado local para refletir a mudança na tela
+        setListaAnimais(prev =>
+          prev.map(animal =>
+            animal.id === animalId ? { ...animal, descricao: novoConteudo } : animal
           )
         );
-      } else {
 
-        showAlert("Erro", "erro ao alterar estatus", 'error')
+        showAlert("Sucesso", "Descrição alterada com sucesso!", "success");
+
+        // Fecha o modo de edição
+        setOpenEditDescricao(prev => ({ ...prev, [animalId]: false }));
+      } else {
+        // Erro do Backend
+        const erroMsg = await response.text();
+        console.error("Erro API:", erroMsg);
+        showAlert("Erro", "Não foi possível salvar as alterações.", "error");
       }
+
     } catch (error) {
-      alert("Erro ao alterar status.");
-      console.error(error);
+      // Erro de Rede / Código
+      console.error("Erro Network:", error);
+      showAlert("Erro", "Erro de conexão com o servidor.", "error");
     }
   };
 
   const isMobile = width < 600;
 
-  const listaMensagens = dadosMensagem.map(chat => (
-    <Mensagem key={chat.id} data={chat} />
-  ));
-
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
-      <Text style={styles.titulo}>Lista de Encontrados ou Perdidos</Text>
+      <Text style={styles.titulo}>Meus Animais Cadastrados</Text>
 
       {listaAnimais.length > 0 ? (
-        listaAnimais.map((animal) =>
-          isMobile ? (
-            // Layout Mobile (vertical)
+        listaAnimais.map((animal) => {
+
+          // Lógica da Foto
+          const fotoCapa = (animal.fotos && animal.fotos.length > 0)
+            ? animal.fotos[0].codigoFoto
+            : "https://placehold.co/400x400/png?text=Sem+Foto";
+
+          // Lógica das Mensagens (Chats) deste animal
+          // Se 'chats' vier do backend, usamos ele. Se não, array vazio.
+          const chatsDoAnimal = (animal as any).chats || [];
+
+          return isMobile ? (
+
+            // === MOBILE CARD ===
             <View key={animal.id} style={styles.cardMobile}>
-              <Text style={styles.nomeAnimal}>🐾 {animal.nome}</Text>
-              <Image source={{ uri: animal.foto }} style={styles.imagemMobile}
-                resizeMode='contain' />
+              <Text style={styles.nomeAnimal}>🐾 {animal.nome || "Sem nome"}</Text>
+
+              <TouchableOpacity
+                onPress={() => DeletarAnimal(animal.id)}
+                style={{ position: "absolute", right: 20, top: 15 }} // Ajuste a posição conforme seu layout
+              >
+                <FontAwesome name="trash" size={20} color="red" />
+              </TouchableOpacity>
+              <Image source={{ uri: fotoCapa }} style={styles.imagemMobile} resizeMode='cover' />
+
               <Text style={styles.data}>
                 <Text style={styles.label}>Data:</Text> {new Date(animal.createdAt).toLocaleDateString()}
               </Text>
 
-              <View style={{ borderWidth: 1, borderColor: "#cccc", marginBottom: 10, minHeight: 55, borderRadius: 5, padding: 15, marginRight: 5, backgroundColor: "#ebebebff" }}>
-
-                <Text style={{ fontWeight: "500", display: openEditDescricao[animal.id] ? "none" : "flex" }}>{animal.descricao}</Text>
-
-                <View style={{
-                  display: openEditDescricao[animal.id] ? "flex" : "none",
-                  gap: 5
-                }}>
+              {/* Edição Descrição */}
+              <View style={styles.boxEdicao}>
+                <Text style={{ fontWeight: "500", display: openEditDescricao[animal.id] ? "none" : "flex" }}>
+                  {animal.descricao}
+                </Text>
+                <View style={{ display: openEditDescricao[animal.id] ? "flex" : "none", gap: 5 }}>
                   <TextInput
-                    style={{
-                      height: 200, borderRadius: 5,
-                      borderWidth: 1, borderColor: "#cccc",
-                      padding: 10,
-                      backgroundColor: "#ffff",
-                      outlineStyle: "none" as any
-                    }}
+                    style={styles.inputEdicao}
                     value={conteudoEditDescricao[animal.id] ?? ""}
-
                     onChangeText={(text) => AtualizaInputDescricao(animal.id, text)}
-
                     placeholder="Alterar Descrição..."
-                    placeholderTextColor="#888"
                     multiline
-                    textAlignVertical="top"
-                    underlineColorAndroid="transparent"
-
                   />
-                  <TouchableOpacity style={{
-                    padding: 10, borderRadius: 5, alignItems: "center",
-                    backgroundColor: Colors.Butao
-                  }}
-                    onPress={() => EnviarEditDescricao(animal.id)}
-                  >
-                    <Text style={{ color: "#ffff", fontWeight: "500" }}>Enviar</Text>
+                  <TouchableOpacity style={styles.btnSalvar} onPress={() => EnviarEditDescricao(animal.id)}>
+                    <Text style={{ color: "#ffff", fontWeight: "500" }}>Salvar</Text>
                   </TouchableOpacity>
-
                 </View>
                 <TouchableOpacity
                   onPress={() => OpenEditDescricao(animal.id, animal.descricao || '')}
-                  style={{ position: "absolute", right: 15 }}>
+                  style={{ position: "absolute", right: 10, top: 10 }}>
                   <FontAwesome name="edit" size={20} color={Colors.Butao} />
                 </TouchableOpacity>
-
               </View>
+
+              {/* Status */}
               <View style={styles.statusRow}>
                 <Text style={styles.label}>Status: </Text>
-                <Text style={{ color: animal.status ? "red" : "green", fontWeight: "bold" }}>
-                  {animal.status ? "Perdido" : "Tutor encontrado"}
+                <Text style={{ color: !animal.encontrado ? "red" : "green", fontWeight: "bold" }}>
+                  {!animal.encontrado ? "Perdido" : "Encontrado"}
                 </Text>
-
-                {animal.status && (
+                {!animal.encontrado && (
                   <TouchableOpacity onPress={() => StatusAdocao(animal.id)} style={styles.botaoAdotarMobile}>
-                    <Text style={styles.botaoTexto}>Encontrou seu tutor</Text>
+                    <Text style={styles.botaoTexto}>Marcar como Encontrado</Text>
                   </TouchableOpacity>
                 )}
               </View>
 
-              <Text style={styles.label}>Mensagens:</Text>
-              {dadosMensagem.length > 0 ? (
-                listaMensagens
 
+              <View style={{ marginTop: 10 }}>
+                <Text style={[styles.label, { marginBottom: 5 }]}>Conversas / Mensagens:</Text>
 
-              ) : (
-                <Text style={styles.texto}>Nenhuma mensagem no momento.</Text>
-              )}
+                {chatsDoAnimal.length > 0 ? (
+                  chatsDoAnimal.map((chat: any) => {
+                    // Pega a última mensagem para exibir
+                    const ultimaMsg = chat.mensagens && chat.mensagens.length > 0
+                      ? chat.mensagens[chat.mensagens.length - 1].conteudo
+                      : "Nova conversa iniciada";
+
+                    // Descobre o nome da outra pessoa
+                    const outroParticipante = chat.participante1.id === user?.id
+                      ? chat.participante2.nome
+                      : chat.participante1.nome;
+
+                    return (
+                      <View>
+                        <Link key={chat.id} href={`/mensagens/${chat.id}`} asChild>
+                          <TouchableOpacity style={styles.chatItem}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                              <Text style={{ fontWeight: 'bold', color: Colors.Butao }}>{outroParticipante}</Text>
+                              <Text style={{ fontSize: 10, color: '#888' }}>Ver chat</Text>
+                            </View>
+                            <Text numberOfLines={1} style={{ color: '#555', marginTop: 2 }}>
+                              {ultimaMsg}
+                            </Text>
+                          </TouchableOpacity>
+                        </Link>
+                        <TouchableOpacity
+                          style={styles.deleteChatButton}
+                          onPress={() => DeletarChat(chat.id, animal.id)}
+                        >
+                          <FontAwesome name="trash-o" size={18} color="#ff4444" />
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })
+                ) : (
+                  <Text style={styles.texto}>Nenhuma mensagem para este animal ainda.</Text>
+                )}
+              </View>
+
             </View>
           ) : (
-            // Layout Tablet/Desktop (horizontal)
+
+            // === DESKTOP CARD ===
             <View key={animal.id} style={styles.cardDesktop}>
+              <View style={[styles.infoContainer, { borderWidth: 1, borderColor: "#cccc", width: "100%" }]}>
 
-              <View style={[styles.infoContainer, { borderWidth: 1, borderColor: "#cccc", width: "100%", }]}>
-                <Image source={{ uri: animal.foto }} style={styles.imagemDesktop}
-                  resizeMode='contain' />
+                <Image source={{ uri: fotoCapa }} style={styles.imagemDesktop} resizeMode='cover' />
 
-                <View style={{ flex: 1, width: "100%", height: "100%", marginLeft: 10, marginTop: 10 }}>
-                  <View style={{ flex: 0.3 }}>
+                <View style={{ flex: 1, marginLeft: 10, padding: 10 }}>
 
-                    <Text style={styles.nomeAnimal}>🐾 {animal.nome}</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={styles.nomeAnimal}>🐾 {animal.nome || "Sem nome"}</Text>
+                    <Text style={styles.data}>{new Date(animal.createdAt).toLocaleDateString()}</Text>
                   </View>
-
-                  <View style={{ flex: 1, borderWidth: 1, borderColor: "#cccc", borderRadius: 5, padding: 10, marginRight: 5, backgroundColor: "#ebebebff" }}>
-
-                    <Text style={{ fontWeight: "500", display: openEditDescricao[animal.id] ? "none" : "flex" }}>{animal.descricao}</Text>
-
+                  <TouchableOpacity
+                    onPress={() => DeletarAnimal(animal.id)}
+                    style={{ position: "absolute", right: 100, top: 10 }} // Ajuste a posição conforme seu layout
+                  >
+                    <FontAwesome name="trash" size={20} color="red" />
+                  </TouchableOpacity>
+                  <View style={styles.boxEdicao}>
+                    <Text style={{ display: openEditDescricao[animal.id] ? "none" : "flex" }}>{animal.descricao}</Text>
 
                     <View style={{ display: openEditDescricao[animal.id] ? "flex" : "none" }}>
-
                       <TextInput
-                        style={{
-                          borderRadius: 5,
-                          borderWidth: 1, borderColor: "#cccc",
-                          padding: 10,
-                          backgroundColor: "#ffff",
-                          outlineStyle: "none" as any
-                        }}
-
+                        style={styles.inputEdicao}
                         value={conteudoEditDescricao[animal.id] ?? animal.descricao}
-                      onChangeText={(text) => AtualizaInputDescricao(animal.id, text)}
-
-
-
-
-                        placeholderTextColor="#888"
+                        onChangeText={(text) => AtualizaInputDescricao(animal.id, text)}
                         multiline
-                        textAlignVertical="top"
-                        underlineColorAndroid="transparent"
-
                       />
-
-                      <TouchableOpacity style={{
-                        padding: 10, borderRadius: 5, alignItems: "center",
-                        backgroundColor: Colors.Butao
-                      }}
-                        onPress={() => EnviarEditDescricao(animal.id)}
-                      >
-                        <Text style={{ color: "#ffff", fontWeight: "500" }}>Enviar</Text>
+                      <TouchableOpacity style={styles.btnSalvar} onPress={() => EnviarEditDescricao(animal.id)}>
+                        <Text style={{ color: "#fff" }}>Salvar</Text>
                       </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity
-                      onPress={() => OpenEditDescricao(animal.id,  animal.descricao)}
-                      style={{ position: "absolute", right: 15 }}>
+                      onPress={() => OpenEditDescricao(animal.id, animal.descricao || '')}
+                      style={{ position: "absolute", right: 10, top: 10 }}>
                       <FontAwesome name="edit" size={20} color={Colors.Butao} />
                     </TouchableOpacity>
-
                   </View>
 
-                  <View style={{ width: "100%", justifyContent: 'space-between', flexDirection: "row" }}>
-
-                    <View style={{ flexDirection: "row", left: 10 }}>
+                  <View style={{ marginTop: 10, flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Text style={styles.label}>Status: </Text>
-
-                      <Text style={{ color: animal.status ? "red" : "green", fontWeight: "bold" }}>
-                        {animal.status ? "Perdido" : "Tutor encontrado"}
+                      <Text style={{ color: !animal.encontrado ? "red" : "green", fontWeight: "bold", marginRight: 10 }}>
+                        {!animal.encontrado ? "Perdido" : "Encontrado"}
                       </Text>
+
+                      {!animal.encontrado && (
+                        <TouchableOpacity onPress={() => StatusAdocao(animal.id)} style={styles.botaoAdotarMobile}>
+                          <Text style={styles.botaoTexto}>Marcar como Encontrado</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
 
-                    <View style={{ right: 10 }}>
-                      <Text style={styles.data}>
-                        <Text style={styles.label}>Data:</Text> {new Date(animal.createdAt).toLocaleDateString()}
+                    {/* Botão de Chat para Desktop - Opcional: Pode expandir lista igual mobile */}
+                    <View>
+                      <Text style={{ fontSize: 12, color: '#888' }}>
+                        {chatsDoAnimal.length} conversas ativas
                       </Text>
+
+
                     </View>
                   </View>
+
+                  {chatsDoAnimal.length > 0 && (
+                    <View style={{ marginTop: 15, borderTopWidth: 1, borderColor: '#eee', paddingTop: 10 }}>
+                      {chatsDoAnimal.map((chat: any) => (
+                        <View>
+
+                          <Link key={chat.id} href={`/mensagens/${chat.id}`} asChild>
+                            <TouchableOpacity style={{ padding: 8, backgroundColor: '#f9f9f9', marginBottom: 5, borderRadius: 4 }}>
+                              <Text style={{ fontWeight: 'bold', fontSize: 12 }}>
+                                Conversa com {chat.participante1.id === user?.id ? chat.participante2.nome : chat.participante1.nome}
+                              </Text>
+                              <Text style={{ fontSize: 12, color: '#666' }}>
+                                {chat.mensagens?.[chat.mensagens.length - 1]?.conteudo || '...'}
+                              </Text>
+                            </TouchableOpacity>
+                          </Link>
+                          <TouchableOpacity
+                            style={styles.deleteChatButton}
+                            onPress={() => DeletarChat(chat.id, animal.id)}
+                          >
+                            <FontAwesome name="trash-o" size={18} color="#ff4444" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
                 </View>
-
-
-
-
               </View>
-              <View>
-
-              </View>
-              {animal.status && (
-                <TouchableOpacity onPress={() => StatusAdocao(animal.id)} style={styles.botaoAdotarMobile}>
-                  <Text style={styles.botaoTexto}>Encontrou seu tutor?</Text>
-                </TouchableOpacity>
-              )}
-              <View style={{ width: "100%" }}>
-
-                <Text style={styles.label}>Mensagens:</Text>
-                {dadosMensagem.length > 0 ? (
-                  listaMensagens
-
-
-                ) : (
-                  <Text style={styles.texto}>Nenhuma mensagem no momento.</Text>
-                )}
-              </View>
-
             </View>
-          )
-        )
+          );
+        })
       ) : (
-        <Text style={{ color: Colors.LetraCinza }}>Você não tem animais cadastrados.</Text>
+        <Text style={{ color: Colors.LetraCinza, marginTop: 20 }}>Você não tem animais cadastrados.</Text>
       )}
     </ScrollView>
   );
 }
 
-// Estilos
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
     alignItems: "center",
-    justifyContent: "flex-start",
     width: "100%",
-
-    // Para web (opcional)
-    alignSelf: "center",
     maxWidth: 1200,
+    alignSelf: "center",
   },
-
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 20,
+    color: Colors.Butao
   },
-  // Mobile Card
   cardMobile: {
     width: "100%",
     padding: 16,
     borderRadius: 12,
-    backgroundColor: "#ffff",
+    backgroundColor: "#fff",
     marginBottom: 20,
     borderWidth: 1,
     borderColor: "#ddd",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3
+  },
+  cardDesktop: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  infoContainer: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    overflow: "hidden"
   },
   imagemMobile: {
     width: "100%",
-    height: 300,
+    height: 250,
     borderRadius: 8,
     marginBottom: 10,
   },
-  // Desktop Card
-  cardDesktop: {
-    flexDirection: "column",
-    alignItems: "center",
-    width: "100%",
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: "#ffff",
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#cccc",
-  },
   imagemDesktop: {
-    flex: 0.4,
-    height: 150,
-
-
-  },
-  infoContainer: {
-    alignItems: "center",
-    flexDirection: "row",
-    marginBottom: 50,
-    borderRadius: 5,
-    height: 200,
-
+    width: 200,
+    height: '100%', // Ocupa toda altura do card no desktop
+    minHeight: 200
   },
   nomeAnimal: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
-    marginBottom: 10,
+    marginBottom: 5,
+    color: "#333"
   },
   data: {
-    fontStyle: "italic",
     fontSize: 14,
+    color: "#666",
     marginBottom: 10,
   },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginVertical: 10,
     flexWrap: "wrap",
   },
   label: {
     fontWeight: "bold",
+    color: "#333"
   },
-  texto: {
-    fontSize: 15,
-  },
-  pedidoContainer: {
-    marginTop: 10,
-    paddingVertical: 6,
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-  },
-  input: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: "#999",
-    borderRadius: 6,
-    padding: 10,
-    backgroundColor: "#fff",
-  },
-  botao: {
-    marginTop: 8,
-    backgroundColor: "#4CAF50",
-    padding: 10,
-    borderRadius: 6,
-  },
-  botaoTexto: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "600",
-  },
-  respostaBox: {
-    backgroundColor: "#dff0d8",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 4,
-  },
-  respostaTexto: {
-    color: "#3c763d",
-    fontSize: 14,
-  },
-
   botaoAdotarMobile: {
-    backgroundColor: "green",
+    backgroundColor: Colors.Butao,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,
     marginLeft: 10,
   },
-  botaoAdotarDesktop: {
-    backgroundColor: "green",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginLeft: 16,
+  botaoTexto: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 12
   },
+  boxEdicao: {
+    borderWidth: 1,
+    borderColor: "#eee",
+    backgroundColor: "#f9f9f9",
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    position: 'relative',
+    width: '100%'
+  },
+  inputEdicao: {
+    height: 100,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    backgroundColor: "#fff",
+    textAlignVertical: "top",
+    marginBottom: 5,
+    width: '100%'
+  },
+  btnSalvar: {
+    padding: 8,
+    borderRadius: 5,
+    alignItems: "center",
+    backgroundColor: Colors.Butao,
+    alignSelf: 'flex-end',
+    width: 100
+  },
+  texto: {
+    color: "#777",
+    fontStyle: 'italic',
+    marginTop: 5
+  },
+
+  chatItem: {
+    padding: 10,
+    backgroundColor: '#f0f8ff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e1e4e8',
+    marginBottom: 8
+  },
+  deleteChatButton: {
+    padding: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderLeftWidth: 1,
+    borderLeftColor: '#e1e4e8',
+    position:"absolute",
+    right:0,
+  }
 });

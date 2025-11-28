@@ -10,7 +10,7 @@ import {
     Platform,
     StyleSheet,
 } from "react-native";
-import { ChatMensagem } from "@/utils/types/mensagem";
+import { ChatMensagem } from "@/utils/types/chatMensagens";
 import { dadosMensagem } from "@/dadosMensagem";
 import Colors from "@/theme/color";
 

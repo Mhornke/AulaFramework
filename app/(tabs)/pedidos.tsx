@@ -1,171 +1,159 @@
 import { useEffect, useState } from "react";
-import { View, Text, Dimensions, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Dimensions, ScrollView, ActivityIndicator,TouchableOpacity, Image} from "react-native";
 import Colors from "../../theme/color";
 import { useAuth } from "../../context/AuthContext";
 import { Link, useRouter } from "expo-router";
 import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
+import { Pedido } from "@/utils/types/pedidos";
 
-interface Responsavel {
-  nome: string;
-  fone: string;
-}
-
-interface Animal {
-  id: number;
-  nome: string;
-  user?: Responsavel;
-  status: boolean;
-  destaque?: boolean;
-}
-
-interface Adotante {
-  id: string;
-  nome: string;
-  email: string;
-}
-
-interface Pedido {
-  id: string;
-  animal: Animal;
-  descricao: string;
-  resposta?: string;
-  createdAt: string;
-  adotante: Adotante;
-}
 
 export default function PedidosPage() {
   const { width, height } = Dimensions.get("window");
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
-
+  
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
+  // 1. Proteção de Rota
   useEffect(() => {
-    
     if (!isLoading && !isAuthenticated) {
       router.push("/login");
     }
   }, [isAuthenticated, isLoading]);
 
+  // 2. Busca de Dados
   useEffect(() => {
-    const buscaPedidos = async () => {
-      if (!user?.id || !user?.token) return;
+    async function buscaDados() {
+      if (!user?.id) return; 
 
       try {
-        const urls = [
-          `${URL_GestaoPet}/interessados/pedidos?userId=${user.id}`,
-          `${URL_Adocao}/pedidos?userId=${user.id}`,
-        ];
-
         
-        const [resInteressados, resPedidos] = await Promise.all([
-          fetch(urls[0], {
-            headers: { Authorization: `Bearer ${user.token}` },
-          }),
-          fetch(urls[1], {
-            headers: { Authorization: `Bearer ${user.token}` },
-          }),
-        ]);
-
-        if (!resInteressados.ok || !resPedidos.ok) {
-          console.error(
-            "Erro nas requisições:",
-            resInteressados.status,
-            resPedidos.status
-          );
-          return;
+        const response = await fetch(`${URL_Adocao}/pedidos?adotanteId=${user.id}`);
+        
+        if (!response.ok) {
+            throw new Error("Erro na resposta da API");
         }
 
-        const dadosInteressados = await resInteressados.json();
-        const dadosPedidos = await resPedidos.json();
-
-        const todosPedidos = [...dadosInteressados, ...dadosPedidos].sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-
-        setPedidos(todosPedidos);
+        const dados = await response.json();
+        setPedidos(dados);
       } catch (error) {
-        console.error("Erro ao buscar pedidos:", error);
+        console.log("erro ao buscar dados", error);
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    buscaPedidos();
-  }, [user]);
+    buscaDados();
+  }, [user]); 
+  
 
   if (isLoading || loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color={Colors.CorFundo} />
+        <ActivityIndicator size="large" color={Colors.Butao} />
         <Text style={{ marginTop: 10 }}>Carregando pedidos...</Text>
       </View>
     );
   }
 
+
   if (!isAuthenticated) return null;
 
-  return (
-    <View style={{ height }}>
+ return (
+    <View style={{ height, backgroundColor: "#f5f5f5" }}>
       <ScrollView contentContainerStyle={{ alignItems: "center", padding: 16 }}>
-        <Text style={{ fontSize: 25, fontWeight: "700" }}>Meus Pedidos</Text>
+        <Text style={{ fontSize: 25, fontWeight: "700", marginBottom: 20 }}>Meus Pedidos</Text>
 
         {pedidos.length > 0 ? (
-          pedidos.map((pedido) => (
-            <Link
-              key={pedido.id}
-              href={`/datails/${pedido.animal.id}${
-                pedido.animal.destaque ? "?destaque=true" : ""
-              }`}
-              asChild
-              style={{ width: "100%" }}
-            >
-              <View
-                style={{
-                  marginVertical: 8,
-                  padding: 12,
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  borderRadius: 8,
-                  backgroundColor: "#eee",
-                  width: "100%",
-                }}
-              >
-                <Text>Pedido nº: {pedido.id}</Text>
-                <Text>
-                  <Text style={{ fontWeight: "bold" }}>Animal:</Text>{" "}
-                  {pedido.animal?.nome}
-                </Text>
-                <Text>
-                  <Text style={{ fontWeight: "bold" }}>Formulário:</Text>{" "}
-                  {pedido.descricao}
-                </Text>
-                <Text>
-                  <Text style={{ fontWeight: "bold" }}>Status:</Text>{" "}
-                  {pedido.resposta || "Aguardando resposta"}
-                </Text>
-                <Text>
-                  <Text style={{ fontWeight: "bold" }}>Data:</Text>{" "}
-                  {new Date(pedido.createdAt).toLocaleDateString()}
-                </Text>
-                <Text>
-                  <Text style={{ fontWeight: "bold" }}>Responsável:</Text>{" "}
-                  {pedido.animal?.user?.nome ?? "Abrigo"}
-                </Text>
+          pedidos.map((pedido) => {
+            
+            // 2. LÓGICA PARA PEGAR A FOTO CORRETA
+            // Verifica se o array existe e tem itens, pega o primeiro item e acessa .codigoFoto
+            const fotoUrl = pedido.animal.fotos && pedido.animal.fotos.length > 0 
+              ? pedido.animal.fotos[0].codigoFoto 
+              : "https://placehold.co/400x400/png?text=Sem+Foto"; // Fallback se não tiver foto
+
+            return (
+              <View style={{ width: "100%" }}>
+
+              
+                <TouchableOpacity activeOpacity={0.9} >
+                  <View
+                    style={{
+                      marginVertical: 8,
+                      padding: 12,
+                      borderWidth: 1,
+                      borderColor: "#ddd",
+                      borderRadius: 8,
+                      backgroundColor: "#fff", 
+                      width: "100%",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 1.41,
+                      elevation: 2,
+                      flexDirection: "row", 
+                      gap: 15
+                    }}
+                  >
+                      <Link
+                        key={pedido.id}
+                        href={`/datails/${pedido.animal.id}`}
+                        asChild
+                        style={{ width: "100%" }}
+                      >
+                    
+                    <Image 
+                      source={{ uri: fotoUrl }}
+                      style={{
+                        width: 100, 
+                        height: 100, 
+                        borderRadius: 8,
+                        backgroundColor: "#eee"
+                      }} 
+                      resizeMode="cover"
+                    />
+                        </Link>
+
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                            <Text style={{fontSize: 12, color: Colors.LetraCinza}}>Pedido #{pedido.id}</Text>
+                            <Text style={{fontSize: 12, color: Colors.LetraCinza}}>{new Date(pedido.createdAt).toLocaleDateString()}</Text>
+                        </View>
+
+                        <Text style={{fontSize: 18, fontWeight: 'bold', color: Colors.Butao, marginVertical: 5}}>
+                            {pedido.animal?.nome}
+                        </Text>
+
+                        <Text numberOfLines={2} ellipsizeMode="tail" style={{marginBottom: 5, fontSize: 14, color: "#555"}}>
+                            <Text style={{ fontWeight: "bold" }}>Msg:</Text> {pedido.descricao}
+                        </Text>
+                        
+                        <View style={{
+                            marginTop: 5, 
+                            paddingVertical: 4,
+                            paddingHorizontal: 8, 
+                            alignSelf: 'flex-start',
+                            backgroundColor: pedido.resposta ? (pedido.resposta.toLowerCase().includes("aprovado") || pedido.resposta.toLowerCase().includes("aceito") ? "#d4edda" : "#fff3cd") : "#e2e3e5",
+                            borderRadius: 4
+                        }}>
+                            <Text style={{ fontWeight: "bold", color: "#333", fontSize: 12 }}>
+                                {pedido.resposta || "Aguardando análise"}
+                            </Text>
+                        </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
-            </Link>
-          ))
+            );
+          })
         ) : (
-          <Text
-            style={{
-              marginTop: 20,
-              fontWeight: "500",
-              color: Colors.LetraCinza,
-            }}
-          >
-            Você não tem pedidos registrados.
-          </Text>
+          <View style={{alignItems: 'center', marginTop: 50}}>
+              <Text style={{ marginTop: 20, fontWeight: "500", color: Colors.LetraCinza, fontSize: 16 }}>
+                Você ainda não fez nenhum pedido de adoção.
+              </Text>
+          </View>
         )}
       </ScrollView>
     </View>

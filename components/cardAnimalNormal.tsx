@@ -5,10 +5,11 @@ import { AnimalI } from "../utils/types/animias";
 import { FontAwesome,MaterialIcons } from "@expo/vector-icons";
 
 export default function CardII({ data }: { data: AnimalI }) {
+
   return (
     <View style={styles.conteiner} key={data.id}>
       <Image
-        source={{ uri: data.foto }}
+        source={{ uri: data.fotos[0].codigoFoto }}
         style={{ width: 400, height: 400, borderTopLeftRadius: 5, borderTopRightRadius: 5 }}
       />
 

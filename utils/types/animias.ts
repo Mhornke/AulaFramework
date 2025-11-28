@@ -5,7 +5,7 @@ id: number
 nome: string
 idade: number
 sexo: string
-status: boolean
+disponivel: boolean
 destaque?: boolean
 foto: string     
 descricao?: string

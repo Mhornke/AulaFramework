@@ -1,12 +1,18 @@
-import { Dimensions, Image, StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { Dimensions, Image, StyleSheet, View, Text, TouchableOpacity, Linking } from "react-native";
 import { Link, router } from "expo-router";
 import Color from "../theme/color";
-import { AnimalI } from "../utils/types/animias";
+import { AnimalPerdidoI } from "@/utils/types/animiasPerdidos";
 import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
+import Colors from "../theme/color";
 
 const { width } = Dimensions.get("window")
-
-export default function Card({ data }: { data: AnimalI }) {
+const CONFIG_ETIQUETA = {
+  'PERDI': { texto: 'PROCURA-SE', cor: "#f00606ff" },
+  'ENCONTREI': { texto: 'ENCONTRADO', cor: "#f8e804ff" }
+}
+export default function Card({ data }: { data: AnimalPerdidoI }) {
+  const config = CONFIG_ETIQUETA[data.tipoAnuncio] || { texto: '', cor: "transparent" }
+ 
   return (
     <View style={{ width: "100%", alignItems: "center" }} >
       {/* criar caminho para animais perdidos */}
@@ -14,56 +20,93 @@ export default function Card({ data }: { data: AnimalI }) {
         onPress={() => {
           router.push("/perdidos")
         }}
-        style={{width:"100%"}}>
+        style={{ width: "100%" }}>
+
         <Text style={{ color: "red", margin: 20, textAlign: "center", fontWeight: "700" }}>Animais Perdidos</Text>
         <View style={styles.container}>
-          <Image
-            source={{ uri: data.foto }}
-            style={{ width: "100%", maxWidth: 1200, height: 400 }}
-            resizeMode="cover"
-          />
 
-          <View style={width > 600 ? styles.containerTextLarge : styles.containerText}>
-            <Text style={styles.TextName}>{data.nome}</Text>
-            <View style={width > 600 && styles.containerTextInfoLarge}>
-              <Text style={styles.Text}>
-                <FontAwesome name="paw" size={16} /> Espécie: {data.especie.nome}
-              </Text>
-              <Text style={styles.Text}>
-                <FontAwesome name="birthday-cake" size={16} /> Idade: {data.idade} ano(s)
-              </Text>
-              <Text style={styles.Text}>
-                <FontAwesome name="venus-mars" size={16} /> Sexo: {data.sexo}
-              </Text>
-              <Text style={styles.Text}>
-                <MaterialIcons
-                  name={data.castrado ? "check-circle" : "cancel"}
-                  size={16}
-                  color={data.castrado ? "green" : "red"}
-                />{" "}
-                {data.castrado ? "Castrado" : "Não castrado"}
-              </Text>
-              <Text style={styles.Text}>
-                <Entypo name="resize-full-screen" size={16} /> Porte: {data.porte}
-              </Text>
-              <Text style={[styles.Text, { width: "100%", flexShrink: 1 }]} numberOfLines={1} ellipsizeMode="tail">
-                <FontAwesome name="file-text" size={16} /> Descrição:
-                {data.descricao}
-              </Text></View>
-          </View>
+          {data?.fotos?.length > 0 ? (
+            <Image
+              source={{ uri: data.fotos[0].codigoFoto }}
+              style={{ width: "100%", height: 400 }}
+            />
+          ) : (
+            <View style={{ width: "100%", height: 400, backgroundColor: "#ccc", justifyContent: "center", alignItems: "center" }}>
+              <Text style={{ color: "#555" }}>Sem foto disponível</Text>
+            </View>
+          )}
 
-          <View style={styles.butao}>
-            <Link href={`/datails/${data.id}?destaque=${data.destaque}`} asChild>
-              <TouchableOpacity>
-                <Text style={styles.botaoTexto}>
-                  <FontAwesome name="plus-circle" size={16} /> Saber mais
+
+          <Text style={styles.TextName}>{data.nome}</Text>
+          <View style={styles.containerTextInfoLarge}>
+
+            <View style={[styles.tegs, { flexDirection: "row", paddingHorizontal: 5, gap: 2 }]}>
+              <FontAwesome name="paw" size={16} />
+              <Text style={styles.Text}>
+                {data.especie?.nome}
+              </Text>
+            </View>
+
+            <View style={[styles.tegs, { flexDirection: "row" }]}>
+              <FontAwesome name="map-marker" size={20} color={"red"} />
+              <TouchableOpacity
+                onPress={() =>
+
+                  Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.localizacao)}`)
+                }
+              >
+
+                <Text style={styles.Text}>
+                  Ultimo lugar visto
                 </Text>
               </TouchableOpacity>
-            </Link>
+            </View>
+            <View style={[styles.tegs, { flexDirection: "row", paddingHorizontal: 6, gap: 5 }]}>
+
+              <FontAwesome name="exclamation-triangle" size={16} color={config.cor} />
+              <Text style={styles.Text}>
+                {config.texto}
+              </Text>
+            </View>
+
+          </View>
+
+
+          <View style={styles.containerbutao}>
+
+            <TouchableOpacity
+              onPress={() => {
+                router.push(`/datails/perdidos/${data.id}`)
+              }}>
+              <View style={[styles.botao,{backgroundColor:'white'}]}>
+                <FontAwesome name="info-circle" size={16} color={Colors.Preto} />
+                <Text style={[styles.botaoTexto,{ color:Colors.Preto}]}>
+                  Informações                  
+                  </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                router.push("/perdidos")
+                
+              }}>
+              
+
+              <View style={styles.botao}>
+                <FontAwesome name="plus-circle" size={16}  color={"white"}/>
+                 <Text style={styles.botaoTexto}>
+                 Outros animais
+                  </Text>
+              </View>
+              
+
+            </TouchableOpacity>
+
           </View>
         </View>
-      </TouchableOpacity>
-    </View>
+      </TouchableOpacity >
+    </View >
   );
 }
 
@@ -77,16 +120,15 @@ const styles = StyleSheet.create({
     overflow: "hidden",
 
   },
-  butao: {
+  containerbutao: {
     margin: 10,
-    alignItems: "center",
+   
+    flexDirection:"row",
+     justifyContent:"center",
+     gap:100
   },
-  botaoTexto: {
-    backgroundColor: Color.Butao,
-    color: "#ffffff",
-    padding: 10,
-    borderRadius: 3,
-    width: 200,
+  botaoTexto: {    
+    color: "#ffffff",    
     textAlign: "center",
     fontWeight: "600",
   },
@@ -107,10 +149,9 @@ const styles = StyleSheet.create({
   },
   Text: {
     marginLeft: 5,
-    color: Color.LetraCinza,
-    marginBottom: 5,
-    fontSize: 14,
-    maxWidth: 300
+    color: Colors.Preto,
+    fontWeight: "500"
+
   },
   TextName: {
     marginLeft: 20,
@@ -119,4 +160,31 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     marginBottom: 8,
   },
+  tegs: {
+    backgroundColor: "white",
+    borderRadius: 5,
+    padding: 3,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#fdfdfdff",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    borderWidth: 1,
+    borderColor: "#ccc",
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  botao:{
+backgroundColor: Colors.Butao,
+padding:10,
+paddingHorizontal:15,
+borderRadius:5,
+flexDirection:"row",
+gap:5,
+justifyContent:"center",
+alignItems:"center"
+  }
 });

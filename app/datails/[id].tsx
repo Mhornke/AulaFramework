@@ -16,25 +16,26 @@ import { AnimalI } from "../../utils/types/animias";
 import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 import CarrosselFotos from "../../components/carrosselFotos";
 import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+
 import { showAlert } from "@/components/swalAlert";
+import Colors from "../../theme/color";
 
 export default function Detalhes() {
   const [data, setData] = useState<AnimalI>();
   const { id, destaque } = useLocalSearchParams();
   const [texto, setTexto] = useState("");
   const [pedidoEnviado, setPedidoEnviado] = useState(false);
+  const sex = data?.sexo == "MACHO"
 
   const { width } = Dimensions.get("window");
   const { user } = useAuth();
+  console.log(`estatus pedido ${pedidoEnviado}`);
 
   useEffect(() => {
     async function buscaDados() {
       try {
-        const URL = destaque
-          ? `${URL_GestaoPet}/animais/${id}/destaque`
-          : `${URL_Adocao}/animais/${id}`;
-        const response = await fetch(URL);
+
+        const response = await fetch(`${URL_Adocao}/animais/${id}`);
         const dados = await response.json();
         setData(dados);
       } catch (error) {
@@ -42,41 +43,40 @@ export default function Detalhes() {
       }
     }
 
-    async function buscarPedidos() {
-      const URL = destaque
-        ? `${URL_GestaoPet}/interessados/pedidos?userId=${user?.id}`
-        : `${URL_Adocao}/pedidos?userId=${user?.id}`;
+    async function verificarStatusPedido() {
+      if (!user) return; // Se não tiver usuário logado, não verifica
 
+      try {
+        // Chama a rota que criamos
+        const response = await fetch(`${URL_Adocao}/pedidos/verificar?adotanteId=${user.id}&animalId=${id}`);
+        const data = await response.json();
 
+        // Atualiza o estado com a resposta do banco (True ou False)
+        setPedidoEnviado(data.jaEnviado);
+      } catch (error) {
+        console.error("Erro ao verificar pedido", error);
+      } finally {
 
-      const response = await fetch(URL);
-      const pedidos = await response.json();
-      if (user) {
-        const jaEnviado = pedidos.some(
-          (pedido: any) =>
-            pedido.animalId === Number(id) && pedido.userId === user?.id
-        );
-        setPedidoEnviado(jaEnviado);
       }
     }
 
-    buscarPedidos();
+
+
+    verificarStatusPedido();
     buscaDados();
-  }, [id, user, destaque]);
+  }, [id, user, id]);
 
   async function enviaForm() {
     try {
       const novoPedido = {
-        userId: user?.id,
+        adotanteId: user?.id,
         animalId: Number(id),
         descricao: texto,
       };
-      const URL = destaque
-        ? `${URL_GestaoPet}/interessados`
-        : `${URL_Adocao}/pedidos`;
 
+      console.log(novoPedido);
 
-      const response = await fetch(URL, {
+      const response = await fetch(`${URL_Adocao}/pedidos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,58 +111,154 @@ export default function Detalhes() {
 
         <ScrollView contentContainerStyle={styles.container} >
 
-          <View style={{ justifyContent: "center", flexDirection: "column", borderRadius: 5, padding: 20, gap: 10, backgroundColor: Color.CorFundo, width: "100%" }}>
+          <View style={{
+            justifyContent: "center",
+            flexDirection: "column",
+            borderRadius: 5,
+            padding: 20,
+            gap: 25,
+            backgroundColor: "#ffff",
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "#cccc",
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+
+            elevation: 5,
+          }}>
 
             <View style={{ width: "100%" }}>
               <CarrosselFotos data={fotosParaCarrossel} />
 
             </View>
 
-            <Text style={{ color: "#fff", textAlign: "left", fontWeight: "700", fontSize: 20, }}>
+            <Text style={{ color: Colors.Butao, textAlign: "left", fontWeight: "700", fontSize: 20, }}>
               {data.nome}</Text>
             <View style={{ marginLeft: 20 }}>
 
-              <Text style={styles.Text}>
-                <FontAwesome name="paw" size={18} color="white" /> Espécie:
-                <Text style={styles.TextoInfoDesktop}>{data.especie.nome}</Text>
-              </Text>
-              <Text style={styles.Text}>
-                <FontAwesome name="birthday-cake" size={18} color={Color.LetraCinza} /> Idade:
-                <Text style={styles.TextoInfoDesktop}> {data.idade} ano(s) </Text>
-              </Text>
-              <Text style={styles.Text}>
-                <FontAwesome name="venus-mars" size={18} color={Color.LetraCinza} /> Sexo:
-                <Text style={styles.TextoInfoDesktop}>
+              <View style={{ gap: 10 }}>
+                <Text style={styles.TextoInfoDesktop}>Descrição:</Text>
 
-                  {data.sexo}
-                </Text>
-              </Text>
-              <Text style={styles.Text}>
-                <Entypo name="resize-full-screen" size={18} color={Color.LetraCinza} /> Porte:
-                <Text style={styles.TextoInfoDesktop}>
-                  {data.porte}
-                </Text>
-              </Text>
-              <Text style={styles.Text}>
-                <MaterialIcons
-                  name={data.castrado ? "check-circle" : "cancel"}
-                  size={16}
-                  color={data.castrado ? "green" : "red"}
-                />{" "}
-                <Text style={styles.TextoInfoDesktop}>
-                  {data.castrado ? "Castrado" : "Não castrado"}
-                </Text>
-              </Text>
-              <Text style={styles.Text}>
-                <FontAwesome name="file-text" size={18} color={Color.LetraCinza} /> Descrição:
-                <Text style={styles.TextoInfoDesktop}>
-                  {data.descricao}
-                </Text>
-              </Text>
+                <View style={{
+                  flexDirection: "row",
+                  gap: 2,
+                  backgroundColor: "#f8f8f8d8",
+                  borderRadius: 10,
+                  padding: 5,
+                  minHeight: 100,
+
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+
+                  elevation: 5,
+                }}>
+
+
+
+                  <Text style={styles.TextoInfoDesktop}>
+                    {data.descricao}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ gap: 15, flexDirection: "row", marginTop: 20, marginBottom: 20, width: "100%", flexWrap: "wrap", alignItems: "center", justifyContent: "space-around", }}>
+
+                <View style={[styles.containerTagsInfo, {
+                  justifyContent: "center",
+                  shadowColor: '#6d6601ff',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.50,
+                  shadowRadius: 3.84,
+
+                  elevation: 5,
+                }]}>
+                  <FontAwesome name="paw" size={18} color='#6d6601ff' />
+
+                  <Text style={styles.TextoInfoDesktop}>{data.especie.nome}</Text>
+                </View>
+
+
+                <View style={[styles.containerTagsInfo, {
+                  justifyContent: "center",
+                  shadowColor: 'pink',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.50,
+                  shadowRadius: 3.84,
+
+                  elevation: 5,
+                }]}>
+                  <FontAwesome name="birthday-cake" size={18} color='pink' />
+                  <Text style={styles.TextoInfoDesktop}> {data.idade} ano(s) </Text>
+                </View>
+
+                <View style={[styles.containerTagsInfo, {
+                  justifyContent: "center",
+                  shadowColor: sex ? '#c523daff' : '#23a6daff',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.50,
+                  shadowRadius: 3.84,
+
+                  elevation: 5,
+                }]}>
+                  <FontAwesome name="venus-mars" size={18} color={sex ? "#c523daff" : "#23a6daff"} />
+                  <Text style={styles.TextoInfoDesktop}>
+
+                    {data.sexo}
+                  </Text>
+                </View>
+
+                <View style={[styles.containerTagsInfo, {
+                  justifyContent: "center",
+                  shadowColor: '#da7c23ff',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.50,
+                  shadowRadius: 3.84,
+
+                  elevation: 5,
+                }]}>
+
+                  <Text style={styles.Text}>
+                    <Entypo name="resize-full-screen" size={18} color={Color.Preto} />
+                    <Text style={styles.TextoInfoDesktop}>
+                      {data.porte}
+                    </Text>
+                  </Text>
+                </View>
+
+                <View style={[styles.containerTagsInfo, {
+                  justifyContent: "center",
+                  shadowColor: data.castrado ? "#15fc00ff" : "#f50202ff",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.50,
+                  shadowRadius: 3.84,
+
+                  elevation: 5,
+                }]}>
+
+
+                  <MaterialIcons
+                    name={data.castrado ? "check-circle" : "cancel"}
+                    size={16}
+                    color={data.castrado ? "green" : "red"}
+                  />{" "}
+                  <Text style={[styles.TextoInfoDesktop]}>
+                    {data.castrado ? "Castrado" : "Não castrado"}
+                  </Text>
+
+                </View>
+
+
+              </View>
+
             </View>
 
             {user ? (
               <View style={[styles.containerTextArea]}>
+
                 {pedidoEnviado ? (
                   <Text style={styles.sucessoMensagem}>
                     Pedido de adoção enviado com sucesso! Em breve entraremos em contato.
@@ -222,62 +318,145 @@ export default function Detalhes() {
             }}
           >
 
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 2 }}>
               <CarrosselFotos data={fotosParaCarrossel} />
 
             </View>
 
 
-            <View style={{ flex: 1.3 }}>
+            <View style={{ flex: 1.3, height: '100%' }}>
 
-              <Text style={{
-                marginBottom: 20,
-                color: "#ffff",
-                fontWeight: "700",
-                fontSize: 20
-              }}>{data.nome}</Text>
-
-              <View style={{ flexDirection: "row", gap: 20, flexWrap: "wrap", marginLeft: 10 }}>
-
-                <Text style={styles.TextoTituloInfoDesktop}>
-                  <FontAwesome name="paw" size={18} color="white" /> Espécie:
-                  <Text style={styles.TextoInfoDesktop}>{data.especie.nome}</Text>
-                </Text>
-                <Text style={styles.TextoTituloInfoDesktop}>
-                  <FontAwesome name="birthday-cake" size={18} color="pink" /> Idade:
-                  <Text style={styles.TextoInfoDesktop}> {data.idade} ano(s) </Text>
-                </Text>
-                <Text style={styles.TextoTituloInfoDesktop}>
-                  <FontAwesome name="venus-mars" size={18} /> Sexo:
-                  <Text style={styles.TextoInfoDesktop}>
-
-                    {data.sexo}
-                  </Text>
-                </Text>
-                <Text style={styles.TextoTituloInfoDesktop}>
-                  <Entypo name="resize-full-screen" size={18} /> Porte:
-                  <Text style={styles.TextoInfoDesktop}>
-                    {data.porte}
-                  </Text>
-                </Text>
-                <Text style={styles.TextoTituloInfoDesktop}>
-                  <MaterialIcons
-                    name={data.castrado ? "check-circle" : "cancel"}
-                    size={16}
-                    color={data.castrado ? "green" : "red"}
-                  />{" "}
-                  <Text style={styles.TextoInfoDesktop}>
-                    {data.castrado ? "Castrado" : "Não castrado"}
-                  </Text>
-                </Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{
+                  color: "#fffff6",
+                  fontWeight: "700",
+                  fontSize: 20
+                }}>{data.nome}</Text>
               </View>
-              <View style={{ marginTop: 20, marginLeft: 10 }}>
-                <Text style={styles.TextoTituloInfoDesktop}>
-                  <FontAwesome name="file-text" size={18} /> Descrição:
-                  <Text style={styles.TextoInfoDesktop}>
-                    {data.descricao}
-                  </Text>
-                </Text>
+
+              <View style={{ flex: 10, flexDirection: "column", gap: 20, marginLeft: 10, height: "100%", justifyContent: "space-around" }}>
+
+                <View style={{
+                  marginLeft: 10,
+                  flexDirection: "column",
+                  gap: 20, backgroundColor: "#fffffff6",
+                  borderRadius: 5,
+                  padding: 10,
+                  minHeight: 200,
+                  flex: 1
+                }}>
+
+                  <View style={{ flexDirection: "row" }}>
+                    <FontAwesome name="file-text" size={18} color={Colors.Preto} />
+                    <Text style={[styles.TextoInfoDesktop, { color: Colors.Preto }]}>
+                      Descrição:
+                    </Text>
+                  </View>
+
+                  <View>
+                    <Text style={styles.TextoInfoDesktop}>
+                      {data.descricao}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={{ flexDirection: "row", flex: 0.2, flexWrap: "wrap", gap: 10, justifyContent: "center", alignContent:"center" }}>
+
+                  <View style={[styles.containerTagsInfo, {
+                    justifyContent: "center",
+                    shadowColor: '#da7c23ff',
+                    backgroundColor: "#fffff6",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.50,
+                    shadowRadius: 3.84,
+                    height: "30%",
+                    width: "30%",
+                    elevation: 5,
+                  }]}>
+
+
+                    <FontAwesome name="paw" size={18} color="#da7c23ff" />
+                    <Text style={styles.TextoInfoDesktop}>{data.especie.nome}</Text>
+
+
+                  </View>
+                  <View style={[styles.containerTagsInfo, {
+                    justifyContent: "center",
+                    shadowColor: 'pink',
+                    backgroundColor: "#fffff6",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.50,
+                    shadowRadius: 3.84,
+                    height: "30%",
+                    width: "30%",
+                    elevation: 5,
+                  }]}>
+
+                    <Text style={styles.TextoTituloInfoDesktop}>
+                      <FontAwesome name="birthday-cake" size={18} color="pink" />
+                      <Text style={styles.TextoInfoDesktop}> {data.idade} ano(s) </Text>
+                    </Text>
+                  </View>
+
+                  <View style={[styles.containerTagsInfo, {
+                    justifyContent: "center",
+                    shadowColor: sex ? "#c523daff" : "#23a6daff",
+                    backgroundColor: "#fffff6",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.50,
+                    shadowRadius: 3.84,
+                    height: "30%",
+                    width: "30%",
+                    elevation: 5,
+                  }]}>
+                    <FontAwesome name="venus-mars" size={18} color={sex ? "#c523daff" : "#23a6daff"} />
+                    <Text style={styles.TextoInfoDesktop}>
+                      {data.sexo}
+                    </Text>
+                  </View>
+
+                  <View style={[styles.containerTagsInfo, {
+                    justifyContent: "center",
+                    shadowColor: "#7fa80cff",
+                    backgroundColor: "#fffff6",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.50,
+                    shadowRadius: 3.84,
+                    height: "30%",
+                    width: "30%",
+                    elevation: 5,
+                  }]}>
+
+                    <Entypo name="resize-full-screen" size={18} />
+                    <Text style={styles.TextoInfoDesktop}>
+                      {data.porte}
+                    </Text>
+                  </View>
+
+                  <View style={[styles.containerTagsInfo, {
+                    justifyContent: "center",
+                    shadowColor: data.castrado ? "#15fc00ff" : "#f50202ff",
+                    backgroundColor: "#fffff6",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.50,
+                    shadowRadius: 3.84,
+                    height: "30%",
+                    width: "35%",
+                    elevation: 5,
+                  }]}>
+                    <Text style={styles.TextoTituloInfoDesktop}>
+                      <MaterialIcons
+                        name={data.castrado ? "check-circle" : "cancel"}
+                        size={16}
+                        color={data.castrado ? "green" : "red"}
+                      />{" "}
+                      <Text style={styles.TextoInfoDesktop}>
+                        {data.castrado ? "Castrado" : "Não castrado"}
+                      </Text>
+                    </Text>
+                  </View>
+
+                </View>
               </View>
             </View>
           </View>
@@ -288,7 +467,7 @@ export default function Detalhes() {
               [styles.containerTextAreaLarg,
               {
                 width: "100%",
-                maxWidth:1200
+                maxWidth: 1200
               }
               ]
 
@@ -427,13 +606,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   TextoInfoDesktop: {
-    color: Color.LetraCinza,
-    fontWeight: "200",
+    color: Colors.Preto,
+    fontWeight: "500",
     marginLeft: 5
   },
   containerTextArea: {
     borderRadius: 5,
-    backgroundColor: "white",
+    backgroundColor: "#0f8604ff",
     padding: 20,
     width: "100%",
   },
@@ -481,7 +660,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   sucessoMensagem: {
-    color: "green",
+    color: Colors.BrancoMaisNemTanto,
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
@@ -495,4 +674,14 @@ const styles = StyleSheet.create({
 
     fontWeight: "600",
   },
+  containerTagsInfo: {
+    flexDirection: "row",
+
+    borderRadius: 10,
+    padding: 5,
+    width: "30%",
+    height: "45%",
+    alignItems: "center",
+
+  }
 });

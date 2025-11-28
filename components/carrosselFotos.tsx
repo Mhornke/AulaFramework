@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "center",
     backgroundColor: "#fff",
-    borderRadius: 10,
+    
   },
   imagem: {
     width: "100%",

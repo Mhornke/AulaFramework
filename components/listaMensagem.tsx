@@ -11,7 +11,7 @@ import {
   StyleSheet
 
 } from "react-native";
-import { ChatMensagem } from "@/utils/types/mensagem";
+import { ChatMensagem } from "@/utils/types/chatMensagens";
 import Chat from "./chat";
 import { FontAwesome } from "@expo/vector-icons";
 import Colors from "@/theme/color";

@@ -2,6 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as keychain from 'react-native-keychain';
 import { Platform } from 'react-native';
+import { URL_Adocao } from '@/utils/url';
+import { showAlert } from '@/components/swalAlert';
+import { router } from 'expo-router';
 
 interface User {
   id: string;
@@ -59,26 +62,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
+
         const userDataString = await AsyncStorage.getItem('user');
+
         if (userDataString) {
           const userData: User = JSON.parse(userDataString);
-          setUser(userData);
+
+
+          try {
+            const response = await fetch(`${URL_Adocao}/adotantes/validar-token`, {
+              method: 'GET',
+              headers: { 'Authorization': `Bearer ${userData.token}` }
+            });
+
+            if (response.ok) {
+
+              setUser(userData);
+            } else {
+
+              const querLogar = await showAlert(
+                "Sua sessão expirou",
+                "Gostaria de fazer login novamente?",
+                'question'
+              );
+              if (querLogar) {
+                router.replace("/(auth)/login")
+              }
+               console.log("Token inválido ao iniciar. Limpando dados...");
+              await clearAllLoginData();
+              setUser(null);
+            }
+          } catch (apiError) {
+
+            console.log("Erro de rede ao validar token, mantendo sessão offline:", apiError);
+            setUser(userData);
+          }
         }
       } catch (error) {
-        console.log('Erro ao carregar dados:', error);
+        console.log('Erro ao carregar dados do storage:', error);
       } finally {
         setIsLoading(false);
       }
     };
+
     loadUser();
   }, []);
 
   const login = async (userData: User, persist: boolean = false) => {
     setUser(userData);
 
-   
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-   
+
+    await AsyncStorage.setItem('user', JSON.stringify(userData));
+
 
     if (Platform.OS !== 'web') {
       if (persist) {

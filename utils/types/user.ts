@@ -5,4 +5,5 @@ export interface User {
   foto:string;
   endereco: string;
   email: string;
+
 }

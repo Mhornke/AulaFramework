@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
 import { showAlert } from "@/components/swalAlert";
 import { useState } from "react";
+import Colors from "../../theme/color";
+import { FontAwesome } from "@expo/vector-icons";
 
 type Input = {
   nome: string,
@@ -20,8 +22,9 @@ type Input = {
 export default function Cadastrado() {
   const [digitosSenha, setDigitoSenha] = useState('')
   const [digTelefone, setdigTelefone] = useState('')
+  const [showPassword, setShowPassword] = useState(false);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<Input>({
+  const { control, handleSubmit, watch, formState: { errors } } = useForm<Input>({
     defaultValues: {
       email: "",
       senha: "",
@@ -33,7 +36,7 @@ export default function Cadastrado() {
   });
   const { login } = useAuth()
 
- 
+
 
 
 
@@ -64,9 +67,9 @@ export default function Cadastrado() {
         showAlert("Erro no cadastro", "O servidor não retornou um token de autenticação.", "error")
       }
       await login(
-        { id: dados.id, nome: dados.nome, token: tokenRecebido, email: data.email }, 
-       false,
-        
+        { id: dados.id, nome: dados.nome, token: tokenRecebido, email: data.email },
+        false,
+
       )
 
       showAlert("cadastro Realizado com sucesso",
@@ -92,14 +95,15 @@ export default function Cadastrado() {
 
   const largura = Dimensions.get('window').width
   const comprimento = Dimensions.get('window').height
-
+const isDesktop = largura > 600
   return (
     <View style={{ backgroundColor: Color.CorFundo, height: comprimento }} >
 
 
 
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <View style={styles.container}>
+       
+        <View style={[styles.container]}>
 
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <Text style={{ color: "#ffff", fontWeight: "bold", fontSize: 20 }}>Cadastro</Text>
@@ -110,106 +114,138 @@ export default function Cadastrado() {
               style={{ width: 70, height: 70 }}
             />
           </View>
+
           <View style={styles.containerInputs}>
-            <Text style={styles.texto}>Nome completo</Text>
-            <Controller
-              control={control}
-              name="nome"
+            <View>
+              <Text style={styles.texto}>Nome completo</Text>
+              <Controller
+                control={control}
+                name="nome"
 
-              rules={{ required: 'Nome obrigatorio' }}
-              render={({ field: { onChange, value } }) => (
+                rules={{ required: 'Nome obrigatorio' }}
+                render={({ field: { onChange, value } }) => (
 
 
-                <TextInput
-                  placeholder="Ensira o nome completo"
-                  value={value}
-                  onChangeText={onChange}
-                  style={styles.inputs}
+                  <TextInput
+                    placeholder="Ensira o nome completo"
+                    value={value}
+                    onChangeText={onChange}
+                    style={[styles.inputs, { color: value ? "#ffff" : Colors.LetraCinza }]}
 
+                  />
+                )}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.texto}>Telefone</Text>
+              <Controller
+                control={control}
+                name="fone"
+
+                rules={{ required: '' }}
+                render={({ field: { onChange, value } }) => (
+
+                  <TextInput
+                    placeholder="(xx) xxxx-xxxx"
+                    value={value}
+                    keyboardType="number-pad"
+                    inputMode="numeric"
+                    maxLength={11}
+                    onChangeText={(text) => {
+                      const somenteNumeros = text.replace(/[^0-9]/g, "");
+                      onChange(somenteNumeros)
+                      setdigTelefone(somenteNumeros)
+                    }}
+                    style={[styles.inputs, { color: value ? "#fff" : Colors.LetraCinza }]}
+
+                  />
+                )}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.texto}>Endereço</Text>
+              <Controller
+                control={control}
+                name="endereco"
+
+                rules={{ required: 'Rua, Avenida, Bairro...' }}
+                render={({ field: { onChange, value } }) => (
+
+
+                  <TextInput
+                    placeholder="Rua, Avenida, Bairro..."
+                    value={value}
+                    onChangeText={onChange}
+                    style={[styles.inputs, { color: value ? "#fff" : Colors.LetraCinza }]}
+
+                  />
+                )}
+              />
+            </View>
+
+            <View>
+              <Text style={styles.texto}>E-mail</Text>
+              <Controller
+                control={control}
+                name="email"
+
+                rules={{ required: 'Email obrigatorio ' }}
+                render={({ field: { onChange, value } }) => (
+
+
+                  <TextInput
+                    placeholder="insira um E-mail"
+                    value={value}
+                    onChangeText={onChange}
+                    style={[styles.inputs, { color: value ? "#fff" : Colors.LetraCinza }]}
+
+                  />
+                )}
+              />
+            </View>
+           
+
+              <View>
+                <Text style={styles.texto}>Senha</Text>
+
+                <View style={{justifyContent:'center'}}>                
+                <Controller
+                  control={control}
+                  name="senha"
+
+                  rules={{ required: '' }}
+                  render={({ field: { onChange, value } }) => (
+
+
+                    <TextInput
+                      placeholder="***************"
+                      value={value}
+                      onChangeText={(text) => {
+                        onChange(text);
+                        setDigitoSenha(text)
+                      }}
+                      secureTextEntry={!showPassword}
+                      style={[styles.inputs, { color: value ? "#ffff" : Colors.LetraCinza }]}
+
+                    />
+
+                  )}
+                  
                 />
-              )}
-            />
-            <Text style={styles.texto}>Telefone</Text>
-            <Controller
-              control={control}
-              name="fone"
-
-              rules={{ required: '' }}
-              render={({ field: { onChange, value } }) => (
-
-
-                <TextInput
-                  placeholder="(xx) xxxx-xxxx"
-                  value={value}
-                  onChangeText={(text) => {
-                    onChange(text)
-                    setdigTelefone(text)
-                  }}
-                  style={[styles.inputs,{color: numTelefone ? Color.LetraCinza: 'red'}]}
-
+              <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <FontAwesome
+                  name={showPassword ? 'eye' : 'eye-slash'}
+                  size={20}
+                  color={Color.LetraCinza}
                 />
-              )}
-            />
-            <Text style={styles.texto}>Endereço</Text>
-            <Controller
-              control={control}
-              name="endereco"
-
-              rules={{ required: 'Rua, Avenida, Bairro...' }}
-              render={({ field: { onChange, value } }) => (
-
-
-                <TextInput
-                  placeholder="Rua, Avenida, Bairro..."
-                  value={value}
-                  onChangeText={onChange}
-                  style={styles.inputs}
-
-                />
-              )}
-            />
-            <Text style={styles.texto}>E-mail</Text>
-            <Controller
-              control={control}
-              name="email"
-
-              rules={{ required: 'Email obrigatorio ' }}
-              render={({ field: { onChange, value } }) => (
-
-
-                <TextInput
-                  placeholder="insira um E-mail"
-                  value={value}
-                  onChangeText={onChange}
-                  style={styles.inputs}
-
-                />
-              )}
-            />
-            <Text style={styles.texto}>Senha</Text>
-
-
-            <Controller
-              control={control}
-              name="senha"
-
-              rules={{ required: '' }}
-              render={({ field: { onChange, value } }) => (
-
-
-                <TextInput
-                  placeholder="***************"
-                  value={value}
-                  onChangeText={(text) => {
-                    onChange(text);
-                    setDigitoSenha(text)
-                  }}
-                  style={styles.inputs}
-
-                />
-
-              )}
-            />
+              </TouchableOpacity>
+              </View>
+              </View>
 
             <View style={{ marginTop: 10, flexDirection: "column" }}>
               <Text style={[styles.textoSenha, { color: "white", fontWeight: "600" }]}>Campos nescessarios para criar senha:</Text>
@@ -218,9 +254,10 @@ export default function Cadastrado() {
               <Text style={[styles.textoSenha, { color: caracter ? 'green' : 'white' }]}>Minimo 1 caracter especial</Text>
               <Text style={[styles.textoSenha, { color: num ? 'green' : 'white' }]}>Minimo 1 numero</Text>
             </View>
+            </View>
 
 
-          </View>
+          
 
           <TouchableOpacity style={styles.botao} onPress={handleSubmit(onSubmit)}>
             <Text style={{ color: "#ffff", fontWeight: "400", fontSize: 16 }}>Entrar</Text>
@@ -246,8 +283,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Color.CardFundo,
     padding: 30,
-    width: 400,
-    height: 600
+    width:'90%',
+     maxWidth: 500,
   },
   texto: {
     color: "#ffff",
@@ -257,7 +294,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     justifyContent: "space-around",
-    padding: 10
+    padding: 20,
+    gap: 20
 
   },
   inputs: {
@@ -274,6 +312,13 @@ const styles = StyleSheet.create({
   },
   textoSenha: {
     fontWeight: "400"
-  }
+  },
+  toggleButton: {
+    position: 'absolute',
+    
+    right: 10,
+    padding: 5,
+    zIndex: 1,
+  },
 
 })

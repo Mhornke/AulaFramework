@@ -11,6 +11,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { dadosPost } from "@/dadosPost"
 import PostCard from "../../components/cardPost"
 import { PostComunidadeI } from '@/utils/types/PostComuniade';
+import { URL_Adocao } from '@/utils/url';
 // Dados de exemplo (virão da sua API no futuro)
 
 export default function ComunidadeScreen() {
@@ -28,20 +29,20 @@ export default function ComunidadeScreen() {
  
 
   useEffect(() => {
-    // async function carregarListaPost() {
-    //   try {
-    //     const response = await fetch("https://SEU_BACKEND.com/ListaPost");
-    //     const data = await response.json();
+    async function carregarListaPost() {
+      try {
+        const response = await fetch(`${URL_Adocao}/comunidade`);
+        const data = await response.json();
 
-    //     setListaPost(data); // ← apenas os ListaPost do backend
-    //   } catch (error) {
-    //     console.log("Erro ao carregar ListaPost:", error);
-    //     Alert.alert("Erro", "Não foi possível carregar as publicações.");
-    //   }
-    // }
+        setListaPost(data); // ← apenas os ListaPost do backend
+      } catch (error) {
+        console.log("Erro ao carregar ListaPost:", error);
+        Alert.alert("Erro", "Não foi possível carregar as publicações.");
+      }
+    }
 
-    // carregarListaPost();
-    setListaPost(dadosPost.postsComunidade)
+    carregarListaPost();
+   
   }, []);
 
   async function processarImagemSelecionada(asset: ImagePickerAsset) {

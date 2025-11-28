@@ -63,5 +63,7 @@ Join our community of developers creating universal apps.
 - npm install sweetalert2
 - npm install browser-image-compression
 - npm install react-native-keychain
+- npm install react-native-mask-text
+
 ## Links
 -- API Adote.com https://api-adocao-git-main-dieizons-projects.vercel.app/

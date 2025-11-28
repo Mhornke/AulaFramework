@@ -1,16 +1,29 @@
-import { EspecieI } from "./especies"
-import { Fotos } from "./fotos"
-export interface AnimalII {
+import { Fotos } from "./fotos";
+import { EspecieI } from "./especies";
+import { User } from "./user";
+
+export interface AnimalPerdidoI {
   id: number;
-  status: boolean;
-  status2: boolean;  
-  especie: EspecieI;
-  sexo: string;
-  porte: string;
+  nome?: string;
   descricao: string;
-  foto: string;      
-  fotos?: Fotos[];    
-  especieId?: number;  
-  createdAt?: string;  
-  updatedAt?: string;  
+  tipoAnuncio: "PERDI" | "ENCONTREI";
+  localizacao?: string;
+  contato?: string;
+  
+
+  encontrado: boolean; 
+  dataEncontrado?: Date | string | null;
+  
+  adotante: User | null;
+  adotanteId: string | null;
+  
+  especieId?: number;
+  especie?: EspecieI;
+  
+  createdAt: string;
+  updatedAt: string;
+   
+  fotos: Fotos[]; 
+  chats?: any[]; 
+ 
 }

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, } from "react";
 import { showAlert } from "@/components/swalAlert";
 import { Link, router } from "expo-router";
-import { Dimensions, Platform, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Dimensions, ScrollView, Image, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { URL_Adocao } from "@/utils/url";
 import { Controller, useForm } from 'react-hook-form';
@@ -16,7 +16,8 @@ type Input = {
 export default function Login() {
   // Estado para controlar a visibilidade da senha
   const [showPassword, setShowPassword] = useState(false);
-
+ 
+  
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<Input>({
     defaultValues: {
       email: "",
@@ -25,8 +26,9 @@ export default function Login() {
     }
   });
   // Desestruturação do useAuth para acesso às funções
-  const { login, loadSavedCredentials } = useAuth()
-
+  const { login, loadSavedCredentials, user } = useAuth()
+ console.log("Token atual:", user?.token);
+  
   useEffect(() => {
     const loadDadosLogin = async () => {
       // Usa a função do contexto para carregar o email e o estado de persistência.
@@ -79,8 +81,18 @@ export default function Login() {
   const comprimento = Dimensions.get('window').height
 
   return (
-    <View style={{ backgroundColor: Color.CorFundo, height: comprimento }} >
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+    <ScrollView
+     contentContainerStyle={{ flexGrow: 1 }}
+    >  
+
+      <View style={{ 
+        flex:1,
+         alignItems: "center", 
+         justifyContent: "center",          
+          backgroundColor:Color.CorFundo,
+        
+          }}>
+
         <Image
           source={{
             uri: "https://raw.githubusercontent.com/DieizonOliveira/frontAdocao/refs/heads/main/public/logo2.png",
@@ -182,12 +194,9 @@ export default function Login() {
 
 
       </View>
+   
+        </ScrollView>
 
-
-
-
-
-    </View>
   );
 }
 
@@ -195,8 +204,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Color.CardFundo,
-    padding: 50,
-    height: "60%",
+    padding: 50,    
     gap: 20
   },
   texto: {
