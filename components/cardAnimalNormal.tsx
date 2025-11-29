@@ -29,7 +29,7 @@ export default function CardII({ data }: { data: AnimalI }) {
           {data.castrado ? "Castrado" : "Não castrado"}
         </Text>
         <Text style={[styles.Text, {width:"100%", flexShrink:1}]} numberOfLines={2} ellipsizeMode="tail" >
-          <FontAwesome name="file-text" size={16} /> Descrição: 
+          <FontAwesome name="file-text" size={16} /> Descrição:
           <Text style={{fontWeight:"400"}}>{data.descricao}</Text></Text>
       </View>
 
@@ -48,10 +48,12 @@ export default function CardII({ data }: { data: AnimalI }) {
 
 const styles = StyleSheet.create({
   conteiner: {
+    top:20,
     backgroundColor: Color.CorFundo,
     marginVertical: 15,
     borderRadius: 5,
     overflow: "hidden",
+    maxWidth:400
   },
   butao: {
     margin: 10,

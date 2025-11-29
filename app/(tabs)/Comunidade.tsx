@@ -1,79 +1,87 @@
-// screens/ComunidadeScreen.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Image, Alert, Platform, useWindowDimensions, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { 
+  View, 
+  StyleSheet, 
+  Image, 
+  Platform, 
+  useWindowDimensions, 
+  TouchableOpacity, 
+  TextInput, 
+  ScrollView, 
+  Text,
+  ActivityIndicator
+} from 'react-native';
 
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { SeletorDeImagem, SeletorDeImagemRef } from '@/components/seletorDeImagens';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { showAlert } from '@/components/swalAlert';
 import imageCompression from 'browser-image-compression';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { dadosPost } from "@/dadosPost"
-import PostCard from "../../components/cardPost"
+import * as FileSystem from 'expo-file-system';
+import PostCard from "../../components/cardPost";
 import { PostComunidadeI } from '@/utils/types/PostComuniade';
 import { URL_Adocao } from '@/utils/url';
-// Dados de exemplo (virão da sua API no futuro)
+import { uploadParaCloudinary } from '@/utils/uploadParaCloundinary';
+import { useAuth } from '@/context/AuthContext';
+import Colors from '@/theme/color';
+import Swal from "sweetalert2";
 
 export default function ComunidadeScreen() {
-
+  // Estados para Imagens
   const [outrasFotosPreview, setOutrasFotosPreview] = useState<string[]>([]);
   const [outrasFotosFiles, setOutrasFotosFiles] = useState<{ uri: string; name: string; type: string }[]>([]);
+  
+  // Estados para o Post
+  const [textoPost, setTextoPost] = useState("");
+  const [listaPost, setListaPost] = useState<PostComunidadeI[]>([]);
+  const [enviando, setEnviando] = useState(false);
+
   const seletorRef = useRef<SeletorDeImagemRef>(null);
-  const [ListaPost, setListaPost] = useState<PostComunidadeI[]>([]);
-
-
+  const { user } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
 
   const { width } = useWindowDimensions();
   const isMobile = width < 800;
- 
 
+  // --- Carregar Posts ---
   useEffect(() => {
-    async function carregarListaPost() {
-      try {
-        const response = await fetch(`${URL_Adocao}/comunidade`);
-        const data = await response.json();
-
-        setListaPost(data); // ← apenas os ListaPost do backend
-      } catch (error) {
-        console.log("Erro ao carregar ListaPost:", error);
-        Alert.alert("Erro", "Não foi possível carregar as publicações.");
-      }
-    }
-
     carregarListaPost();
-   
   }, []);
 
+  async function carregarListaPost() {
+    try {
+      // Ajuste a rota conforme seu backend real
+      const response = await fetch(`${URL_Adocao}/posts-comunidade`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setListaPost(data);
+      }
+    } catch (error) {
+      console.log("Erro ao carregar ListaPost:", error);
+    }
+  }
+
+  // --- Processamento de Imagem ---
   async function processarImagemSelecionada(asset: ImagePickerAsset) {
-    // Para o preview imediato, usamos a URI que recebemos
     const originalUri = asset.uri;
     let processedFile: { uri: string; name: string; type: string; };
 
     const MAX_SIZE_MB = 10;
-    const options = {
-      maxSizeMB: MAX_SIZE_MB,
-      useWebWorker: true,
-    };
-
+    const options = { maxSizeMB: MAX_SIZE_MB, useWebWorker: true };
 
     if (Platform.OS === 'web') {
-      // LÓGICA PARA WEB
-      console.log("Processando imagem na Web...");
       try {
-        // A biblioteca browser-image-compression precisa de um objeto File.
-        // Convertemos a URI Base64 para um File.
         const res = await fetch(originalUri);
         const blob = await res.blob();
         const webFile = new File([blob], asset.fileName || 'image.jpg', { type: blob.type });
 
         if (webFile.size > options.maxSizeMB * 1024 * 1024) {
-          Alert.alert("Imagem grande", "A imagem será otimizada para o envio.");
+          console.log("Comprimindo imagem web...");
         }
 
         const compressedFile = await imageCompression(webFile, options);
-
-        // Convertemos o arquivo comprimido de volta para uma URI Base64 para o upload
         const compressedBase64 = await imageCompression.getDataUrlFromFile(compressedFile);
 
         processedFile = {
@@ -81,27 +89,22 @@ export default function ComunidadeScreen() {
           name: compressedFile.name,
           type: compressedFile.type,
         };
-
       } catch (error) {
-        console.error("Erro ao comprimir na web:", error);
-        showAlert("Erro", "Não foi possível processar a imagem.", "error");
+        console.error("Erro web:", error);
         return null;
       }
     } else {
-      // LÓGICA PARA MOBILE
-      console.log("Processando imagem no Mobile...");
       try {
         const fileInfo = await FileSystem.getInfoAsync(originalUri);
         let finalAsset = asset;
 
         if (fileInfo.exists && fileInfo.size > options.maxSizeMB * 1024 * 1024) {
-          Alert.alert("Imagem grande", "A imagem será otimizada para o envio.");
           const manipulatedImage = await ImageManipulator.manipulateAsync(
             originalUri,
-            [], // Sem redimensionamento explícito, deixamos a compressão atuar
+            [],
             { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
           );
-          finalAsset = manipulatedImage;
+          finalAsset = manipulatedImage as any;
         }
 
         processedFile = {
@@ -110,144 +113,313 @@ export default function ComunidadeScreen() {
           type: 'image/jpeg',
         };
       } catch (error) {
-        console.error("Erro ao processar no mobile:", error);
-        showAlert("Erro", "Não foi possível processar a imagem.", "error");
+        console.error("Erro mobile:", error);
         return null;
       }
     }
-
     return { originalUri, processedFile };
   }
 
+  // --- Remover Imagem Selecionada ---
+  function removerImagem(index: number) {
+    setOutrasFotosPreview(prev => prev.filter((_, i) => i !== index));
+    setOutrasFotosFiles(prev => prev.filter((_, i) => i !== index));
+  }
 
+  // --- Enviar Publicação ---
+  async function publicarPost() {
+    if (!user) {
+      showAlert("Atenção", "Você precisa estar logado para publicar.", "warning");
+      return;
+    }
 
+    if (!textoPost.trim() && outrasFotosFiles.length === 0) {
+      showAlert("Atenção", "Escreva algo ou adicione uma foto.", "warning");
+      return;
+    }
 
-
-  const listaListaPost = ListaPost.map((post) => (
-    <PostCard key={post.id} data={post}     
-    />
-  ));
-
-
-
-  return (
-    <ScrollView ref={scrollRef}
-    >
+    try {
+      setEnviando(true);
       
+      // 1. Upload das imagens (se houver)
+      let urlsImagens: string[] = [];
+      if (outrasFotosFiles.length > 0) {
+        urlsImagens = await Promise.all(
+          outrasFotosFiles.map(file => uploadParaCloudinary(file))
+        );
+      }
 
+   
+      const body = {
+        texto: textoPost,
+        adotanteId: user.id,      
+        fotos: urlsImagens 
+      };
 
+      console.log("Enviando post:", body);
 
-        <View style={[styles.container,{marginHorizontal: isMobile ? 30 : 0}]}>
+      // 3. Enviar para API
+      const response = await fetch(`${URL_Adocao}/posts-comunidade`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`
+        },
+        body: JSON.stringify(body)
+      });
 
+      if (response.ok) {
+        const novoPost = await response.json();
+        
+        // Adiciona o novo post no topo da lista localmente
+        setListaPost(prev => [novoPost, ...prev]);
+        
+        // Limpa formulário
+        setTextoPost("");
+        setOutrasFotosFiles([]);
+        setOutrasFotosPreview([]);
+        
+        showAlert("Sucesso", "Publicação realizada!", "success");
+      } else {
+        const erro = await response.json();
+        showAlert("Erro", erro.erro || "Falha ao publicar.", "error");
+      }
 
-          <View style={{ maxWidth:1100, }}>
+    } catch (error) {
+      console.error(error);
+      showAlert("Erro", "Erro de conexão.", "error");
+    } finally {
+      setEnviando(false);
+    }
+  }
 
-            <View style={{
-              backgroundColor: "#FFFFFF", borderRadius: 5,
-              maxWidth: 1100,
-              width: "100%",
+  // --- RENDERIZAÇÃO ---
+  return (
+    <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent}>
+      
+      <View style={[styles.container, { width: isMobile ? '95%' : '100%', maxWidth: 800 }]}>
 
+        
+        <View style={styles.createPostCard}>
+          
+          <View style={styles.inputRow}>
+           
+            
+            <TextInput
+              style={styles.textInput}
+              placeholder={`No que você está pensando, ${user?.nome|| 'visitante'}?`}
+              placeholderTextColor="#888"
+              multiline
+              value={textoPost}
+              onChangeText={setTextoPost}
+            />
+          </View>
 
-            }}>
+          {/* Preview das Imagens Selecionadas */}
+          {outrasFotosPreview.length > 0 && (
+            <ScrollView horizontal style={styles.previewContainer}>
+              {outrasFotosPreview.map((uri, index) => (
+                <View key={index} style={styles.previewWrapper}>
+                  <Image source={{ uri }} style={styles.previewImage} />
+                  <TouchableOpacity 
+                    style={styles.removeBtn} 
+                    onPress={() => removerImagem(index)}
+                  >
+                    <FontAwesome name="times" size={12} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          )}
 
-              <TextInput
-                style={[styles.createPostButton, styles.createPostText, {
-                  height: "50%", borderWidth: 0,
-                  outlineStyle: "none" as any
-                }]}
-                placeholder="Crie uma nova Publicação..."
-                placeholderTextColor="#888"
-                multiline
-                textAlignVertical="top"
-                underlineColorAndroid="transparent"
-              />
+          <View style={styles.divider} />
 
+          {/* Botões de Ação (Foto e Publicar) */}
+          <View style={styles.actionsRow}>
+            
+            <TouchableOpacity 
+              style={styles.mediaButton}
+              onPress={() => seletorRef.current?.abrirGaleria()}
+            >
+              <FontAwesome name="image" size={20} color={Colors.Butao} />
+              <Text style={styles.mediaText}>Foto/Vídeo</Text>
+            </TouchableOpacity>
 
-              <View style={{ flexDirection: "row", gap: 20, }}>
-
-                <TouchableOpacity
-                  onPress={() => seletorRef.current?.abrirGaleria()}
-                  style={{ justifyContent: "flex-end", margin: 10 }}
-                >
-                  <FontAwesome name="image" size={20} color="#007BFF" />
-                </TouchableOpacity>
-
-
-                <SeletorDeImagem
-                  ref={seletorRef}
-                  onSelecionada={async (asset) => {
-                    const previewUri =
-                      Platform.OS === "web"
-                        ? `data:image/jpeg;base64,${asset.base64}`
-                        : asset.uri;
-
-                    setOutrasFotosPreview((prev) => [...prev, previewUri]);
-
-                    const resultado = await processarImagemSelecionada(asset);
-                    if (resultado) {
-                      setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
-                    }
-                  }}
-                />
-
-
-                {outrasFotosPreview.map((uri, index) => (
-                  <Image
-                    key={index}
-                    source={{ uri }}
-                    style={{
-                      width: 80,
-                      height: 80,
-                      borderRadius: 8,
-                      margin: 5
-
-                    }}
-                  />
-                ))}
-
-              </View>
-            </View>
-            <View style={{ top: 50, alignItems: "center", width: "100%" }}>
-              {listaListaPost}
-            </View>
-
+            <TouchableOpacity 
+              style={[
+                styles.publishButton, 
+                (!textoPost && outrasFotosFiles.length === 0) && styles.publishButtonDisabled
+              ]}
+              onPress={publicarPost}
+              disabled={enviando || (!textoPost && outrasFotosFiles.length === 0)}
+            >
+              {enviando ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.publishText}>Publicar</Text>
+              )}
+            </TouchableOpacity>
 
           </View>
 
+          {/* Componente Invisível para Lógica de Seleção */}
+          <SeletorDeImagem
+            ref={seletorRef}
+            onSelecionada={async (asset) => {
+              const previewUri = Platform.OS === "web"
+                  ? `data:image/jpeg;base64,${asset.base64}`
+                  : asset.uri;
 
+              setOutrasFotosPreview((prev) => [...prev, previewUri]);
+
+              const resultado = await processarImagemSelecionada(asset);
+              if (resultado && resultado.processedFile) {
+                setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
+              }
+            }}
+          />
         </View>
-      
+
+        {/* === LISTA DE POSTS === */}
+        <View style={styles.feedContainer}>
+          {listaPost.map((post) => (
+            <PostCard key={post.id} data={post} />
+          ))}
+          {listaPost.length === 0 && (
+            <Text style={{textAlign: 'center', color: '#888', marginTop: 20}}>
+                Nenhuma publicação ainda. Seja o primeiro!
+            </Text>
+          )}
+        </View>
+
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    justifyContent: "center",
+  scrollContent: {
     alignItems: "center",
-    marginTop: 20,
-
+    paddingVertical: 20,
+    backgroundColor: "#F0F2F5", // Fundo cinza estilo feed
+    flexGrow: 1,
   },
-  createPostButton: {
+  container: {
+    alignItems: "center",
+  },
+  
+  // Card de Criação
+  createPostCard: {
+    backgroundColor: "#fff",
+    width: "100%",
+    borderRadius: 8,
     padding: 15,
-    marginHorizontal: 16,
-    marginTop: 10,
-    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
   },
-  createPostText: {
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 10,
+  },
+  userAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.Butao, // Cor do tema
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textInput: {
+    flex: 1,
     fontSize: 16,
-    color: '#888',
-
+    color: '#333',
+    minHeight: 40,
+    maxHeight: 150,
+    textAlignVertical: 'top',
+    paddingTop: 8, // Alinha com o avatar
+    // Remove outline no web
+    ...Platform.select({
+        web: { outlineStyle: 'none' } as any
+    })
   },
-  iconMore: {
-    flexDirection: "row",
-    margin: 10,
-    left: 20,
-    gap: 10
+  
+  // Preview Imagens
+  previewContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    marginTop: 5,
   },
-  ModelIconMore: {
-    // backgroundColor: 'red',
+  previewWrapper: {
+    position: 'relative',
+    marginRight: 10,
+  },
+  previewImage: {
     width: 100,
-    position: "relative"
+    height: 100,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#eee'
+  },
+  removeBtn: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: '#E4E6EB',
+    marginVertical: 10,
+  },
+
+  // Ações
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  mediaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 8,
+    borderRadius: 5,
+  },
+  mediaText: {
+    color: '#65676B',
+    fontWeight: '600',
+  },
+  publishButton: {
+    backgroundColor: Colors.Butao,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  publishButtonDisabled: {
+    backgroundColor: '#E4E6EB',
+  },
+  publishText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  // Feed
+  feedContainer: {
+    width: "100%",
+    gap: 15, // Espaçamento entre posts
   }
 });

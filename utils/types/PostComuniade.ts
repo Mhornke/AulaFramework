@@ -5,8 +5,8 @@ export interface PostComunidadeI{
     id: number,
     texto: string,
     curtida: number,
-    fotos: string[],
+    fotos: Fotos[],
     comentarios: Comentario[],
-    user: User,
+    adotante: User,
     createdAt: string
 }

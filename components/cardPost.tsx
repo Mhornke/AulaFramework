@@ -1,40 +1,40 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, TextInput, TouchableOpacity, Animated, useWindowDimensions } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  Image, 
+  StyleSheet, 
+  Dimensions, 
+  TextInput, 
+  TouchableOpacity, 
+  useWindowDimensions ,Platform
+} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { PostComunidadeI } from '@/utils/types/PostComuniade';
-import CarrosselFotos from "./carrosselFotosComunidade";
+import { PostComunidadeI } from '@/utils/types/PostComuniade';// Ajuste o caminho
+import CarrosselFotos from "./carrosselFotosComunidade"; // Seu componente de carrossel
 import Colors from '@/theme/color';
 import { showAlert } from './swalAlert';
 import AnimacaoLike from './animacaoLike';
 
+interface PostCardProps {
+  data: PostComunidadeI;
+}
 
-
-export default function PostCard({ data }: any) {
+export default function PostCard({ data }: PostCardProps) {
 
   const [openComentario, setOpenComentario] = useState(false);
-  const [respostasAbertas, setRespostasAbertas] = useState<Record<number, boolean>>({});
   const [modelResponderAbertas, setModelResponderAbertas] = useState<Record<number, boolean>>({});
-  const [Curtida, setCurtida] = useState(false)
+  const [curtida, setCurtida] = useState(false);
 
-  const [conteudorespostaComentario, setConteudoRespostaComentario] = useState('')
-  const [conteudoComentario, setConteudoComentario] = useState('')
-
+  const [conteudoRespostaComentario, setConteudoRespostaComentario] = useState('');
+  const [conteudoComentario, setConteudoComentario] = useState('');
 
   const { width } = useWindowDimensions();
   const isWeb = width > 800;
   const larguraTela = Dimensions.get("window").width;
 
-
-
   function OpenModelComentario() {
     setOpenComentario(prev => !prev);
-  }
-
-  function OpenModelRespostaComentario(idComentario: number) {
-    setRespostasAbertas(prev => ({
-      ...prev,
-      [idComentario]: !prev[idComentario]
-    }));
   }
 
   function OpenModelResponderComentario(idComentario: number) {
@@ -43,179 +43,147 @@ export default function PostCard({ data }: any) {
       [idComentario]: !prev[idComentario]
     }));
   }
+
   async function EnviarComentario() {
-
     if (conteudoComentario.length > 0) {
-
-      showAlert("Comentario enviado", "", 'success')
+      // Aqui entraria o fetch POST /comentario
+      showAlert("Comentário enviado", "", 'success');
+      setConteudoComentario("");
     }
   }
+
   async function EnviarRespostaComentario() {
-
-    if (conteudorespostaComentario.length > 0) {
-
-      showAlert("Resposta enviado", "", 'success')
+    if (conteudoRespostaComentario.length > 0) {
+      showAlert("Resposta enviada", "", 'success');
+      setConteudoRespostaComentario("");
     }
-
   }
+
+  // Formata a data para ficar bonitinha (ex: 29/11/2025)
+  const dataFormatada = new Date(data.createdAt).toLocaleDateString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+
+  // Verifica se tem comentários para evitar erro de .length em undefined
+  const qtdComentarios = data.comentarios ? data.comentarios.length : 0;
+  
+  const nomeUsuario = data.adotante.nome || "Usuário";
+  const avatarURL = `https://ui-avatars.com/api/?name=${nomeUsuario}&background=random&color=fff`;
+console.log(data.fotos);
 
   return (
-    <View
-      style={[
+    <View style={[
         styles.card,
-        { maxWidth: isWeb ? 1100 : "100%", width: isWeb ? larguraTela : "100%" }
+        { maxWidth: isWeb ? 700 : "100%", width: isWeb ? 700 : "100%" } // Ajustei maxWidth para ficar estilo Feed
       ]}
     >
 
-      {/* HEADER */}
+    
       <View style={styles.header}>
-        <Image source={data.foto} style={styles.avatar} />
-        <Text style={styles.userName}>{data.user.nome}</Text>
+       
+             <Image source={{ uri:avatarURL }} style={styles.avatar} />
+        
+            <View>
+          
+            <Text style={styles.userName}>{nomeUsuario || "Usuário"}</Text>
+            <Text style={styles.timestamp}>{dataFormatada}</Text>
+        </View>
       </View>
 
-      {/* FOTOS */}
-      {data.fotos?.length > 0 && (
-        <CarrosselFotos fotos={data.fotos} />
+      
+      <View style={styles.textContainer}>
+          <Text style={styles.postText}>{data.texto}</Text>
+      </View>
+
+     
+      {data.fotos && data.fotos.length > 0 && (
+        <View style={{height: 300, width: '100%', marginVertical: 10}}>
+            
+             <CarrosselFotos data={data.fotos} /> 
+        </View>
       )}
 
-      {/* AÇÕES */}
+     
       <View style={styles.actionsContainer}>
+        
+        {/* Botão Curtir */}
+        <TouchableOpacity style={styles.actionButton} onPress={() => setCurtida(!curtida)}>
+           <AnimacaoLike onToggle={() => setCurtida(!curtida)} /> 
+           <Text style={styles.actionText}>{data.curtida} Curtidas</Text>
+        </TouchableOpacity>
 
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-
-          <View style={styles.actionButton}>
-            <AnimacaoLike onToggle={() => setCurtida(true)} />
-            <Text style={{ marginLeft: -6 }}>{data.curtida}</Text>
-          </View>
-
-
-
-          <TouchableOpacity
-            style={{ flexDirection: "row", alignItems: "center" }}
-            onPress={OpenModelComentario}
-          >
-
-
-            <FontAwesome name={openComentario ? "comment" : "comment-o"} size={22} color="#333" />
-            <Text style={{ marginLeft: 5 }}>{data.comentarios.length}</Text>
-
-
-          </TouchableOpacity>
-
-          <View style={styles.timestampContainer}>
-            <FontAwesome name="clock-o" size={15} color="#888" />
-            <Text style={styles.timestamp}>{data.createdAt}</Text>
-          </View>
-        </View>
-
-        <View style={styles.textContainer}>
-          <Text style={styles.postText}>{data.texto}</Text>
-        </View>
+        {/* Botão Comentar */}
+        <TouchableOpacity style={styles.actionButton} onPress={OpenModelComentario}>
+           <FontAwesome name="comment-o" size={20} color="#65676B" />
+           <Text style={styles.actionText}>{qtdComentarios} Comentários</Text>
+        </TouchableOpacity>
 
       </View>
 
-
-
-      {/* LISTA DE COMENTÁRIOS */}
-      <View
-        style={[
-          styles.ModelComentario,
-          { display: openComentario ? "flex" : "none", padding: 12 }
-        ]}
-
-      >
-        {/* AREA DE COMENTARIOS */}
-        <View style={{ marginBottom: 20 }}>
-
-          {/* BOTÃO DE COMENTÁRIOS */}
-          <View style={{ alignItems: "center", borderWidth: 1, borderColor: "#cccc", paddingBottom: 10, borderRadius: 5 }}>
-            <TextInput
-              placeholder='Deixar comentario..'
-              placeholderTextColor="#888"
-              multiline
-              textAlignVertical="top"
-              underlineColorAndroid="transparent"
-              value={conteudoComentario}
-              onChangeText={setConteudoComentario}
-
-              style={[styles.TextAreaDeixarComentarios]}
-            />
-
-            <TouchableOpacity
-
-              style={[
-                styles.ButtonComentarios,
-                { width: isWeb ? 180 : "40%" }
-              ]}
-
-              onPress={EnviarComentario}
-            >
-              <Text style={{ color: "#fff", fontWeight: "600" }}>
-                Enviar
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{ borderWidth: 1, borderColor: "rgba(204, 204, 204, 0.23)", width: "100%", marginVertical: 50 }}></View>
-          {data.comentarios.map(c => (
-
-            <View key={c.id} style={{ marginBottom: 20, padding: 10, borderWidth: 1, borderColor: "#cccc", borderRadius: 5 }}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-
-                <Image source={c.foto} style={[styles.avatar, {
-                  width: 30,
-                  height: 30,
-                }]} />
-
-
-                <Text style={{ fontWeight: "bold" }}>{c.adotante.nome}</Text>
-              </View>
-
-              <Text style={{ paddingVertical: 40 }}>{c.texto}</Text>
-
-              <View style={{ flexDirection: "row", gap: 10 }}>
-
-                <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", marginVertical: 10, gap: 5 }}>
-                  <FontAwesome name="heart-o" size={15} color="#3d3b3bff" style={{ marginTop: 4 }} />
-                  <Text>Curtir</Text>
-                  <Text>{c.curtida}</Text>
-                </TouchableOpacity>             
-
-                <TouchableOpacity
-                  onPress={() => OpenModelResponderComentario(c.id)}
-                  style={{ flexDirection: "row", alignItems: "center", marginVertical: 10, marginLeft: 15, gap: 5 }}>
-                  <FontAwesome name="comment-o" size={15} color="#3d3b3bff" style={{ marginTop: 4 }} />
-                  <Text>Deixar Resposta</Text>
-                </TouchableOpacity>
-
-              </View>              
-
-              <View style={{ flexDirection: "row", marginVertical: 20, gap: 20, display: modelResponderAbertas[c.id] ? "flex" : "none", padding: 12 }}>
-                <FontAwesome name="level-down" size={20} color="#555"
-                  style={{ transform: [{ scaleX: -1 }, { rotate: "90deg" }], marginLeft: 10 }}
-                />
-
-                {/* INPUT DE RESPOSTA PARA OS COMENTARIOS */}
-                <TextInput
-                  placeholder='Deixar uma Resposta para o comentario'
+      {/* ÁREA DE COMENTÁRIOS (Expansível) */}
+      {openComentario && (
+        <View style={styles.commentSection}>
+            
+            {/* Input Novo Comentário */}
+            <View style={styles.inputCommentRow}>
+               <TextInput 
+                  style={styles.commentInput}
+                  placeholder="Escreva um comentário..."
                   placeholderTextColor="#888"
-                  underlineColorAndroid="transparent"
-                  value={conteudorespostaComentario}
-                  onChangeText={setConteudoRespostaComentario}
-
                   multiline
-                  style={styles.InputRespostaComentario}
-                />
-                <TouchableOpacity style={styles.botaoResposta}
-                  onPress={EnviarRespostaComentario}
-                >
-                  <Text style={{ fontWeight: "500", color: "#ffff" }}>Enviar</Text>
-                </TouchableOpacity>
-              </View>
+                  value={conteudoComentario}
+                  onChangeText={setConteudoComentario}
+               />
+               <TouchableOpacity onPress={EnviarComentario} style={styles.sendIcon}>
+                   <FontAwesome name="send" size={18} color={Colors.Butao} />
+               </TouchableOpacity>
             </View>
-          ))}
-        </View>
 
-      </View>
+            {/* Lista de Comentários */}
+            {data.comentarios && data.comentarios.map(c => (
+                <View key={c.id} style={styles.singleCommentContainer}>
+                    
+                    {/* Avatar do Comentário */}
+                    <View style={styles.commentAvatar}>
+                        <FontAwesome name="user-circle" size={30} color="#ccc" />
+                    </View>
+
+                    {/* Balão do Comentário */}
+                    <View style={{flex: 1}}>
+                        <View style={styles.commentBubble}>
+                            <Text style={styles.commentUser}>{c.adotante.nome}</Text>
+                            <Text style={styles.commentText}>{c.texto}</Text>
+                        </View>
+
+                        {/* Ações do Comentário (Curtir/Responder) */}
+                        <View style={styles.commentActions}>
+                            <TouchableOpacity onPress={() => OpenModelResponderComentario(c.id)}>
+                                <Text style={styles.commentActionText}>Responder</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.commentDate}>
+                                {new Date(c.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </Text>
+                        </View>
+
+                        {/* Input de Resposta (Aninhado) */}
+                        {modelResponderAbertas[c.id] && (
+                            <View style={styles.replyContainer}>
+                                <TextInput
+                                    style={styles.replyInput}
+                                    placeholder="Responda..."
+                                    value={conteudoRespostaComentario}
+                                    onChangeText={setConteudoRespostaComentario}
+                                />
+                                <TouchableOpacity onPress={EnviarRespostaComentario}>
+                                    <Text style={{color: Colors.Butao, fontWeight:'bold', marginLeft: 10}}>Enviar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            ))}
+        </View>
+      )}
 
     </View>
   );
@@ -224,119 +192,146 @@ export default function PostCard({ data }: any) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    marginVertical: 12,
-    paddingBottom: 10,
-
+    borderRadius: 8,
+    marginVertical: 10,
+    // Sombra estilo card
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     elevation: 2,
+    overflow: 'hidden',
+    alignSelf: 'center'
   },
-
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
   },
-
   avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#CCC",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 10,
   },
-
   userName: {
     fontWeight: 'bold',
     fontSize: 16,
+    color: '#050505',
   },
-
+  timestamp: {
+    fontSize: 12,
+    color: '#65676B',
+  },
+  textContainer: {
+    paddingHorizontal: 12,
+    paddingBottom: 10,
+  },
+  postText: {
+    fontSize: 15,
+    color: '#050505',
+    lineHeight: 22,
+  },
   actionsContainer: {
-    padding: 10,
-    marginVertical: 25,
-
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#F0F2F5',
+    paddingVertical: 8,
+    marginHorizontal: 12,
+    justifyContent: 'space-around' // Botões centralizados
   },
-
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
-  },
-
-  ButtonComentarios: {
-    padding: 10,
-    alignItems: "center",
-    borderRadius: 6,
-    backgroundColor: Colors.Butao,
-  },
-
-  actionText: {
-    marginLeft: 4,
-    fontSize: 15,
-    color: '#333',
-  },
-
-  timestampContainer: {
+    padding: 8,
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
   },
-
-  timestamp: {
-    fontSize: 13,
-    color: '#888',
-    marginLeft: 6,
+  actionText: {
+    color: '#65676B',
+    fontWeight: '600',
+    fontSize: 14
   },
-
-  textContainer: {
-    marginTop: 8,
+  
+  // Estilos de Comentário
+  commentSection: {
+      paddingHorizontal: 12,
+      paddingBottom: 12,
+      borderTopWidth: 1,
+      borderTopColor: '#F0F2F5',
+      backgroundColor: '#FAFAFA'
   },
-
-  ModelComentario: {},
-  postText: {
-    fontSize: 16,
-    lineHeight: 22,
+  inputCommentRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#F0F2F5',
+      borderRadius: 20,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      marginVertical: 10
   },
-  InputRespostaComentario: {
-    width: "95%",
-
-    borderWidth: 0,
-    borderColor: "transparent",
-    borderStyle: "none" as any,
-    borderBottomWidth: 0,
-
-    outlineWidth: 0,
-    outlineStyle: "none" as any,
-    outlineColor: "transparent",
-
+  commentInput: {
+      flex: 1,
+      fontSize: 14,
+      maxHeight: 80,
+      color: '#333',
+      // Remove outline web
+      ...Platform.select({ web: { outlineStyle: 'none' } as any })
   },
-  TextAreaDeixarComentarios: {
-    width: "100%",
-    marginBottom: 20,
-    backgroundColor: "#fff",
-    height: 125,
-
-    borderWidth: 0,
-    borderColor: "transparent",
-    borderStyle: "none" as any,
-    borderBottomWidth: 0,
-
-    outlineWidth: 0,
-    outlineStyle: "none" as any,
-    outlineColor: "transparent",
-
-    padding: 10,
+  sendIcon: {
+      marginLeft: 10
   },
-  botaoResposta: {
-    backgroundColor: Colors.Butao,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 5
+  
+  singleCommentContainer: {
+      flexDirection: 'row',
+      marginBottom: 10
+  },
+  commentAvatar: {
+      marginRight: 8,
+      marginTop: 2
+  },
+  commentBubble: {
+      backgroundColor: '#F0F2F5',
+      borderRadius: 12,
+      padding: 10,
+      alignSelf: 'flex-start'
+  },
+  commentUser: {
+      fontWeight: 'bold',
+      fontSize: 13,
+      marginBottom: 2
+  },
+  commentText: {
+      fontSize: 14,
+      color: '#050505'
+  },
+  commentActions: {
+      flexDirection: 'row',
+      marginLeft: 10,
+      marginTop: 2,
+      gap: 15
+  },
+  commentActionText: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      color: '#65676B'
+  },
+  commentDate: {
+      fontSize: 12,
+      color: '#65676B'
+  },
+  replyContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 5,
+      marginLeft: 10
+  },
+  replyInput: {
+      borderBottomWidth: 1,
+      borderBottomColor: '#ccc',
+      flex: 1,
+      paddingVertical: 2,
+      fontSize: 13
   }
-
 });

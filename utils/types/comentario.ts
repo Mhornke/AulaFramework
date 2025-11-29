@@ -3,6 +3,7 @@ export interface Comentario{
    id: number,
   texto: string,
   curtida: number,
-  adotante:  User
-  createdAt: string
+  adotante:  User,
+  createdAt: string,
+  comentarios:
 }

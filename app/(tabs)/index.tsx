@@ -13,6 +13,7 @@ import { AnimalI } from "../../utils/types/animias";
 import { FontAwesome } from "@expo/vector-icons";
 import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
 import { useAuth } from "@/context/AuthContext";
+import Colors from "@/theme/color";
 
 
 export default function Home() {
@@ -20,13 +21,13 @@ export default function Home() {
     const [animaisDestaque, setAnimaisDestaque] = useState<AnimalI[]>([])
     const [quantVisivelAdotados, setQuantVisivelAdotados] = useState(4)
     const scrollViewRef = useRef<ScrollView>(null)
-const {user} = useAuth()
+    const { user } = useAuth()
     const scrollParaTopo = () => {
         scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     };
     console.log(animais);
     const { width } = Dimensions.get('window')
-console.log(user?.token);
+    console.log(user?.token);
 
 
     const styles = StyleSheet.create({
@@ -170,13 +171,48 @@ console.log(user?.token);
                 >
                     <View style={[styles.contentWrapper, {}]}>
 
-                        <View style={{ flex: 1,  }}>
+                        <View style={{ flex: 1, }}>
                             <Pesquisa />
                         </View>
                         {animaisDestaque.length > 0 ? (
-                            
-                            <View style={{ alignItems: "center", justifyContent:"center", flex: 10 }}>
-                                <Text>Nos ajude a encontrar -</Text>
+
+                            <View style={{ alignItems: "center", justifyContent: "center", flex: 10 }}>
+                                <View style={{ alignItems: "center", justifyContent: "center", flex: 10 }}>
+                                    <View style={{ width: "100%", alignItems: "center" }}>
+
+                                       
+                                        <Text
+                                            style={{
+                                                fontWeight: "700",
+                                                fontSize: 25,
+                                                color: Colors.Butao,
+                                                marginBottom: 20,
+                                                alignSelf: "flex-start", 
+                                                paddingHorizontal: 20,   
+                                            }}
+                                        >
+                                            - Volte pra casa
+                                        </Text>
+
+                                       
+                                        <View style={{ width: '80%' }}>
+                                            <Text
+                                                style={{
+                                                    fontWeight: "400",
+                                                    fontSize: 15,
+                                                    color: Colors.Preto,
+                                                    textAlign: "center", 
+                                                    marginBottom: 50,
+                                                }}
+                                            >
+                                                Nosso amigo está perdido e precisamos da sua ajuda! 🐾
+                                                Se você viu ou tem alguma informação sobre ele/ela, por favor entre em contato. Cada pista conta e pode fazer toda a diferença para trazê-lo de volta para casa, seguro e feliz. Compartilhe esta mensagem e nos ajude a encontrá-lo!
+                                            </Text>
+                                        </View>
+
+                                    </View>
+                                </View>
+
 
                                 <Carrossel data={animaisDestaque} />
 
@@ -198,11 +234,24 @@ console.log(user?.token);
 
                         <View style={[styles.cardTable,
                         {
-                            flexDirection: "column",                           
+                            flexDirection: "column",
                             paddingTop: 50,
-                            
+
                         }]}>
-                            <Text style={styles.text}>- Seu novo amigo está à sua espera</Text>
+                            <View style={{
+                                flexDirection: "row", width: "100%", alignItems: "baseline"
+
+                            }}>
+                                <View style={{
+                                    flexDirection: "row", flex: 1, backgroundColor: Colors.CardFundo,
+                                    borderRadius: 5, padding: 5, alignItems: "center", gap: 5
+                                }}>
+                                    <Text style={[styles.text, { fontSize: 20, color: "white" }]}>Em busca do meu</Text>
+                                    <Text style={[styles.text, { color: Colors.Butao, fontSize: 18 }]}>pet</Text>
+                                    <View style={{ backgroundColor: Colors.Butao, width: 10, height: 1 }}></View>
+                                </View>
+                                <View style={{ flex: 2, backgroundColor: Colors.CardFundo, height: 15, borderEndEndRadius: 5 }}></View>
+                            </View>
 
                             {listaAnimais}
                         </View>
@@ -224,9 +273,9 @@ console.log(user?.token);
                             </TouchableOpacity>
                         </View>
                     </View>
-                    
+
                     <Footer />
-                   
+
                 </ScrollView>
                 <TouchableOpacity style={styles.botaoFlutuante} onPress={scrollParaTopo}>
                     <FontAwesome name="arrow-up" size={15} color="#fff" />

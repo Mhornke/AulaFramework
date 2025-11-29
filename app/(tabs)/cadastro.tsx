@@ -34,7 +34,6 @@ export default function Cadastrado() {
   const [date, setDate] = useState<Date | null>(null);
   const [especies, setEspecies] = useState<{ id: string; nome: string }[]>([]);
   const [especieId, setEspecieId] = useState<string | null>(null);
-const [animaisPerdidos, setDadosAnimalPerdido] = useState<AnimalPerdidoI[]>([])
   const [localizacao, setLocalizacao] = useState('');
   const lenLocal = localizacao.length
 
@@ -64,17 +63,18 @@ const [animaisPerdidos, setDadosAnimalPerdido] = useState<AnimalPerdidoI[]>([])
   console.log("usuario ide existe:", user?.id);
 
   useEffect(() => {
-  if (isLoading) return;        // só roda depois de carregar
-  if (!user) return;            // evita disparo antes de popular
+    if (isLoading) return;        // só roda depois de carregar
+    if (!user) return;            // evita disparo antes de popular
 
-  if (!user?.token) {
-    showAlert("Atenção", "Você precisa estar logado...", "question")
-      .then(confirmarLogin => {
-        if (confirmarLogin) router.push("/(auth)/login");
-        else router.push('/');
-      });
-  }
-}, [isLoading, user]);
+    if (!user?.token) {
+      showAlert("Atenção", "Você precisa estar logado...", "question")
+        .then(confirmarLogin => {
+          if (confirmarLogin) router.push("/(auth)/login");
+          else router.push('/');
+        });
+    }
+  }, [isLoading, user]);
+
   function toDate(value: any): Date | null {
     if (!value) return null;
 
@@ -261,9 +261,9 @@ const [animaisPerdidos, setDadosAnimalPerdido] = useState<AnimalPerdidoI[]>([])
           uploadParaCloudinary(file)
         )
       );
-     console.log("Link da foto ",urlsAdicionais);
+      console.log("Link da foto ", urlsAdicionais);
 
-      
+
 
 
       const adotanteId = user?.id
@@ -291,23 +291,23 @@ const [animaisPerdidos, setDadosAnimalPerdido] = useState<AnimalPerdidoI[]>([])
         },
         body: JSON.stringify(novoAnimal),
       });
-const resposta = await lerResposta(response);
+      const resposta = await lerResposta(response);
       // const responseData = await response.json();
       // const animalIdSalvo = responseData.id;
 
       // console.log(`id do animal retornado pra foto ${animalIdSalvo}`);
       if (!response.ok) {
-       console.error("❌ BACKEND ERROU:", resposta);
-      throw new Error(resposta.message || "Erro no cadastro");
+        console.error("❌ BACKEND ERROU:", resposta);
+        throw new Error(resposta.message || "Erro no cadastro");
       }
 
 
-console.log("✅ BACKEND SUCESSO:", resposta);
-    const animalIdSalvo = resposta.id;
-    console.log("ID do animal:", animalIdSalvo);
+      console.log("✅ BACKEND SUCESSO:", resposta);
+      const animalIdSalvo = resposta.id;
+      console.log("ID do animal:", animalIdSalvo);
 
       if (urlsAdicionais.length > 0) {
-console.log("entrou no if de urlAdicionais");
+        console.log("entrou no if de urlAdicionais");
 
         const responsesFotos = await Promise.all(
 
@@ -323,13 +323,13 @@ console.log("entrou no if de urlAdicionais");
                 codigoFoto: fotoUrl,
                 animalPerdidoId: animalIdSalvo,
               }),
-              
+
             })
           )
         );
-      
+
         console.log(responsesFotos);
-        
+
         const algumaRequisicaoFalhou = responsesFotos.some(res => !res.ok);
         if (algumaRequisicaoFalhou) {
           // Se pelo menos uma falhou, lançamos um erro para parar o processo
@@ -348,7 +348,7 @@ console.log("entrou no if de urlAdicionais");
         showCancelButton: true,
         confirmButtonColor: "green",
         cancelButtonColor: "red",
-        confirmButtonText:"Sim, Desejo ir!!",
+        confirmButtonText: "Sim, Desejo ir!!",
         cancelButtonText: "Não, Desejo ficar!!"
       })
 
@@ -386,10 +386,13 @@ console.log("entrou no if de urlAdicionais");
       <View style={{ alignItems: "center", marginBottom: 30 }}>
         <Text style={styles.title}>Cadastro de Animal</Text>
 
-        <View style={{ borderWidth: 1, borderColor: "#ccc", width: 400 }}>
+        <View style={{
+          borderWidth: 1, borderColor: "#ccc", flexDirection: IsLayoutMl ? "row" : "column", width: "100%", maxWidth: 1200,
+          justifyContent: "space-between"
+        }}>
 
-          <View style={styles.galeriaContainer}>
-
+          {/* Galeria de fotos */}
+          <View style={[styles.galeriaContainer,IsLayoutMl && { flex:1},{alignItems:"center", top:10}]}>
 
             <CarrosselPreview fotosUri={outrasFotosPreview}
               onRemoverFoto={removerFotoindex} />
@@ -398,7 +401,7 @@ console.log("entrou no if de urlAdicionais");
               <TouchableOpacity
                 onPress={() => seletorRef.current?.abrirGaleria()}>
 
-                <FontAwesome name="image" size={20} color="#007BFF" />
+                <FontAwesome name="camera" size={20} color="#007BFF" />
               </TouchableOpacity>
 
               <SeletorDeImagem
@@ -415,138 +418,137 @@ console.log("entrou no if de urlAdicionais");
                   }
                 }}
               />
-
-
-
-
             </View>
           </View>
-          <View style={{ alignItems: "center", marginTop: 20, marginBottom: 5 }}>
 
-            <Text style={{ fontWeight: "600", fontSize: 12, color: "red" }}>É obrigatorio o preenchimento dos campos marcados com ' * '</Text>
-          </View>
 
-          <View style={{ width: '100%', padding: 15 }} >
-            <View style={{ flexDirection: "row" }}>
+          <View style={{ flex: 1 }}>
+            <View style={{ width: '100%', padding: 15 }} >
+              <View style={{ alignItems: "center", marginTop: 20, marginBottom: 5 }}>
 
-              <Text style={styles.label}>Descrição</Text>
-              <Text style={{ color: "red" }}>*</Text>
+                <Text style={{ fontWeight: "600", fontSize: 12, color: "red" }}>É obrigatorio o preenchimento dos campos marcados com ' * '</Text>
+              </View>
+
+              <View style={{ flexDirection: "row" }}>
+
+                <Text style={styles.label}>Descrição</Text>
+                <Text style={{ color: "red" }}>*</Text>
+              </View>
+              <TextInput
+                style={{
+                  fontSize:14,
+                  height: 100,
+                  width: "100%",
+                  backgroundColor: Colors.inputCor,
+                  color: lenDescription ? "#fff" : Colors.LetraCinza,
+                  padding: 10,
+                  borderRadius: 5
+                }}
+                placeholder="Digite uma descrição do animal"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+              />
             </View>
-            <TextInput
-              style={{
-                height: 100,
-                width: "100%",
-                backgroundColor: Colors.inputCor,
-                color: lenDescription ? "#fff" : Colors.LetraCinza,
-                padding: 10,
-                borderRadius: 5
-              }}
-              placeholder="Digite uma descrição do animal"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-            />
-          </View>
 
-          <View >
-
-            {/* Linha 2 - Dados Básicos */}
-            <View style={styles.row}>
-              {/* Coluna 1 - Nome e Espécie */}
-              <View style={styles.column}>
-                <View style={styles.inputContainer}>
-                  <View style={{flexDirection:"row"}}>
-
-                  <Text style={[styles.label,]}>Nome ou Raça</Text>
-                  <Text style={[styles.label,{color:"red"}]}>*</Text>
-                  </View>
-
-                  <TextInput
-                    style={[styles.input, { color: lenName ? "#fff" : Colors.LetraCinza }]}
-                    placeholder="Digite o nome do animal"
-                    value={name}
-                    onChangeText={setName}
-                  />
-                </View>
-                <View>
+            <View style={{ flex: 2 }}>
+              {/* Linha 2 - Dados Básicos */}
+              <View style={styles.row}>
+                {/* Coluna 1 - Nome e Espécie */}
+                <View style={styles.column}>
                   <View style={styles.inputContainer}>
-
                     <View style={{ flexDirection: "row" }}>
-                      <Text style={styles.label}>Tipo de Anúncio</Text>
+
+                      <Text style={[styles.label,]}>Nome ou Raça</Text>
                       <Text style={[styles.label, { color: "red" }]}>*</Text>
                     </View>
 
-                    <View style={styles.radioGroup}>
-                      {/* ENCONTREI */}
-                      <TouchableOpacity
-                        style={[
-                          styles.radioButton,
-                          tipoAnuncio === 'ENCONTREI' && styles.radioButtonSelected
-                        ]}
-                        onPress={() => setTipoAnuncio('ENCONTREI')}
-                      >
-                        <Text
-                          style={[
-                            styles.radioText,
-                            { color: tipoAnuncio === 'ENCONTREI' ? '#fff' : 'black' }
-                          ]}
-                        >
-                          Encontrado
-                        </Text>
-                      </TouchableOpacity>
+                    <TextInput
+                      style={[styles.input, { color: lenName ? "#fff" : Colors.LetraCinza,fontSize:14 }]}
+                      placeholder="Digite o nome do animal"
+                      value={name}
+                      onChangeText={setName}
+                    />
+                  </View>
+                  <View>
+                    <View style={styles.inputContainer}>
 
-                      {/* PERDI */}
-                      <TouchableOpacity
-                        style={[
-                          styles.radioButton,
-                          tipoAnuncio === 'PERDI' && styles.radioButtonSelected
-                        ]}
-                        onPress={() => setTipoAnuncio('PERDI')}
-                      >
-                        <Text
+                      <View style={{ flexDirection: "row" }}>
+                        <Text style={styles.label}>Tipo de Anúncio</Text>
+                        <Text style={[styles.label, { color: "red" }]}>*</Text>
+                      </View>
+
+                      <View style={styles.radioGroup}>
+                        {/* ENCONTREI */}
+                        <TouchableOpacity
                           style={[
-                            styles.radioText,
-                            { color: tipoAnuncio === 'PERDI' ? '#fff' : 'black' }
+                            styles.radioButton,
+                            tipoAnuncio === 'ENCONTREI' && styles.radioButtonSelected
                           ]}
+                          onPress={() => setTipoAnuncio('ENCONTREI')}
                         >
-                          Perdido
-                        </Text>
-                      </TouchableOpacity>
+                          <Text
+                            style={[
+                              styles.radioText,
+                              { color: tipoAnuncio === 'ENCONTREI' ? '#fff' : 'black' }
+                            ]}
+                          >
+                            Encontrado
+                          </Text>
+                        </TouchableOpacity>
+
+                        {/* PERDI */}
+                        <TouchableOpacity
+                          style={[
+                            styles.radioButton,
+                            tipoAnuncio === 'PERDI' && styles.radioButtonSelected
+                          ]}
+                          onPress={() => setTipoAnuncio('PERDI')}
+                        >
+                          <Text
+                            style={[
+                              styles.radioText,
+                              { color: tipoAnuncio === 'PERDI' ? '#fff' : 'black' }
+                            ]}
+                          >
+                            Perdido
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-                </View>
-                <View style={styles.inputContainer}>
-                  <View style={{ flexDirection: "row" }}>
-                    <Text style={styles.label}>Espécie</Text>
-                    <Text style={{ color: "red", fontWeight: "800" }}>*</Text>
+                  <View style={styles.inputContainer}>
+                    <View style={{ flexDirection: "row" }}>
+                      <Text style={styles.label}>Espécie</Text>
+                      <Text style={{ color: "red", fontWeight: "800" }}>*</Text>
+                    </View>
+                    <RNPickerSelect
+                      onValueChange={(value) => setEspecieId(value)}
+                      items={especiesOptions}
+                      placeholder={{ label: 'Selecione uma espécie...', value: null }}
+                      style={{
+                        inputWeb: styles.input,
+                        inputAndroid: styles.input,
+                        inputIOS: styles.input,
+                      }}
+                      value={especieId}
+                    />
                   </View>
-                  <RNPickerSelect
-                    onValueChange={(value) => setEspecieId(value)}
-                    items={especiesOptions}
-                    placeholder={{ label: 'Selecione uma espécie...', value: null }}
-                    style={{
-                      inputWeb: styles.input,
-                      inputAndroid: styles.input,
-                      inputIOS: styles.input,
-                    }}
-                    value={especieId}
-                  />
-                </View>
 
 
 
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Contato</Text>
-                  <TextInput
-                    style={[styles.input, { color: lenContato ? "#fff" : Colors.LetraCinza }]}
-                    placeholder="Digite Numero telefonico ou email!! "
-                    value={contato}
-                    onChangeText={setContato}
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Contato</Text>
+                    <TextInput
+                      style={[styles.input, { color: lenContato ? "#fff" : Colors.LetraCinza,fontSize:14 }]}
+                      placeholder="Digite Numero telefonico ou email!! "
+                      value={contato}
+                      onChangeText={setContato}
 
-                  />
-                </View>
+                    />
+                  </View>
 
-                {/* <View style={styles.inputContainer}>
+                  {/* <View style={styles.inputContainer}>
                   
                   {/* <Text style={styles.label}>Ultima data visto</Text>
                   <MaskedTextInput
@@ -560,62 +562,62 @@ console.log("entrou no if de urlAdicionais");
                   />
                 </View> */}
 
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Última data vista</Text>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Última data vista</Text>
 
-                  <TouchableOpacity
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5
-                    }}
-                    onPress={() => setShow(true)}
-                  >
-                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                      <Text style={{ color: date ? Colors.Preto : Colors.LetraCinza }}>
-                        {date ? date.toLocaleDateString('pt-BR') : "dd/mm/aaaa"}
-                      </Text>
-                      <FontAwesome name='angle-down' size={18} color={"black"} />
-                    </View>
-                  </TouchableOpacity>
-
-                  {show && (
-                    <DateTimePicker
-                      mode="single"
-                      date={date || new Date()}
-                      onChange={(params) => {
-                        setDate(toDate(params.date));
-                        setShow(false);
+                    <TouchableOpacity
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5
                       }}
-                    />
-                  )}
-
-
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Ultima localização visto</Text>
-                  <TextInput
-                    style={[styles.input, { color: lenLocal ? "#fff" : Colors.LetraCinza }]}
-                    placeholder="Onde foi visto pela ultima vez? "
-                    value={localizacao}
-                    onChangeText={setLocalizacao}
-
-                  />
-                  <View style={{ top: 25 }} >
-                    <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                      <Text style={styles.buttonText}>Cadastrar Animal</Text>
+                      onPress={() => setShow(true)}
+                    >
+                      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                        <Text style={{ color: date ? Colors.Preto : Colors.LetraCinza }}>
+                          {date ? date.toLocaleDateString('pt-BR') : "dd/mm/aaaa"}
+                        </Text>
+                        <FontAwesome name='angle-down' size={18} color={"black"} />
+                      </View>
                     </TouchableOpacity>
+
+                    {show && (
+                      <DateTimePicker
+                        mode="single"
+                        date={date || new Date()}
+                        onChange={(params) => {
+                          setDate(toDate(params.date));
+                          setShow(false);
+                        }}
+                      />
+                    )}
+
+
                   </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Ultima localização visto</Text>
+                    <TextInput
+                      style={[styles.input, { color: lenLocal ? "#fff" : Colors.LetraCinza }]}
+                      placeholder="Onde foi visto pela ultima vez? "
+                      value={localizacao}
+                      onChangeText={setLocalizacao}
+
+                    />
+                    <View style={{ top: 25 }} >
+                      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                        <Text style={styles.buttonText}>Cadastrar Animal</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+
                 </View>
+
 
 
               </View>
-
-
-
             </View>
-
           </View>
 
         </View>
@@ -626,14 +628,7 @@ console.log("entrou no if de urlAdicionais");
 };
 const styles = StyleSheet.create({
 
-  containerLarge: {
-    flex: 1,
-    alignItems: "center",
-    padding: 20,
-    maxWidth: 1200,
-    alignSelf: 'center',
-    width: '100%',
-  },
+
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -696,7 +691,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
-    fontSize: 16,
+    fontSize: 14,
   },
   radioGroup: {
     flexDirection: 'row',
@@ -755,11 +750,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   galeriaContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 10,
-    justifyContent: 'center',
-    marginBottom: 20,
+        marginBottom: 20,
   },
   galeriaImage: {
     width: "100%",

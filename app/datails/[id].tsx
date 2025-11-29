@@ -3,38 +3,38 @@ import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Dimensions,
-
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
   ScrollView,
+  Platform,
 } from "react-native";
-import Color from "../../theme/color";
+import Color from "../../theme/color"; // Seu tema
 import { AnimalI } from "../../utils/types/animias";
 import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 import CarrosselFotos from "../../components/carrosselFotos";
-import { URL_Adocao, URL_GestaoPet } from "@/utils/url";
-
+import { URL_Adocao } from "@/utils/url";
 import { showAlert } from "@/components/swalAlert";
-import Colors from "../../theme/color";
+import Colors from "../../theme/color"; // Alias para Color se necessário
 
 export default function Detalhes() {
   const [data, setData] = useState<AnimalI>();
-  const { id, destaque } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const [texto, setTexto] = useState("");
   const [pedidoEnviado, setPedidoEnviado] = useState(false);
-  const sex = data?.sexo == "MACHO"
-
+  
+  // Lógica original mantida
+  const sex = data?.sexo == "MACHO";
   const { width } = Dimensions.get("window");
   const { user } = useAuth();
+  
   console.log(`estatus pedido ${pedidoEnviado}`);
 
   useEffect(() => {
     async function buscaDados() {
       try {
-
         const response = await fetch(`${URL_Adocao}/animais/${id}`);
         const dados = await response.json();
         setData(dados);
@@ -44,27 +44,19 @@ export default function Detalhes() {
     }
 
     async function verificarStatusPedido() {
-      if (!user) return; // Se não tiver usuário logado, não verifica
-
+      if (!user) return;
       try {
-        // Chama a rota que criamos
         const response = await fetch(`${URL_Adocao}/pedidos/verificar?adotanteId=${user.id}&animalId=${id}`);
-        const data = await response.json();
-
-        // Atualiza o estado com a resposta do banco (True ou False)
-        setPedidoEnviado(data.jaEnviado);
+        const dataRes = await response.json();
+        setPedidoEnviado(dataRes.jaEnviado);
       } catch (error) {
         console.error("Erro ao verificar pedido", error);
-      } finally {
-
       }
     }
 
-
-
     verificarStatusPedido();
     buscaDados();
-  }, [id, user, id]);
+  }, [id, user]);
 
   async function enviaForm() {
     try {
@@ -84,7 +76,7 @@ export default function Detalhes() {
         body: JSON.stringify(novoPedido),
       });
       if (response.ok) {
-        showAlert("Pedido enviado com sucesso!", "Seu pedido Logo sera respondi", "success");
+        showAlert("O pedido foi enviado 😍!", "Seu pedido logo sera respondido, fique atento! 😊", "success");
         setPedidoEnviado(true);
         setTexto("");
       } else {
@@ -98,179 +90,90 @@ export default function Detalhes() {
 
   if (!data) return <Text style={styles.loading}>Carregando...</Text>;
 
-
   const fotosParaCarrossel = data.foto
     ? [{ id: -1, codigoFoto: data.foto, descricao: "Foto principal" }, ...(data.fotos ?? [])]
     : data.fotos ?? [];
 
+  // Cores dinâmicas para manter a lógica visual original, mas organizadas
+  const shadowSex = sex ? '#c523da' : '#23a6da';
+  const shadowCastrado = data.castrado ? "#15fc00" : "#f50202";
+
   return (
-
-
     <>
       {width < 1100 ? (
-
-        <ScrollView contentContainerStyle={styles.container} >
-
-          <View style={{
-            justifyContent: "center",
-            flexDirection: "column",
-            borderRadius: 5,
-            padding: 20,
-            gap: 25,
-            backgroundColor: "#ffff",
-            width: "100%",
-            borderWidth: 1,
-            borderColor: "#cccc",
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-
-            elevation: 5,
-          }}>
-
-            <View style={{ width: "100%" }}>
+        // ================== VERSÃO MOBILE / TABLET ==================
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.cardContainer}>
+            
+            <View style={styles.fullWidth}>
               <CarrosselFotos data={fotosParaCarrossel} />
-
             </View>
 
-            <Text style={{ color: Colors.Butao, textAlign: "left", fontWeight: "700", fontSize: 20, }}>
-              {data.nome}</Text>
-            <View style={{ marginLeft: 20 }}>
+            <Text style={styles.titleName}>{data.nome}</Text>
 
-              <View style={{ gap: 10 }}>
-                <Text style={styles.TextoInfoDesktop}>Descrição:</Text>
-
-                <View style={{
-                  flexDirection: "row",
-                  gap: 2,
-                  backgroundColor: "#f8f8f8d8",
-                  borderRadius: 10,
-                  padding: 5,
-                  minHeight: 100,
-
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 3.84,
-
-                  elevation: 5,
-                }}>
-
-
-
-                  <Text style={styles.TextoInfoDesktop}>
-                    {data.descricao}
-                  </Text>
+            <View style={styles.contentWrapper}>
+              
+              {/* Box Descrição */}
+              <View style={styles.sectionGap}>
+                <Text style={styles.labelTitle}>Descrição:</Text>
+                <View style={styles.descriptionBox}>
+                  <Text style={styles.infoText}>{data.descricao}</Text>
                 </View>
               </View>
 
-              <View style={{ gap: 15, flexDirection: "row", marginTop: 20, marginBottom: 20, width: "100%", flexWrap: "wrap", alignItems: "center", justifyContent: "space-around", }}>
-
-                <View style={[styles.containerTagsInfo, {
-                  justifyContent: "center",
-                  shadowColor: '#6d6601ff',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.50,
-                  shadowRadius: 3.84,
-
-                  elevation: 5,
-                }]}>
-                  <FontAwesome name="paw" size={18} color='#6d6601ff' />
-
-                  <Text style={styles.TextoInfoDesktop}>{data.especie.nome}</Text>
+              {/* Tags Info */}
+              <View style={styles.tagsWrapper}>
+                
+                <View style={[styles.tagItem, { shadowColor: '#6d6601' }]}>
+                  <FontAwesome name="paw" size={18} color='#6d6601' />
+                  <Text style={styles.infoText}>{data.especie.nome}</Text>
                 </View>
 
-
-                <View style={[styles.containerTagsInfo, {
-                  justifyContent: "center",
-                  shadowColor: 'pink',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.50,
-                  shadowRadius: 3.84,
-
-                  elevation: 5,
-                }]}>
+                <View style={[styles.tagItem, { shadowColor: 'pink' }]}>
                   <FontAwesome name="birthday-cake" size={18} color='pink' />
-                  <Text style={styles.TextoInfoDesktop}> {data.idade} ano(s) </Text>
+                  <Text style={styles.infoText}> {data.idade} ano(s) </Text>
                 </View>
 
-                <View style={[styles.containerTagsInfo, {
-                  justifyContent: "center",
-                  shadowColor: sex ? '#c523daff' : '#23a6daff',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.50,
-                  shadowRadius: 3.84,
-
-                  elevation: 5,
-                }]}>
-                  <FontAwesome name="venus-mars" size={18} color={sex ? "#c523daff" : "#23a6daff"} />
-                  <Text style={styles.TextoInfoDesktop}>
-
-                    {data.sexo}
-                  </Text>
+                <View style={[styles.tagItem, { shadowColor: shadowSex }]}>
+                  <FontAwesome name="venus-mars" size={18} color={shadowSex} />
+                  <Text style={styles.infoText}>{data.sexo}</Text>
                 </View>
 
-                <View style={[styles.containerTagsInfo, {
-                  justifyContent: "center",
-                  shadowColor: '#da7c23ff',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.50,
-                  shadowRadius: 3.84,
-
-                  elevation: 5,
-                }]}>
-
-                  <Text style={styles.Text}>
-                    <Entypo name="resize-full-screen" size={18} color={Color.Preto} />
-                    <Text style={styles.TextoInfoDesktop}>
-                      {data.porte}
-                    </Text>
-                  </Text>
+                <View style={[styles.tagItem, { shadowColor: '#da7c23' }]}>
+                  <Entypo name="resize-full-screen" size={18} color={Color.Preto} />
+                  <Text style={styles.infoText}>{data.porte}</Text>
                 </View>
 
-                <View style={[styles.containerTagsInfo, {
-                  justifyContent: "center",
-                  shadowColor: data.castrado ? "#15fc00ff" : "#f50202ff",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.50,
-                  shadowRadius: 3.84,
-
-                  elevation: 5,
-                }]}>
-
-
+                <View style={[styles.tagItem, { shadowColor: shadowCastrado }]}>
                   <MaterialIcons
                     name={data.castrado ? "check-circle" : "cancel"}
                     size={16}
                     color={data.castrado ? "green" : "red"}
-                  />{" "}
-                  <Text style={[styles.TextoInfoDesktop]}>
+                  />
+                  <Text style={styles.infoText}>
                     {data.castrado ? "Castrado" : "Não castrado"}
                   </Text>
-
                 </View>
 
-
               </View>
-
             </View>
 
-            {user ? (
-              <View style={[styles.containerTextArea]}>
-
-                {pedidoEnviado ? (
-                  <Text style={styles.sucessoMensagem}>
-                    Pedido de adoção enviado com sucesso! Em breve entraremos em contato.
-                  </Text>
+            {/* Formulário ou Login */}
+            <View style={styles.formContainer}>
+              {user ? (
+                pedidoEnviado ? (
+                  <View style={styles.successBox}>
+                    <Text style={styles.successText}>
+                      Pedido de adoção enviado com sucesso! Em breve entraremos em contato.
+                    </Text>
+                  </View>
                 ) : (
                   <>
-                    <Text style={[styles.tituloFormulario, { color: Color.CorFundo }]}>Formulário de Adoção</Text>
-                    <Text style={[styles.TextFormulario, { color: Color.CorFundo }]}>
-                      Em poucas palavras, diga se você já tem animais e por que gostaria de adotar este
-                      animal.
+                    <Text style={styles.formTitle}>Formulário de Adoção</Text>
+                    <Text style={styles.formSubtitle}>
+                      Em poucas palavras, diga se você já tem animais e por que gostaria de adotar este animal.
                     </Text>
-                    <Text style={[styles.TextFormulario, { color: Color.CorFundo }]}>Pedido:</Text>
+                    <Text style={styles.formLabel}>Pedido:</Text>
 
                     <TextInput
                       multiline
@@ -278,181 +181,88 @@ export default function Detalhes() {
                       placeholder="Insira aqui seu pedido de adoção"
                       value={texto}
                       onChangeText={setTexto}
-                      style={styles.TextAreaInput}
+                      style={styles.textArea}
                     />
 
-                    <View style={styles.botaoContainer}>
-                      <TouchableOpacity style={styles.botao} onPress={enviaForm}>
-                        <Text style={styles.botaoTexto}>Enviar</Text>
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity style={styles.button} onPress={enviaForm}>
+                        <Text style={styles.buttonText}>Enviar</Text>
                       </TouchableOpacity>
                     </View>
                   </>
-                )}
-              </View>
-            ) : (
-              <Link href="/(auth)/login" style={{ textAlign: "center", borderWidth: 1, borderRadius: 5, padding: 10, marginTop: 20, backgroundColor: "green" }}>
-                <TouchableOpacity>
-                  <Text style={styles.linkLoginText}>Tenho interesse</Text>
-                </TouchableOpacity>
-              </Link>
-            )}
+                )
+              ) : (
+                <Link href="/(auth)/login" asChild>
+                  <TouchableOpacity style={styles.loginLinkButton}>
+                    <Text style={styles.loginLinkText}>Tenho interesse (Faça Login)</Text>
+                  </TouchableOpacity>
+                </Link>
+              )}
+            </View>
+
           </View>
         </ScrollView>
 
       ) : (
 
-        <ScrollView contentContainerStyle={styles.container} >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "flex-start",
-              gap: 20,
-              marginTop: 30,
-              width: "100%",
-              maxWidth: 1200,
-              backgroundColor: Color.CorFundo,
-              padding: 16,
-              borderTopStartRadius: 5,
-              borderTopEndRadius: 5
-            }}
-          >
-
-            <View style={{ flex: 2 }}>
+        // ================== VERSÃO DESKTOP ==================
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.desktopContainer}>
+            
+            {/* Coluna Esquerda: Fotos */}
+            <View style={styles.desktopLeftCol}>
               <CarrosselFotos data={fotosParaCarrossel} />
-
             </View>
 
+            {/* Coluna Direita: Informações */}
+            <View style={styles.desktopRightCol}>
+              
+              <Text style={styles.desktopTitleName}>{data.nome}</Text>
 
-            <View style={{ flex: 1.3, height: '100%' }}>
-
-              <View style={{ flex: 1 }}>
-                <Text style={{
-                  color: "#fffff6",
-                  fontWeight: "700",
-                  fontSize: 20
-                }}>{data.nome}</Text>
-              </View>
-
-              <View style={{ flex: 10, flexDirection: "column", gap: 20, marginLeft: 10, height: "100%", justifyContent: "space-around" }}>
-
-                <View style={{
-                  marginLeft: 10,
-                  flexDirection: "column",
-                  gap: 20, backgroundColor: "#fffffff6",
-                  borderRadius: 5,
-                  padding: 10,
-                  minHeight: 200,
-                  flex: 1
-                }}>
-
-                  <View style={{ flexDirection: "row" }}>
+              <View style={styles.desktopContent}>
+                
+                {/* Descrição */}
+                <View style={styles.descriptionBoxDesktop}>
+                  <View style={{ flexDirection: "row", marginBottom: 5 }}>
                     <FontAwesome name="file-text" size={18} color={Colors.Preto} />
-                    <Text style={[styles.TextoInfoDesktop, { color: Colors.Preto }]}>
+                    <Text style={[styles.infoText, { marginLeft: 5, fontWeight: 'bold' }]}>
                       Descrição:
                     </Text>
                   </View>
-
-                  <View>
-                    <Text style={styles.TextoInfoDesktop}>
-                      {data.descricao}
-                    </Text>
-                  </View>
+                  <Text style={styles.infoText}>{data.descricao}</Text>
                 </View>
 
-                <View style={{ flexDirection: "row", flex: 0.2, flexWrap: "wrap", gap: 10, justifyContent: "center", alignContent:"center" }}>
-
-                  <View style={[styles.containerTagsInfo, {
-                    justifyContent: "center",
-                    shadowColor: '#da7c23ff',
-                    backgroundColor: "#fffff6",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.50,
-                    shadowRadius: 3.84,
-                    height: "30%",
-                    width: "30%",
-                    elevation: 5,
-                  }]}>
-
-
-                    <FontAwesome name="paw" size={18} color="#da7c23ff" />
-                    <Text style={styles.TextoInfoDesktop}>{data.especie.nome}</Text>
-
-
-                  </View>
-                  <View style={[styles.containerTagsInfo, {
-                    justifyContent: "center",
-                    shadowColor: 'pink',
-                    backgroundColor: "#fffff6",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.50,
-                    shadowRadius: 3.84,
-                    height: "30%",
-                    width: "30%",
-                    elevation: 5,
-                  }]}>
-
-                    <Text style={styles.TextoTituloInfoDesktop}>
-                      <FontAwesome name="birthday-cake" size={18} color="pink" />
-                      <Text style={styles.TextoInfoDesktop}> {data.idade} ano(s) </Text>
-                    </Text>
+                {/* Tags Desktop */}
+                <View style={styles.tagsWrapper}>
+                  
+                  <View style={[styles.tagItem, { shadowColor: '#da7c23' }]}>
+                    <FontAwesome name="paw" size={18} color="#da7c23" />
+                    <Text style={styles.infoText}>{data.especie.nome}</Text>
                   </View>
 
-                  <View style={[styles.containerTagsInfo, {
-                    justifyContent: "center",
-                    shadowColor: sex ? "#c523daff" : "#23a6daff",
-                    backgroundColor: "#fffff6",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.50,
-                    shadowRadius: 3.84,
-                    height: "30%",
-                    width: "30%",
-                    elevation: 5,
-                  }]}>
-                    <FontAwesome name="venus-mars" size={18} color={sex ? "#c523daff" : "#23a6daff"} />
-                    <Text style={styles.TextoInfoDesktop}>
-                      {data.sexo}
-                    </Text>
+                  <View style={[styles.tagItem, { shadowColor: 'pink' }]}>
+                    <FontAwesome name="birthday-cake" size={18} color="pink" />
+                    <Text style={styles.infoText}> {data.idade} ano(s) </Text>
                   </View>
 
-                  <View style={[styles.containerTagsInfo, {
-                    justifyContent: "center",
-                    shadowColor: "#7fa80cff",
-                    backgroundColor: "#fffff6",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.50,
-                    shadowRadius: 3.84,
-                    height: "30%",
-                    width: "30%",
-                    elevation: 5,
-                  }]}>
-
-                    <Entypo name="resize-full-screen" size={18} />
-                    <Text style={styles.TextoInfoDesktop}>
-                      {data.porte}
-                    </Text>
+                  <View style={[styles.tagItem, { shadowColor: shadowSex }]}>
+                    <FontAwesome name="venus-mars" size={18} color={shadowSex} />
+                    <Text style={styles.infoText}>{data.sexo}</Text>
                   </View>
 
-                  <View style={[styles.containerTagsInfo, {
-                    justifyContent: "center",
-                    shadowColor: data.castrado ? "#15fc00ff" : "#f50202ff",
-                    backgroundColor: "#fffff6",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.50,
-                    shadowRadius: 3.84,
-                    height: "30%",
-                    width: "35%",
-                    elevation: 5,
-                  }]}>
-                    <Text style={styles.TextoTituloInfoDesktop}>
-                      <MaterialIcons
+                  <View style={[styles.tagItem, { shadowColor: '#7fa80c' }]}>
+                    <Entypo name="resize-full-screen" size={18} color="#7fa80c" />
+                    <Text style={styles.infoText}>{data.porte}</Text>
+                  </View>
+
+                  <View style={[styles.tagItem, { shadowColor: shadowCastrado }]}>
+                    <MaterialIcons
                         name={data.castrado ? "check-circle" : "cancel"}
                         size={16}
                         color={data.castrado ? "green" : "red"}
-                      />{" "}
-                      <Text style={styles.TextoInfoDesktop}>
+                      />
+                    <Text style={styles.infoText}>
                         {data.castrado ? "Castrado" : "Não castrado"}
-                      </Text>
                     </Text>
                   </View>
 
@@ -461,31 +271,22 @@ export default function Detalhes() {
             </View>
           </View>
 
-
-          {user ? (
-            <View style={
-              [styles.containerTextAreaLarg,
-              {
-                width: "100%",
-                maxWidth: 1200
-              }
-              ]
-
-            }>
-              {pedidoEnviado ? (
-                <View style={{ backgroundColor: "green", padding: 20 }}>
-                  <Text style={[styles.sucessoMensagem, { color: "white" }]}>
+          {/* Área do Formulário Desktop (Full Width abaixo das colunas) */}
+          <View style={[styles.formContainer, { width: "100%", maxWidth: 1200, marginTop: 20 }]}>
+            {user ? (
+              pedidoEnviado ? (
+                <View style={styles.successBox}>
+                  <Text style={styles.successText}>
                     Pedido de adoção enviado com sucesso! Em breve entraremos em contato.
                   </Text>
                 </View>
               ) : (
-                <View style={{ margin: 15 }}>
-                  <Text style={[styles.tituloFormulario, { color: "white" }]}>Formulário de Adoção</Text>
-                  <Text style={[styles.TextFormulario, { color: Color.LetraCinza }]}>
-                    Em poucas palavras, diga se você já tem animais e por que gostaria de adotar este
-                    animal.
+                <>
+                  <Text style={styles.formTitle}>Formulário de Adoção</Text>
+                  <Text style={styles.formSubtitle}>
+                    Em poucas palavras, diga se você já tem animais e por que gostaria de adotar este animal.
                   </Text>
-                  <Text style={[styles.TextFormulario, { color: Color.LetraCinza }]}>Pedido:</Text>
+                  <Text style={styles.formLabel}>Pedido:</Text>
 
                   <TextInput
                     multiline
@@ -493,195 +294,251 @@ export default function Detalhes() {
                     placeholder="Insira aqui seu pedido de adoção"
                     value={texto}
                     onChangeText={setTexto}
-                    style={styles.TextAreaInput}
+                    style={styles.textArea}
                   />
 
-                  <View style={styles.botaoContainer}>
-                    <TouchableOpacity style={styles.botao} onPress={enviaForm}>
-                      <Text style={styles.botaoTexto}>Enviar</Text>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.button} onPress={enviaForm}>
+                      <Text style={styles.buttonText}>Enviar</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
-              )}
-            </View>
-          ) : (
-            <Link href="/(auth)/login" style={styles.linkLogin}>
-              <TouchableOpacity>
-                <Text style={styles.linkLoginText}>Tenho interesse (faça login)</Text>
-              </TouchableOpacity>
-            </Link>
-          )}
+                </>
+              )
+            ) : (
+              <Link href="/(auth)/login" asChild>
+                <TouchableOpacity style={styles.loginLinkButton}>
+                  <Text style={styles.loginLinkText}>Tenho interesse (Faça Login)</Text>
+                </TouchableOpacity>
+              </Link>
+            )}
+          </View>
         </ScrollView>
-
       )}
     </>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 5,
-  },
+  // Geral
   loading: {
     color: Color.LetraCinza,
     textAlign: "center",
     marginTop: 50,
     fontSize: 18,
   },
-  containerGeral: {
+  scrollContainer: {
     flexGrow: 1,
     alignItems: "center",
-    justifyContent: "center",
     padding: 16,
-    width: "100%",
-
-
+    backgroundColor: "#f4f4f4", // Fundo neutro
   },
-  conteudo: {
+  fullWidth: {
     width: "100%",
-    borderRadius: 10,
-    padding: 16,
-    alignItems: "center",
+  },
+  
+  // Card Container (Mobile e Base)
+  cardContainer: {
+    backgroundColor: Color.CorFundo, // Branco ou cor do tema
+    width: "100%",
     maxWidth: 600,
-    backgroundColor: Color.CorFundo
-
-
-  },
-  conteudoLargura: {
-    backgroundColor: Color.CardFundo,
-    borderWidth: 1,
-
-    shadowColor: '#000',
+    borderRadius: 12,
+    padding: 16,
+    gap: 20,
+    // Sombras
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.50,
-    shadowRadius: 6.84,
-    flexDirection: "row",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
 
-  },
-  image: {
+  // Desktop Container
+  desktopContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    gap: 24,
     width: "100%",
-    height: 350,
-    borderRadius: 15,
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: Color.Butao,
+    maxWidth: 1200,
+    backgroundColor: Color.CorFundo,
+    padding: 24,
+    borderRadius: 12,
+    // Sombras
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
-  containerText: {
+  desktopLeftCol: {
+    flex: 1.5,
+  },
+  desktopRightCol: {
+    flex: 1,
+    height: '100%',
+  },
+  desktopContent: {
+    flex: 1,
+    justifyContent: "space-between",
+    gap: 20
+  },
+
+  // Tipografia
+  titleName: {
+    color: Color.Butao,
+    textAlign: "left",
+    fontWeight: "700",
+    fontSize: 24,
+    marginBottom: 5,
+  },
+  desktopTitleName: {
+    color: Color.Butao,
+    fontWeight: "700",
+    fontSize: 28,
     marginBottom: 20,
-    alignItems: "flex-start",
-    width: "100%",
   },
-  containerTextoLarge: {
-    marginTop: 40,
-    marginBottom: 40,
-
-    maxWidth: "60%",
-    flexWrap: "wrap",
-    gap: 30,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    width: "100%",
-  },
-  TextName: {
-    fontSize: 26,
+  labelTitle: {
     fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 12,
+    color: Colors.Preto,
+    marginBottom: 5,
+    fontSize: 16
   },
-  Text: {
-    color: Color.LetraCinza,
-    fontWeight: "500",
-    marginVertical: 4,
-    fontSize: 16,
-    flexDirection: "row",
-  },
-  TextoTituloInfoDesktop: {
-    color: Color.LetraCinza,
-    fontWeight: "500",
-    marginVertical: 4,
-    fontSize: 16,
-    flexDirection: "row",
-  },
-  TextoInfoDesktop: {
+  infoText: {
     color: Colors.Preto,
     fontWeight: "500",
-    marginLeft: 5
+    fontSize: 15,
+    lineHeight: 22,
   },
-  containerTextArea: {
-    borderRadius: 5,
-    backgroundColor: "#0f8604ff",
-    padding: 20,
-    width: "100%",
-  },
-  containerTextAreaLarg: {
 
-    width: "90%",
-    backgroundColor: Color.CardFundo,
-    borderBottomStartRadius: 5,
-    borderBottomEndRadius: 5,
+  // Descrição e Conteúdo
+  contentWrapper: {
+    gap: 20,
   },
-  tituloFormulario: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
-
+  sectionGap: {
+    gap: 8,
   },
-  TextFormulario: {
-    marginVertical: 6,
-    fontWeight: "500"
-  },
-  TextAreaInput: {
-    backgroundColor: Color.inputCor,
+  descriptionBox: {
+    backgroundColor: "#f8f8f8",
     borderRadius: 8,
     padding: 12,
+    minHeight: 80,
+    borderLeftWidth: 4,
+    borderLeftColor: Color.Butao,
+  },
+  descriptionBoxDesktop: {
+    backgroundColor: "#f8f8f8",
+    borderRadius: 8,
+    padding: 16,
+    minHeight: 150,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+
+  // Tags (Padronizado para Mobile e Desktop)
+  tagsWrapper: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    justifyContent: "flex-start",
+    marginTop: 10,
+  },
+  tagItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    gap: 8,
+    // Sombra das tags (mantida a lógica de cor dinâmica no componente via inline style)
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+    minWidth: 100, // Garante um tamanho mínimo
+    flexGrow: 1,   // Permite esticar para preencher espaços
+  },
+
+  // Formulário
+  formContainer: {
+    backgroundColor: Color.CardFundo, // Fundo escuro do tema para o formulário
+    borderRadius: 12,
+    padding: 24,
+    width: "100%",
+    marginTop: 10,
+  },
+  formTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 8,
+  },
+  formSubtitle: {
+    marginVertical: 6,
+    fontWeight: "400",
+    color: "#e0e0e0",
+    fontSize: 14,
+  },
+  formLabel: {
     marginTop: 12,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 6,
+  },
+  textArea: {
+    backgroundColor: "#fff", // Input branco para contraste
+    borderRadius: 8,
+    padding: 12,
     textAlignVertical: "top",
     fontSize: 16,
     height: 120,
-    color: Color.LetraCinza
+    color: Color.Preto,
   },
-  botaoContainer: {
+  buttonContainer: {
     alignItems: "center",
     marginTop: 20,
   },
-  botao: {
+  button: {
     backgroundColor: Color.Butao,
     paddingVertical: 12,
-    paddingHorizontal: 60,
+    paddingHorizontal: 40,
     borderRadius: 8,
     elevation: 2,
+    width: "100%",
+    alignItems: "center",
   },
-  botaoTexto: {
+  buttonText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
   },
-  sucessoMensagem: {
-    color: Colors.BrancoMaisNemTanto,
+  
+  // Feedback e Login
+  successBox: {
+    backgroundColor: "#27ae60",
+    padding: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  successText: {
+    color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
   },
-  linkLogin: {
-    marginTop: 20,
+  loginLinkButton: {
+    backgroundColor: "#27ae60", // Verde chamativo para ação
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
   },
-  linkLoginText: {
+  loginLinkText: {
     color: "#fff",
     fontSize: 16,
-
     fontWeight: "600",
   },
-  containerTagsInfo: {
-    flexDirection: "row",
-
-    borderRadius: 10,
-    padding: 5,
-    width: "30%",
-    height: "45%",
-    alignItems: "center",
-
-  }
 });
