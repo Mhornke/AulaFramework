@@ -19,7 +19,7 @@ import { showAlert } from '@/components/swalAlert';
 import imageCompression from 'browser-image-compression';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
-import PostCard from "../../components/cardPost";
+import PostCard from '@/components/comunidade/cardPost';
 import { PostComunidadeI } from '@/utils/types/PostComuniade';
 import { URL_Adocao } from '@/utils/url';
 import { uploadParaCloudinary } from '@/utils/uploadParaCloundinary';
@@ -163,7 +163,7 @@ export default function ComunidadeScreen() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${user.token}`
+          "Authorization": `Bearer ${user!.token}`
         },
         body: JSON.stringify(body)
       });

@@ -1,18 +1,17 @@
-// AnimacaoLike.tsx
-import React, { useRef, useState } from "react";
-import { Animated, TouchableWithoutFeedback, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, View } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
 type Props = {
-  initialLiked?: boolean;
-  onToggle?: (liked: boolean) => void;
+  liked: boolean; // Agora é obrigatório receber o estado atual
   iconSize?: number;
+  // Removemos onToggle pois o Pai já controla o clique no TouchableOpacity
 };
 
-export default function AnimacaoLike({ initialLiked = false, onToggle, iconSize = 24 }: Props) {
-  const [liked, setLiked] = useState(initialLiked);
-
-  // pulso do coração
+export default function AnimacaoLike({ liked, iconSize = 24 }: Props) {
+  
+  // REMOVIDO: const [liked, setLiked] = useState(...) -> O pai manda a verdade
+  
   const pulse = useRef(new Animated.Value(1)).current;
 
   // patinhas (esquerda/direita)
@@ -29,7 +28,16 @@ export default function AnimacaoLike({ initialLiked = false, onToggle, iconSize 
     opacity: useRef(new Animated.Value(0)).current,
   };
 
-  // função que reinicia valores e executa animação
+  // O Segredo: Monitorar a prop 'liked'. Se virar TRUE, dispara a animação.
+  useEffect(() => {
+    if (liked) {
+      runAnimation();
+    } else {
+      // Opcional: Se quiser resetar valores instantaneamente quando descurtir
+      pulse.setValue(1); 
+    }
+  }, [liked]); // Só roda quando a prop mudar
+
   function runAnimation() {
     // reset
     pulse.setValue(1);
@@ -50,7 +58,7 @@ export default function AnimacaoLike({ initialLiked = false, onToggle, iconSize 
         Animated.timing(pulse, { toValue: 1.5, duration: 140, useNativeDriver: true }),
         Animated.timing(pulse, { toValue: 1, duration: 160, useNativeDriver: true }),
       ]),
-      // patinha esquerda: aparece, cresce e move
+      // patinha esquerda
       Animated.sequence([
         Animated.parallel([
           Animated.timing(left.opacity, { toValue: 1, duration: 80, useNativeDriver: true }),
@@ -60,7 +68,7 @@ export default function AnimacaoLike({ initialLiked = false, onToggle, iconSize 
         ]),
         Animated.timing(left.opacity, { toValue: 0, duration: 300, delay: 120, useNativeDriver: true }),
       ]),
-      // patinha direita: aparece, cresce e move
+      // patinha direita
       Animated.sequence([
         Animated.parallel([
           Animated.timing(right.opacity, { toValue: 1, duration: 100, useNativeDriver: true }),
@@ -70,62 +78,52 @@ export default function AnimacaoLike({ initialLiked = false, onToggle, iconSize 
         ]),
         Animated.timing(right.opacity, { toValue: 0, duration: 300, delay: 120, useNativeDriver: true }),
       ]),
-    ]).start(); // não precisa callback para esconder — valores voltam ao final
+    ]).start();
   }
 
-  function handlePress() {
-    const next = !liked;
-    setLiked(next);
-    onToggle && onToggle(next);
-
-    if (next) {
-      // só anima quando virar liked = true
-      runAnimation();
-    } else {
-      // opcional: se quiser animação para "unlike", adicione aqui
-    }
-  }
-
+  // Removemos o TouchableWithoutFeedback porque o pai já é um botão
   return (
-    <TouchableWithoutFeedback onPress={handlePress}>
-      <View style={{ width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-        {/* patinha esquerda */}
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            opacity: left.opacity,
-            transform: [
-              { translateX: left.tx },
-              { translateY: left.ty },
-              { scale: left.scale },
-            ],
-          }}
-        >
-          <FontAwesome name="paw" size={Math.round(iconSize * 0.7)} color="#ff6b81" />
-        </Animated.View>
+    <View style={{ width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
+      {/* patinha esquerda */}
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          opacity: left.opacity,
+          transform: [
+            { translateX: left.tx },
+            { translateY: left.ty },
+            { scale: left.scale },
+          ],
+        }}
+      >
+        <FontAwesome name="paw" size={Math.round(iconSize * 0.7)} color="#ff6b81" />
+      </Animated.View>
 
-        {/* patinha direita */}
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            opacity: right.opacity,
-            transform: [
-              { translateX: right.tx },
-              { translateY: right.ty },
-              { scale: right.scale },
-            ],
-          }}
-        >
-          <FontAwesome name="paw" size={Math.round(iconSize * 0.9)} color="#ff5470" />
-        </Animated.View>
+      {/* patinha direita */}
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          opacity: right.opacity,
+          transform: [
+            { translateX: right.tx },
+            { translateY: right.ty },
+            { scale: right.scale },
+          ],
+        }}
+      >
+        <FontAwesome name="paw" size={Math.round(iconSize * 0.9)} color="#ff5470" />
+      </Animated.View>
 
-        {/* coração (pulsa) */}
-        <Animated.View style={{ transform: [{ scale: pulse }] }}>
-          <FontAwesome name={liked ? "heart" : "heart-o"} size={iconSize} color={liked ? "#e73a4e" : "#333"} />
-        </Animated.View>
-      </View>
-    </TouchableWithoutFeedback>
+      {/* coração (pulsa) */}
+      <Animated.View style={{ transform: [{ scale: pulse }] }}>
+        <FontAwesome 
+            name={liked ? "heart" : "heart-o"} 
+            size={iconSize} 
+            color={liked ? "#e73a4e" : "#65676B"} // Usei cinza padrão do feed quando vazio
+        />
+      </Animated.View>
+    </View>
   );
 }

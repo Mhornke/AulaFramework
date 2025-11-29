@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { View, Image, TouchableOpacity, Text, Dimensions,  } from "react-native";
+import { View, Image, TouchableOpacity, Text, Dimensions, } from "react-native";
 import { Fotos } from "@/utils/types/fotos";
-
+import { Ionicons } from "@expo/vector-icons";
+import Colors from "@/theme/color";
 export default function CarrosselFotos({ fotos }: { fotos: Fotos[] }) {
   const [indexAtual, setIndexAtual] = useState(0);
 
@@ -20,15 +21,16 @@ export default function CarrosselFotos({ fotos }: { fotos: Fotos[] }) {
     }
   }
 
+
   return (
     <View style={{ width: "100%", alignItems: "center" }}>
 
-      
+
       <Image
         source={{ uri: fotoAtual }}
         style={{
-          width: "100%",  
-          height: 400, 
+          width: "100%",
+          height: 400,
           borderRadius: 10
         }}
         resizeMode='contain'
@@ -48,13 +50,21 @@ export default function CarrosselFotos({ fotos }: { fotos: Fotos[] }) {
           disabled={indexAtual === 0}
           style={{
             padding: 10,
-            opacity: indexAtual === 0 ? 0.4 : 1,
-            backgroundColor: "#ddd",
-            borderRadius: 8,
-            marginLeft: 10
+            opacity: indexAtual === fotos.length - 1 ? 0.4 : 1,
+            position: "absolute",
+            bottom: 200,
+            left: 5,
+
+            marginLeft: 10,
+            borderRadius: 100,
+            backgroundColor: "#2564eb6e"
           }}
         >
-          <Text>◀</Text>
+          <Ionicons
+            name="chevron-back"
+            size={20}
+            color={indexAtual === 0 ? "black" : "white"}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -63,20 +73,37 @@ export default function CarrosselFotos({ fotos }: { fotos: Fotos[] }) {
           style={{
             padding: 10,
             opacity: indexAtual === fotos.length - 1 ? 0.4 : 1,
-            backgroundColor: "#ddd",
-            borderRadius: 8,
-            marginRight: 10
+            position: "absolute",
+
+            bottom: 200,
+
+            right: 5,
+            borderRadius: 100,
+            backgroundColor: "#2564eb94"
           }}
         >
-          <Text>▶</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={indexAtual === fotos.length - 1 ? "black" : "white"}
+          />
         </TouchableOpacity>
       </View>
 
-      {/* INDICADOR */}
-      <Text style={{ marginTop: 5, color: "#555" }}>
-        {indexAtual + 1} / {fotos.length}
-      </Text>
 
+      <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center', marginTop: 10 }}>
+        {fotos.map((_, index) => (
+          <View
+            key={index}
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,             
+              backgroundColor: index === indexAtual ? Colors.Butao :"#ccc"
+            }}
+          />
+        ))}
+      </View>
     </View>
   );
 }

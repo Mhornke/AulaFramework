@@ -5,5 +5,5 @@ export interface Comentario{
   curtida: number,
   adotante:  User,
   createdAt: string,
-  comentarios:
+  
 }

@@ -65,39 +65,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const userDataString = await AsyncStorage.getItem('user');
 
-        if (userDataString) {
-          const userData: User = JSON.parse(userDataString);
-
-
-          try {
-            const response = await fetch(`${URL_Adocao}/adotantes/validar-token`, {
-              method: 'GET',
-              headers: { 'Authorization': `Bearer ${userData.token}` }
-            });
-
-            if (response.ok) {
-
-              setUser(userData);
-            } else {
-
-              const querLogar = await showAlert(
-                "Sua sessão expirou",
-                "Gostaria de fazer login novamente?",
-                'question'
-              );
-              if (querLogar) {
-                router.replace("/(auth)/login")
-              }
-               console.log("Token inválido ao iniciar. Limpando dados...");
-              await clearAllLoginData();
-              setUser(null);
-            }
-          } catch (apiError) {
-
-            console.log("Erro de rede ao validar token, mantendo sessão offline:", apiError);
-            setUser(userData);
-          }
+        if (!userDataString) {
+          console.log("Nenhum token salvo — primeira vez abrindo o app.");
+          setUser(null);
+          return;
         }
+        
+        const userData: User = JSON.parse(userDataString);
+        if (!userData.token || userData.token.length < 10) {
+          console.log("Token inexistente ou inválido no storage.");
+          setUser(null);
+          return;
+        }
+
+        try {
+          const response = await fetch(`${URL_Adocao}/adotantes/validar-token`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${userData.token}` }
+          });
+
+          if (response.ok) {
+
+            setUser(userData);
+          } else {
+
+            const querLogar = await showAlert(
+              "Sua sessão expirou",
+              "Gostaria de fazer login novamente?",
+              'question'
+            );
+            if (querLogar) {
+              router.replace("/(auth)/login")
+            }
+            console.log("Token inválido ao iniciar. Limpando dados...");
+            await clearAllLoginData();
+            setUser(null);
+          }
+        } catch (apiError) {
+
+          console.log("Erro de rede ao validar token, mantendo sessão offline:", apiError);
+          setUser(userData);
+        }
+
       } catch (error) {
         console.log('Erro ao carregar dados do storage:', error);
       } finally {
