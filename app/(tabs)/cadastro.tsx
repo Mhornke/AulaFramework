@@ -382,253 +382,298 @@ export default function Cadastrado() {
   }
 
   return (
+
     <ScrollView>
       <View style={{ alignItems: "center", marginBottom: 30 }}>
         <Text style={styles.title}>Cadastro de Animal</Text>
 
-        <View style={{
-          borderWidth: 1, borderColor: "#ccc", flexDirection: IsLayoutMl ? "row" : "column", width: "100%", maxWidth: 1200,
-          justifyContent: "space-between"
-        }}>
+        {/* --- INÍCIO DA VERIFICAÇÃO DE USUÁRIO --- */}
+        {user ? (
+          // =================================================
+          // BLOCO 1: USUÁRIO LOGADO (FORMULÁRIO COMPLETO)
+          // =================================================
+          <View style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            flexDirection: IsLayoutMl ? "row" : "column",
+            width: "100%",
+            maxWidth: 1200,
+            justifyContent: "space-between"
+          }}>
 
-          {/* Galeria de fotos */}
-          <View style={[styles.galeriaContainer,IsLayoutMl && { flex:1},{alignItems:"center", top:10}]}>
-
-            <CarrosselPreview fotosUri={outrasFotosPreview}
-              onRemoverFoto={removerFotoindex} />
-
-            <View>
-              <TouchableOpacity
-                onPress={() => seletorRef.current?.abrirGaleria()}>
-
-                <FontAwesome name="camera" size={20} color="#007BFF" />
-              </TouchableOpacity>
-
-              <SeletorDeImagem
-                ref={seletorRef}
-                onSelecionada={async (asset) => {
-                  const previewUri =
-                    Platform.OS === "web"
+            {/* Coluna da Esquerda: Galeria de Fotos */}
+            <View style={[styles.galeriaContainer, IsLayoutMl && { flex: 1 }, { alignItems: "center", top: 10 }]}>
+              <CarrosselPreview
+                fotosUri={outrasFotosPreview}
+                onRemoverFoto={removerFotoindex}
+              />
+              <View>
+                <TouchableOpacity onPress={() => seletorRef.current?.abrirGaleria()}>
+                  <FontAwesome name="camera" size={20} color="#007BFF" />
+                </TouchableOpacity>
+                <SeletorDeImagem
+                  ref={seletorRef}
+                  onSelecionada={async (asset) => {
+                    const previewUri = Platform.OS === "web"
                       ? `data:image/jpeg;base64,${asset.base64}`
                       : asset.uri;
-                  setOutrasFotosPreview((prev) => [...prev, previewUri]);
-                  const resultado = await processarImagemSelecionada(asset);
-                  if (resultado) {
-                    setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
-                  }
-                }}
-              />
-            </View>
-          </View>
-
-
-          <View style={{ flex: 1 }}>
-            <View style={{ width: '100%', padding: 15 }} >
-              <View style={{ alignItems: "center", marginTop: 20, marginBottom: 5 }}>
-
-                <Text style={{ fontWeight: "600", fontSize: 12, color: "red" }}>É obrigatorio o preenchimento dos campos marcados com ' * '</Text>
+                    setOutrasFotosPreview((prev) => [...prev, previewUri]);
+                    const resultado = await processarImagemSelecionada(asset);
+                    if (resultado) {
+                      setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
+                    }
+                  }}
+                />
               </View>
-
-              <View style={{ flexDirection: "row" }}>
-
-                <Text style={styles.label}>Descrição</Text>
-                <Text style={{ color: "red" }}>*</Text>
-              </View>
-              <TextInput
-                style={{
-                  fontSize:14,
-                  height: 100,
-                  width: "100%",
-                  backgroundColor: Colors.inputCor,
-                  color: lenDescription ? "#fff" : Colors.LetraCinza,
-                  padding: 10,
-                  borderRadius: 5
-                }}
-                placeholder="Digite uma descrição do animal"
-                value={description}
-                onChangeText={setDescription}
-                multiline
-              />
             </View>
 
-            <View style={{ flex: 2 }}>
-              {/* Linha 2 - Dados Básicos */}
-              <View style={styles.row}>
-                {/* Coluna 1 - Nome e Espécie */}
-                <View style={styles.column}>
-                  <View style={styles.inputContainer}>
-                    <View style={{ flexDirection: "row" }}>
+            {/* Coluna da Direita: Campos do Formulário */}
+            <View style={{ flex: 1 }}>
+              <View style={{ width: '100%', padding: 15 }} >
 
-                      <Text style={[styles.label,]}>Nome ou Raça</Text>
-                      <Text style={[styles.label, { color: "red" }]}>*</Text>
-                    </View>
-
-                    <TextInput
-                      style={[styles.input, { color: lenName ? "#fff" : Colors.LetraCinza,fontSize:14 }]}
-                      placeholder="Digite o nome do animal"
-                      value={name}
-                      onChangeText={setName}
-                    />
-                  </View>
-                  <View>
-                    <View style={styles.inputContainer}>
-
-                      <View style={{ flexDirection: "row" }}>
-                        <Text style={styles.label}>Tipo de Anúncio</Text>
-                        <Text style={[styles.label, { color: "red" }]}>*</Text>
-                      </View>
-
-                      <View style={styles.radioGroup}>
-                        {/* ENCONTREI */}
-                        <TouchableOpacity
-                          style={[
-                            styles.radioButton,
-                            tipoAnuncio === 'ENCONTREI' && styles.radioButtonSelected
-                          ]}
-                          onPress={() => setTipoAnuncio('ENCONTREI')}
-                        >
-                          <Text
-                            style={[
-                              styles.radioText,
-                              { color: tipoAnuncio === 'ENCONTREI' ? '#fff' : 'black' }
-                            ]}
-                          >
-                            Encontrado
-                          </Text>
-                        </TouchableOpacity>
-
-                        {/* PERDI */}
-                        <TouchableOpacity
-                          style={[
-                            styles.radioButton,
-                            tipoAnuncio === 'PERDI' && styles.radioButtonSelected
-                          ]}
-                          onPress={() => setTipoAnuncio('PERDI')}
-                        >
-                          <Text
-                            style={[
-                              styles.radioText,
-                              { color: tipoAnuncio === 'PERDI' ? '#fff' : 'black' }
-                            ]}
-                          >
-                            Perdido
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                  <View style={styles.inputContainer}>
-                    <View style={{ flexDirection: "row" }}>
-                      <Text style={styles.label}>Espécie</Text>
-                      <Text style={{ color: "red", fontWeight: "800" }}>*</Text>
-                    </View>
-                    <RNPickerSelect
-                      onValueChange={(value) => setEspecieId(value)}
-                      items={especiesOptions}
-                      placeholder={{ label: 'Selecione uma espécie...', value: null }}
-                      style={{
-                        inputWeb: styles.input,
-                        inputAndroid: styles.input,
-                        inputIOS: styles.input,
-                      }}
-                      value={especieId}
-                    />
-                  </View>
-
-
-
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Contato</Text>
-                    <TextInput
-                      style={[styles.input, { color: lenContato ? "#fff" : Colors.LetraCinza,fontSize:14 }]}
-                      placeholder="Digite Numero telefonico ou email!! "
-                      value={contato}
-                      onChangeText={setContato}
-
-                    />
-                  </View>
-
-                  {/* <View style={styles.inputContainer}>
-                  
-                  {/* <Text style={styles.label}>Ultima data visto</Text>
-                  <MaskedTextInput
-                    mask="99/99/9999"
-                    style={[styles.input, { color: lenDataVisto ? "#fff" : Colors.LetraCinza }]}
-                    placeholder="dd/mm/aaaa"
-                    value={dataVisto}
-                    onChangeText={(t) => setDataVisto(t)}
-                    keyboardType='numeric'
-
-                  />
-                </View> */}
-
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Última data vista</Text>
-
-                    <TouchableOpacity
-                      style={{
-                        borderWidth: 1,
-                        padding: 10,
-                        borderRadius: 5
-                      }}
-                      onPress={() => setShow(true)}
-                    >
-                      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                        <Text style={{ color: date ? Colors.Preto : Colors.LetraCinza }}>
-                          {date ? date.toLocaleDateString('pt-BR') : "dd/mm/aaaa"}
-                        </Text>
-                        <FontAwesome name='angle-down' size={18} color={"black"} />
-                      </View>
-                    </TouchableOpacity>
-
-                    {show && (
-                      <DateTimePicker
-                        mode="single"
-                        date={date || new Date()}
-                        onChange={(params) => {
-                          setDate(toDate(params.date));
-                          setShow(false);
-                        }}
-                      />
-                    )}
-
-
-                  </View>
-
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Ultima localização visto</Text>
-                    <TextInput
-                      style={[styles.input, { color: lenLocal ? "#fff" : Colors.LetraCinza }]}
-                      placeholder="Onde foi visto pela ultima vez? "
-                      value={localizacao}
-                      onChangeText={setLocalizacao}
-
-                    />
-                    <View style={{ top: 25 }} >
-                      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                        <Text style={styles.buttonText}>Cadastrar Animal</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-
-
+                {/* Aviso de Campos Obrigatórios */}
+                <View style={{ alignItems: "center", marginTop: 20, marginBottom: 5 }}>
+                  <Text style={{ fontWeight: "600", fontSize: 12, color: "red" }}>
+                    É obrigatorio o preenchimento dos campos marcados com ' * '
+                  </Text>
                 </View>
 
+                {/* Campo Descrição */}
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={styles.label}>Descrição</Text>
+                  <Text style={{ color: "red" }}>*</Text>
+                </View>
+                <TextInput
+                  style={{
+                    fontSize: 14,
+                    height: 100,
+                    width: "100%",
+                    backgroundColor: Colors.inputCor,
+                    color: lenDescription ? "#fff" : Colors.LetraCinza,
+                    padding: 10,
+                    borderRadius: 5
+                  }}
+                  placeholder="Digite uma descrição do animal"
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                />
 
+                {/* Resto dos Campos (Nome, Tipo, Espécie, Contato...) */}
+                <View style={{ flex: 2, marginTop: 15 }}>
+                  <View style={styles.row}>
+                    <View style={styles.column}>
 
+                      {/* Nome */}
+                      <View style={styles.inputContainer}>
+                        <View style={{ flexDirection: "row" }}>
+                          <Text style={styles.label}>Nome ou Raça</Text>
+                          <Text style={{ color: "red" }}>*</Text>
+                        </View>
+                        <TextInput
+                          style={[styles.input, { color: lenName ? "#fff" : Colors.LetraCinza, fontSize: 14 }]}
+                          placeholder="Digite o nome do animal"
+                          value={name}
+                          onChangeText={setName}
+                        />
+                      </View>
+
+                      {/* Tipo de Anúncio (Radio Buttons) */}
+                      <View style={styles.inputContainer}>
+                        <View style={{ flexDirection: "row" }}>
+                          <Text style={styles.label}>Tipo de Anúncio</Text>
+                          <Text style={{ color: "red" }}>*</Text>
+                        </View>
+                        <View style={styles.radioGroup}>
+                          <TouchableOpacity
+                            style={[styles.radioButton, tipoAnuncio === 'ENCONTREI' && styles.radioButtonSelected]}
+                            onPress={() => setTipoAnuncio('ENCONTREI')}
+                          >
+                            <Text style={[styles.radioText, { color: tipoAnuncio === 'ENCONTREI' ? '#fff' : 'black' }]}>
+                              Encontrado
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.radioButton, tipoAnuncio === 'PERDI' && styles.radioButtonSelected]}
+                            onPress={() => setTipoAnuncio('PERDI')}
+                          >
+                            <Text style={[styles.radioText, { color: tipoAnuncio === 'PERDI' ? '#fff' : 'black' }]}>
+                              Perdido
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+
+                      {/* Espécie */}
+                      <View style={styles.inputContainer}>
+                        <View style={{ flexDirection: "row" }}>
+                          <Text style={styles.label}>Espécie</Text>
+                          <Text style={{ color: "red", fontWeight: "800" }}>*</Text>
+                        </View>
+                        <RNPickerSelect
+                          onValueChange={(value) => setEspecieId(value)}
+                          items={especiesOptions}
+                          placeholder={{ label: 'Selecione uma espécie...', value: null }}
+                          style={{
+                            inputWeb: styles.input,
+                            inputAndroid: styles.input,
+                            inputIOS: styles.input,
+                          }}
+                          value={especieId}
+                        />
+                      </View>
+
+                      {/* Contato */}
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Contato</Text>
+                        <TextInput
+                          style={[styles.input, { color: lenContato ? "#fff" : Colors.LetraCinza, fontSize: 14 }]}
+                          placeholder="Digite Numero telefonico ou email!! "
+                          value={contato}
+                          onChangeText={setContato}
+                        />
+                      </View>
+
+                      {/* Data */}
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Última data vista</Text>
+                        <TouchableOpacity
+                          style={{ borderWidth: 1, padding: 10, borderRadius: 5 }}
+                          onPress={() => setShow(true)}
+                        >
+                          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <Text style={{ color: date ? Colors.Preto : Colors.LetraCinza }}>
+                              {date ? date.toLocaleDateString('pt-BR') : "dd/mm/aaaa"}
+                            </Text>
+                            <FontAwesome name='angle-down' size={18} color={"black"} />
+                          </View>
+                        </TouchableOpacity>
+                        {show && (
+                          <DateTimePicker
+                            mode="single"
+                            date={date || new Date()}
+                            onChange={(params) => {
+                              setDate(toDate(params.date));
+                              setShow(false);
+                            }}
+                          />
+                        )}
+                      </View>
+
+                      {/* Localização e Botão Salvar */}
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Ultima localização visto</Text>
+                        <TextInput
+                          style={[styles.input, { color: lenLocal ? "#fff" : Colors.LetraCinza }]}
+                          placeholder="Onde foi visto pela ultima vez? "
+                          value={localizacao}
+                          onChangeText={setLocalizacao}
+                        />
+                        <View style={{ marginTop: 25 }}>
+                          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                            <Text style={styles.buttonText}>Cadastrar Animal</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+
+                    </View>
+                  </View>
+                </View>
               </View>
             </View>
           </View>
 
-        </View>
+        ) : (
+          // =================================================
+          // BLOCO 2: USUÁRIO DESLOGADO (AVISO)
+          // =================================================
+          <View style={styles.loginWarningContainer}>
+            <FontAwesome name="lock" size={40} color={Colors.LetraCinza} style={{ marginBottom: 10 }} />
+            <Text style={styles.warningText}>
+              Identificamos que você não está logado.
+            </Text>
+            <Text style={styles.subWarningText}>
+              Para cadastrar um animal, acesse sua conta.
+            </Text>
+            <View style={styles.authButtonsContainer}>
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={() => router.push('/(auth)/login')}
+              >
+                <Text style={styles.loginButtonText}>Fazer Login</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.registerButton}
+                onPress={() => router.push('/(auth)/register')}
+              >
+                <Text style={styles.registerButtonText}>Criar Conta</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+        {/* --- FIM DA VERIFICAÇÃO --- */}
+
       </View>
     </ScrollView>
+
   );
 
 };
+
+
 const styles = StyleSheet.create({
+  // ... seus outros estilos ...
 
-
+  loginWarningContainer: {
+    marginTop: 30,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    width: '100%'
+  },
+  warningText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center'
+  },
+  subWarningText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20
+  },
+  authButtonsContainer: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center'
+  },
+  loginButton: {
+    backgroundColor: Colors.Butao, // Azul/Verde do seu tema
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontWeight: 'bold'
+  },
+  registerButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: Colors.Butao
+  },
+  registerButtonText: {
+    color: Colors.Butao,
+    fontWeight: 'bold'
+  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -751,7 +796,7 @@ const styles = StyleSheet.create({
   },
   galeriaContainer: {
     gap: 10,
-        marginBottom: 20,
+    marginBottom: 20,
   },
   galeriaImage: {
     width: "100%",
