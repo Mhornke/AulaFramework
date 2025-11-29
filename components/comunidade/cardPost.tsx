@@ -22,26 +22,26 @@ import { Comentario } from '@/utils/types/comentario';
 import { Fotos } from '@/utils/types/fotos';
 interface PostCardProps {
   data: PostComunidadeI;
+  onDelete: (id: number) => void;
 }
 
-export default function PostCard({ data }: PostCardProps) {
+export default function PostCard({ data, onDelete }: PostCardProps,) {
   const { user } = useAuth()
   const [openComentario, setOpenComentario] = useState(false);
   const [modelResponderAbertas, setModelResponderAbertas] = useState<Record<number, boolean>>({});
   const [curtida, setCurtida] = useState(false);
- const [listaComentarios, setComentarios] = useState<Comentario[]>(data.comentarios || []);
-  const [conteudoRespostaComentario, setConteudoRespostaComentario] = useState('');
+  const [listaComentarios, setComentarios] = useState<Comentario[]>(data.comentarios || []);
   const [conteudoComentario, setConteudoComentario] = useState('');
   const { width } = useWindowDimensions();
   const isWeb = width > 800;
   const larguraTela = Dimensions.get("window").width;
   const [numeroCurtidas, setNumeroCurtidas] = useState(data.curtida);
 
-useEffect(() => {
-  if (data.comentarios) {
-    setComentarios(data.comentarios);
-  }
-}, [data.comentarios]);
+  useEffect(() => {
+    if (data.comentarios) {
+      setComentarios(data.comentarios);
+    }
+  }, [data.comentarios]);
   function OpenModelComentario() {
     setOpenComentario(prev => !prev);
   }
@@ -73,7 +73,7 @@ useEffect(() => {
       const dados = await response.json()
       showAlert("Comentário enviado", "", 'success');
       setConteudoComentario("");
-       setComentarios((listaAtual) => [...listaAtual, dados]);
+      setComentarios((listaAtual) => [...listaAtual, dados]);
     } else {
       throw console.error("os que esta sendo enviado", body);
 
@@ -100,10 +100,11 @@ useEffect(() => {
           tipo: proximoStatus ? "add" : "remove"
         })
       });
-      if (!response.ok) {
-        // Se der erro (ex: 400), capturamos o texto do erro
-        const errorData = await response.json();
-        console.log("Erro backend:", errorData);
+      if (response.ok) {
+        const dados = await response.json();
+        setNumeroCurtidas(dados.curtida);
+
+      } else {
         throw new Error('Falha na API');
       }
     } catch (error) {
@@ -147,9 +148,37 @@ useEffect(() => {
 
   }
 
+  async function handleExcluirPost(idPoste: number) {
+
+    const queroExcluir = await showAlert("Você realmente deseja excluir?", "", "question")
+
+    if (queroExcluir) {
+      try {
+        const response = await fetch(`${URL_Adocao}/posts-comunidade/${idPoste}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${user?.token}`
+          }
+        });
+
+        if (response.ok) {
+          showAlert("Poste apagado", "", 'success');
+          if (onDelete) {
+            onDelete(idPoste)
+          }
+        } else {
+          showAlert("Erro ao apagar", "Você não tem permissão ou houve um erro", 'error');
+        }
+      } catch (error) {
+        console.log(error);
+        showAlert("Erro de conexão", "Tente mais tarde", 'error');
+      }
+
+    }
 
 
 
+  }
 
 
   // Formata a data para ficar bonitinha (ex: 29/11/2025)
@@ -209,7 +238,7 @@ useEffect(() => {
         <TouchableOpacity style={styles.actionButton}
           onPress={handleCurtir}>
           <AnimacaoLike liked={curtida} />
-          <Text style={styles.actionText}>{data.curtida} Curtidas</Text>
+          <Text style={styles.actionText}>{numeroCurtidas} Curtidas</Text>
         </TouchableOpacity>
 
         {/* Botão Comentar */}
@@ -259,7 +288,7 @@ useEffect(() => {
 
                 {/* Ações do Comentário (Curtir/Responder) */}
                 <View style={styles.commentActions}>
-                  
+
                   {user?.id === c.adotante.id && (
                     <TouchableOpacity onPress={() => handleExcluirComentario(c.id)}>
                       <Text style={styles.commentActionText}>Excluir</Text>
@@ -378,7 +407,7 @@ const styles = StyleSheet.create({
   singleCommentContainer: {
     flexDirection: 'row',
     marginBottom: 10,
-   
+
   },
   commentAvatar: {
     marginRight: 8,

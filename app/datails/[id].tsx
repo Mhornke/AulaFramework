@@ -30,7 +30,6 @@ export default function Detalhes() {
   const { width } = Dimensions.get("window");
   const { user } = useAuth();
   
-  console.log(`estatus pedido ${pedidoEnviado}`);
 
   useEffect(() => {
     async function buscaDados() {
@@ -57,6 +56,7 @@ export default function Detalhes() {
     verificarStatusPedido();
     buscaDados();
   }, [id, user]);
+  console.log(`estatus pedido ${pedidoEnviado}`);
 
   async function enviaForm() {
     try {

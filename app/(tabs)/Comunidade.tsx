@@ -193,7 +193,9 @@ export default function ComunidadeScreen() {
     }
   }
 
-  // --- RENDERIZAÇÃO ---
+  function removerPostDaListaVisual(idPostDeletado: number) {
+    setListaPost((listaAtual) => listaAtual.filter(post => post.id !== idPostDeletado));
+  }
   return (
     <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent}>
       
@@ -283,7 +285,8 @@ export default function ComunidadeScreen() {
         {/* === LISTA DE POSTS === */}
         <View style={styles.feedContainer}>
           {listaPost.map((post) => (
-            <PostCard key={post.id} data={post} />
+            <PostCard key={post.id} data={post}
+           onDelete={() => removerPostDaListaVisual(post.id)} />
           ))}
           {listaPost.length === 0 && (
             <Text style={{textAlign: 'center', color: '#888', marginTop: 20}}>
