@@ -14,7 +14,7 @@ import { PostComunidadeI } from '@/utils/types/PostComuniade';// Ajuste o caminh
 import CarrosselFotos from "./carrosselFotosComunidade"; // Seu componente de carrossel
 import Colors from '@/theme/color';
 import { showAlert } from '../swalAlert';
-import AnimacaoLike from '../animacaoLike';
+import AnimacaoLike from './animacaoLike';
 import { URL_Adocao } from '@/utils/url';
 import { useAuth } from '@/context/AuthContext';
 import { deletar } from './delete';

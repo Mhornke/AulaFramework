@@ -345,8 +345,8 @@ const styles = StyleSheet.create({
     minHeight: 40,
     maxHeight: 150,
     textAlignVertical: 'top',
-    paddingTop: 8, // Alinha com o avatar
-    // Remove outline no web
+    paddingTop: 8, 
+    
     ...Platform.select({
         web: { outlineStyle: 'none' } as any
     })

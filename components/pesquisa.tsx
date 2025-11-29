@@ -1,103 +1,109 @@
 import { FontAwesome } from "@expo/vector-icons";
 import {
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { Link } from "expo-router";
-import { push } from "expo-router/build/global-state/routing";
+import { useRouter } from "expo-router"; // Importação correta
 import React, { useState } from "react";
 import Colors from "../theme/color";
 
 export default function Pesquisa() {
   const [termo, setTermo] = useState("");
+  const router = useRouter(); // Hook para navegação
 
-  const enviaPesquisa = (text: any) => {
+  const enviaPesquisa = (text: string) => {
     setTermo(text);
   };
-  function LimpaPesquisa() {
+
+  // Função para realizar a busca (pelo ícone ou enter do teclado)
+  function handleSearch() {
+    if (termo.trim() === "") return;
+    
+    router.push({
+      pathname: "/pesquisa/[termo]",
+      params: { termo }
+    });
+  }
+
+  function limparPesquisa() {
     setTermo("");
-    push("/");
+    // Opcional: Se quiser voltar para home ao limpar, descomente a linha abaixo
+    // router.push("/"); 
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
+      <View style={styles.searchBar}>
+        
+        {/* Input de Texto */}
         <TextInput
-          style={[styles.input, { color: termo ? '#ffff' : Colors.LetraCinza }]}
+          style={styles.input}
           placeholder="Pesquisar..."
+          placeholderTextColor="#999"
           value={termo}
           onChangeText={enviaPesquisa}
+          onSubmitEditing={handleSearch} // Permite pesquisar dando "Enter" no teclado
+          returnKeyType="search"
         />
 
+        {/* Botão X (Limpar) - Só aparece se tiver texto */}
         {termo.length > 0 && (
-          <TouchableOpacity onPress={LimpaPesquisa} style={styles.clearButton}>
-            <FontAwesome name="close" size={20} color="gray" />
+          <TouchableOpacity onPress={limparPesquisa} style={styles.iconButton}>
+            <FontAwesome name="close" size={16} color="#888" />
           </TouchableOpacity>
         )}
 
-        <Link
+        {/* Botão Lupa (Pesquisar) */}
+        <TouchableOpacity 
+          onPress={handleSearch} 
           style={styles.searchButton}
-          href={{ pathname: "/pesquisa/[termo]", params: { termo } }}
         >
-          <FontAwesome name="search" size={20} color="white" />
-        </Link>
-        <TouchableOpacity onPress={LimpaPesquisa} style={styles.ClearButton}>
-        <Text style={{color:"#ffff"}}>limpar</Text>
-      </TouchableOpacity>
+          <FontAwesome name="search" size={18} color="white" />
+        </TouchableOpacity>
+
       </View>
-      
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screenContainer: {
-    flex: 1,
-    paddingTop: 15,
-    paddingHorizontal: 15,
-    backgroundColor: "#fff",
-  },
   container: {
-    marginBottom: 50,
-    marginTop:10
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+    height:100,
+  
+    marginBottom:100
   },
-  searchContainer: {
+  searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 25,
-    paddingHorizontal: 15,
+    backgroundColor: "#fff", 
+    borderRadius: 30, 
+    paddingVertical: 5,
+    paddingLeft: 15,
+    paddingRight: 5, 
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
   },
   input: {
-    flex: 1,
+    flex: 1, 
     height: 40,
     fontSize: 16,
-    backgroundColor:Colors.CorFundo,
-    color:Colors.LetraCinza,
-    paddingLeft:10,
-    borderRadius:10
+    color: "#333",
+    outlineStyle: 'none' as any
   },
-  clearButton: {
-    padding: 5,
+  iconButton: {
+    padding: 8,
+    marginRight: 5,
   },
   searchButton: {
-    backgroundColor: Colors.Butao,
-    borderRadius: 20,
-    padding: 8,
-    marginLeft: 5,
-  },
-  ClearButton: {
-    backgroundColor: Colors.Butao,
-    borderRadius: 10,
-    width: 100,
-    fontWeight: "500",
-    padding: 8,
-    marginLeft: 5,
-    color: "white",
+    backgroundColor: Colors.Butao || "#007BFF", 
+    width: 40,
+    height: 40,
+    borderRadius: 20, 
     alignItems: "center",
+    justifyContent: "center",
   },
 });

@@ -135,7 +135,9 @@ export default function Home() {
         return (
             <>
                 <ScrollView ref={scrollViewRef}
-                    showsVerticalScrollIndicator={false}>
+                    showsVerticalScrollIndicator={false}
+                    style={{backgroundColor:"white"}}
+                    >
 
                     <Pesquisa />
                     <View>
