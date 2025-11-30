@@ -230,7 +230,7 @@ export default function Header() {
             </View>
           ) : (
             <View style={styles.authLinks}>
-              <Link href="/"><Text style={styles.desktopLinkText}>Início</Text></Link>
+             
               <Link href="/(auth)/login"><Text style={styles.desktopLinkText}>Entrar</Text></Link>
               <Link href="/(auth)/register"><Text style={styles.desktopLinkText}>Criar Conta</Text></Link>
             </View>
