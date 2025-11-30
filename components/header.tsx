@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,421 +7,405 @@ import {
   TouchableOpacity,
   Dimensions,
   Modal,
-  Alert,
+  ScrollView,
+  Platform
 } from "react-native";
-import { showAlert } from "./swalAlert";
 import { Link, router } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
-import { useState } from "react";
 import Color from "../theme/color";
 import { useAuth } from "../context/AuthContext";
+import { showAlert } from "./swalAlert";
 import DeleteUserButton from "./deleteUser";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import DownBarAnimada from "./giraNoticias";
+
+
+const MAX_WIDTH_DESKTOP = 1200;
+const MENU_WIDTH_MOBILE = 250;
+
 export default function Header() {
-  const [openMenu, SetOpenMenu] = useState(false);
-  const { width, height } = Dimensions.get("window");
+  const [openMenu, setOpenMenu] = useState(false);
+  const { width } = Dimensions.get("window");
   const { user, logout } = useAuth();
+  const isMobile = width <= 768; 
 
-  const sair = () => {
-    showAlert("Usuario deslogado com sucesso",
-      "Até mais tarde",
-      "success"
-    )
+  const handleSair = () => {
+    setOpenMenu(false);
+    showAlert("Usuário deslogado", "Até mais tarde!", "success");
     logout();
-    router.replace('/');
+    router.replace("/");
   };
 
-  const styles = StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: Color.CorFundo,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    overlayDesktop: {
-      flex: 1,
-
-    },
-    sidebar: {
-      position: "absolute",
-      top: 74,
-      height: '100%',
-      width: 200,
-      backgroundColor: Color.CorFundo,
-      padding: 20,
-      right: 0,
-      gap: 20,
-      alignItems: 'center'
-
-    },
-
-    sair: {
-      color: Color.Butao,
-      fontWeight: '500',
-      fontSize: 16, // padronizado
-      marginTop: 20,
-      textAlign: 'center',
-
-    },
-
-    Header: {
-      flexDirection: "row",
-      width: "100%",
-      backgroundColor: Color.CorFundo,
-      padding: 15,
-      alignItems: "center",
-      justifyContent: "space-between"
-
-    },
-
-    logo: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-
-    texto: {
-      color: "#fff",
-      fontWeight: "700",
-      fontSize: 20,
-      marginLeft: 4,
-    },
-
-    menu: {
-      flex: 1,
-      width: width,
-      justifyContent: "flex-start",
-      alignItems: "center",
-    },
-
-    textoMenu: {
-      color: "#fff",
-      fontWeight: "500",
-      fontSize: 18,
-      marginBottom: 16,
-      textAlign: "center",
-    },
-
-    textMenuDesktop: {
-      color: "#fff",
-      fontWeight: "500",
-      fontSize: 16,
-      marginHorizontal: 10,
-    },
-    BotaoCloseModel: {
-      position: "absolute",
-      right: 0,
-      top: -0
-
-    }
-  });
-
-
-  const clickMenu = () => {
-    SetOpenMenu(!openMenu);
+  const navigateTo = (path: string) => {
+    setOpenMenu(false);
+    router.push(path as any);
   };
 
-  if (width <= 600) {
+  const LogoComponent = () => (
+    <View style={styles.logoContainer}>
+      <Link href="/">
+        <Image
+          source={{ uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true" }}
+          style={styles.logoImage}
+        />
+      </Link>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={styles.logoTextMain}>Adote</Text>
+        <Text style={styles.logoTextSub}>.Com</Text>
+      </View>
+    </View>
+  );
+
+  const AlertButton = () => (
+    <TouchableOpacity
+      onPress={() => navigateTo('/cadastro')}
+      style={styles.alertButton}
+    >
+      <FontAwesome name="exclamation-triangle" size={16} color="#e5fc62" />
+      <Text style={styles.alertButtonText}>Perdeu ou Encontrou</Text>
+    </TouchableOpacity>
+  );
+
+
+  if (isMobile) {
     return (
-      <View style={[styles.Header, {}]}>
+      <View style={styles.headerContainer}>
+        <View style={styles.mobileHeaderContent}>
+          <LogoComponent />
 
-        <View style={styles.logo}>
-          <Link href="/">
-            <Image
-              source={{
-                uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
-              }}
-              style={{ width: 40, height: 40 }}
-            />
-          </Link>
-          <Text style={styles.texto}>Adote</Text>
-          <Text style={styles.texto}>.Com </Text>
+          <TouchableOpacity onPress={() => setOpenMenu(true)}>
+            <FontAwesome name="bars" size={28} color="white" />
+          </TouchableOpacity>
         </View>
 
-        <View >
-          <TouchableOpacity onPress={clickMenu}>
-            <FontAwesome
-              name={openMenu ? "times" : "bars"}
-              size={30}
-              color="white"
-
-            />
-          </TouchableOpacity>
-
-          <Modal visible={openMenu} transparent animationType="fade">
-
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => SetOpenMenu(false)}
-              style={styles.overlay}
-            >
-
-              <TouchableOpacity onPress={clickMenu} style={{ position: 'absolute', right: 15, top: 21 }}>
-                <FontAwesome
-                  name={openMenu ? "times" : "bars"}
-                  size={30}
-                  color="white"
-
-                />
-              </TouchableOpacity>
-              <View >
-                <TouchableOpacity
-                  activeOpacity={1}
-                  style={styles.menu}
-                  onPress={() => { }}
-                >
-
-                  {user ? (
-                    <View>
-                      <Text style={styles.textoMenu}>Olá, {user.nome}</Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/')
-                        }}>
-                        <Text style={styles.textoMenu}>Início</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => {
-                        SetOpenMenu(false)
-                        router.push('/Comunidade')
-                      }}
-                      >
-                        <Text style={styles.textoMenu}>Comunidade</Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/cadastro')
-                        }}>
-
-                        <View style={{ flexDirection: "row", gap: 10, borderWidth: 1, borderColor: Color.Preto, backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", marginBottom: 15, justifyContent: "center" }}>
-                          <FontAwesome name="exclamation-triangle" size={20} color="#e5fc62ff" style={{
-
-                          }} />
-                          <Text style={{ fontWeight: "500", color: "white", fontSize: 20 }}>Perdeu ou Encontrou</Text>
-                        </View>
-
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/(tabs)/pedidos')
-                        }}>
-                        <Text style={styles.textoMenu}>Meus Pedidos de Adoção</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/(tabs)/listaPerdidosEncontrados')
-                        }}>
-                        <Text style={styles.textoMenu}>Lista de Pets que Perdeu ou encontrou </Text>
-                      </TouchableOpacity>
-
-
-                      <TouchableOpacity onPress={() => {
-                        SetOpenMenu(false)
-                        sair()
-
-                      }}>
-
-                        <Text style={styles.sair}>Sair</Text>
-                      </TouchableOpacity>
-                      <View style={{ position: "absolute", bottom: -300, left: 96 }}>
-
-                        <DeleteUserButton />
-                      </View>
-                    </View>
-                  ) : (
-                    <View>
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/cadastro')
-                        }}>
-
-                        <View style={{ flexDirection: "row", gap: 10, borderWidth: 1, borderColor: Color.Preto, backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", marginBottom: 30 }}>
-                          <FontAwesome name="exclamation-triangle" size={20} color="#e5fc62ff" style={{
-
-                          }} />
-                          <Text style={{ fontWeight: "500", color: "white", fontSize: 20 }}>Perdeu ou Encontrou</Text>
-                        </View>
-
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/')
-                        }}>
-                        <Text style={styles.textoMenu}>Início</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/(auth)/login')
-                        }}>
-                        <Text style={styles.textoMenu}>Entrar</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          SetOpenMenu(false)
-                          router.push('/(auth)/register')
-                        }}>
-                        <Text style={styles.textoMenu}>Criar Conta</Text>
-                      </TouchableOpacity>
-
-
-                    </View>
-                  )}
+        <Modal visible={openMenu} transparent animationType="fade">
+          <View style={styles.overlay}>
+            <TouchableOpacity style={styles.overlayClickArea} onPress={() => setOpenMenu(false)} />
+            
+            <View style={styles.drawer}>
+              <View style={styles.drawerHeader}>
+                <Text style={styles.drawerTitle}>Menu</Text>
+                <TouchableOpacity onPress={() => setOpenMenu(false)}>
+                  <FontAwesome name="times" size={24} color={Color.Butao} />
                 </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-          </Modal>
 
-        </View>
+              <ScrollView contentContainerStyle={styles.drawerContent}>
+                {user ? (
+                  <>
+                    <Text style={styles.welcomeText}>Olá, {user.nome}</Text>
+                    <AlertButton />
+                    
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/')}>
+                      <FontAwesome name="home" size={20} color={Color.Butao} />
+                      <Text style={styles.menuItemText}>Início</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/Comunidade')}>
+                      <FontAwesome name="users" size={20} color={Color.Butao} />
+                      <Text style={styles.menuItemText}>Comunidade</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/pedidos')}>
+                      <FontAwesome name="paw" size={20} color={Color.Butao} />
+                      <Text style={styles.menuItemText}>Meus Pedidos</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/listaPerdidosEncontrados')}>
+                      <FontAwesome name="list-ul" size={20} color={Color.Butao} />
+                      <Text style={styles.menuItemText}>Lista de Pets</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.divider} />
+
+                    <TouchableOpacity style={styles.menuItem} onPress={handleSair}>
+                      <FontAwesome name="sign-out" size={20} color="red" />
+                      <Text style={[styles.menuItemText, { color: 'red' }]}>Sair</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.drawerFooter}>
+                      <DeleteUserButton />
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <AlertButton />
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/')}>
+                      <Text style={styles.menuItemText}>Início</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(auth)/login')}>
+                      <Text style={styles.menuItemText}>Entrar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(auth)/register')}>
+                      <Text style={styles.menuItemText}>Criar Conta</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </View>
-
     );
-  } else {
+  }
 
+  
+  return (
+    <View style={styles.headerContainer}>
+      <View style={styles.desktopContent}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+          <LogoComponent />
+         
+        </View>
 
-    // DESKTOP
-
-
-
-    return (
-      <View style={{
-        backgroundColor: Color.CorFundo
-        , borderBottomWidth: 0.5,
-        borderBottomColor: "#ccccc",
-        paddingBottom: 15,
-        alignItems: "center",
-        paddingTop: 15,
-        width: "100%"
-      }}>
-
-        <View style={{
-          width: "100%",
-          maxWidth: 1200,
-          alignItems: "center",
-          flexDirection: "row",
-        }}>
-          <View style={[styles.logo, { marginLeft: 10 }]}>
-            <Link href="/">
-              <Image
-                source={{
-                  uri: "https://github.com/DieizonOliveira/frontAdocao/blob/main/public/logo.png?raw=true",
-                }}
-                style={{ width: 40, height: 40 }}
-              />
-            </Link>
-            <Text style={styles.texto}>Adote</Text>
-
-            <Text style={styles.texto}>.Com </Text>
-          </View>
-
-          <View style={{ flexDirection: "row", marginLeft: "auto", marginRight: 50 }}>
-
-            <TouchableOpacity
-              onPress={() => {
-
-                router.push('/cadastro')
-              }}
-              style={{ backgroundColor: Color.Butao, padding: 5, borderRadius: 5, alignItems: "center", }}>
-              <Text style={[styles.textMenuDesktop, { textAlign: 'center' }]}>Perdeu ou Encontrou</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.desktopRightSide}>
+          <AlertButton />
+           <TouchableOpacity onPress={() => navigateTo('/(tabs)/Comunidade')}>
+             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
+                <FontAwesome name="users" size={20} color="white" />
+             </View>
+          </TouchableOpacity>
 
           {user ? (
-            <View style={{ marginRight: 10, flexDirection: "row", gap: 30, alignItems: "center" }}>
+            <View style={styles.desktopUserArea}>
+              <Link href="/">
+                <FontAwesome name="home" size={26} color="white" />
+              </Link>
 
-              <View style={{}}>
-                <Link href="/">
-                  <FontAwesome name="home" size={30} color="white" />
-                </Link>
-              </View>
-
-              <TouchableOpacity onPress={() => {
-                router.push('/(tabs)/Comunidade')
-              }}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  <FontAwesome name="users" size={24} color="white" />
-
-                </View>
+              <TouchableOpacity style={styles.desktopUserBtn} onPress={() => setOpenMenu(true)}>
+                 <Text style={{color: '#fff', fontWeight: 'bold'}}>{user.nome}</Text>
+                 <FontAwesome name="ellipsis-v" size={24} color="white" />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={clickMenu}>
-                <FontAwesome
-                  name={openMenu ? "times" : "bars"}
-                  size={30}
-                  color="white"
-                />
-              </TouchableOpacity>
+              <Modal visible={openMenu} transparent animationType="fade">
+                <TouchableOpacity style={styles.overlayDesktop} onPress={() => setOpenMenu(false)}>
+                  <View style={styles.dropdownDesktop}>
+                    <Text style={styles.dropdownTitle}>Menu do Usuário</Text>
+                    
+                    <TouchableOpacity style={styles.dropdownItem} onPress={() => navigateTo('/(tabs)/pedidos')}>
+                      <Text>Meus Pedidos</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity style={styles.dropdownItem} onPress={() => navigateTo('/(tabs)/listaPerdidosEncontrados')}>
+                      <Text>Meus Pets cadastrados</Text>
+                    </TouchableOpacity>
 
-              <Modal visible={openMenu} transparent animationType="fade" >
+                    <View style={styles.divider} />
+                    
+                    <TouchableOpacity style={styles.dropdownItem} onPress={handleSair}>
+                      <Text style={{color: 'red'}}>Sair</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                  activeOpacity={1}
-                  onPress={() => SetOpenMenu(false)}
-                  style={styles.overlayDesktop}
-                ></TouchableOpacity>
-                <View style={styles.sidebar}>
-                  <Text style={styles.textMenuDesktop}>Olá, {user.nome}</Text>
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      SetOpenMenu(false)
-                      router.push('/(tabs)/pedidos')
-                    }}>
-                    <Text style={styles.textMenuDesktop}>Meus Pedidos de Adoção</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      SetOpenMenu(false)
-                      router.push('/(tabs)/listaPerdidosEncontrados')
-                    }}>
-                    <Text style={styles.textMenuDesktop}>Lista de Pets perdidos</Text>
-                  </TouchableOpacity>
-
-
-
-
-                  <TouchableOpacity onPress={() => {
-                    SetOpenMenu(false)
-                    sair()
-
-                  }}>
-
-                    <Text style={styles.sair}>Sair</Text>
-                  </TouchableOpacity>
-                  <View style={{position:"absolute", bottom:150}}>
-                  <DeleteUserButton />
+                    <View style={{marginTop: 10}}>
+                       <DeleteUserButton />
+                    </View>
+                    
+                    <View style={{marginTop: 10, height: 30}}>
+                        <DownBarAnimada /> 
+                    </View>
                   </View>
-               
-                </View>
-                <View style={{}}>
-                  <DownBarAnimada/>
-                </View>
-
+                </TouchableOpacity>
               </Modal>
             </View>
           ) : (
-            <View style={{ alignItems: "center", flexDirection: "row" }}>
-              <Link href="/">
-                <Text style={styles.textMenuDesktop}>Início</Text>
-              </Link>
-              <Link href="/(auth)/login">
-                <Text style={styles.textMenuDesktop}>Entrar</Text>
-              </Link>
-              <Link href="/(auth)/register">
-                <Text style={styles.textMenuDesktop}>Criar Conta</Text>
-              </Link>
+            <View style={styles.authLinks}>
+              <Link href="/"><Text style={styles.desktopLinkText}>Início</Text></Link>
+              <Link href="/(auth)/login"><Text style={styles.desktopLinkText}>Entrar</Text></Link>
+              <Link href="/(auth)/register"><Text style={styles.desktopLinkText}>Criar Conta</Text></Link>
             </View>
           )}
         </View>
-      </View >
-    );
-  }
+      </View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    width: "100%",
+    backgroundColor: Color.CorFundo,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    zIndex: 100, 
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+
+
+  logoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
+    marginRight: 5,
+  },
+  logoTextMain: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 20,
+  },
+  logoTextSub: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 20,
+  },
+
+ 
+  mobileHeaderContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    flexDirection: 'row',
+    justifyContent: 'flex-end', 
+  },
+  overlayClickArea: {
+    flex: 1,
+  },
+  drawer: {
+    width: MENU_WIDTH_MOBILE,
+    backgroundColor: "#fff",
+    height: '100%',
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  drawerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    paddingBottom: 10,
+  },
+  drawerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Color.CorFundo,
+  },
+  drawerContent: {
+    gap: 15,
+  },
+  drawerFooter: {
+    marginTop: 20,
+    alignItems: 'center'
+  },
+
+ 
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  welcomeText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Color.CorFundo,
+    marginBottom: 10,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 10,
+  },
+
+  
+  alertButton: {
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: Color.Butao,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#333'
+  },
+  alertButtonText: {
+    fontWeight: "600",
+    color: "white",
+    fontSize: 14,
+  },
+
+  
+  desktopContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: MAX_WIDTH_DESKTOP,
+    alignSelf: 'center', 
+  },
+  desktopRightSide: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  desktopUserArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  desktopUserBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    cursor: 'pointer' 
+  },
+  desktopLinkText: {
+    color: '#fff',
+    fontWeight: '500',
+    fontSize: 16,
+  },
+  authLinks: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  
+  overlayDesktop: {
+    flex: 1,
+    backgroundColor: 'transparent', 
+  },
+  dropdownDesktop: {
+    position: 'absolute',
+    top: 70, 
+    right: (Dimensions.get('window').width - Math.min(Dimensions.get('window').width, MAX_WIDTH_DESKTOP)) / 2 + 20, // Calcula posição baseado no container centralizado
+    width: 220,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  dropdownTitle: {
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+    textAlign: 'center',
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#f0f0f0',
+  }
+});

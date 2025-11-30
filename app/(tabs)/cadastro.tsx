@@ -20,11 +20,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { router } from 'expo-router';
 import CarrosselPreview from '@/components/carrocelPreview';
 import { CriaAnimalPerdidoDTO } from '@/utils/types/animalPerdidoDTO';
-import ConverteData from '@/utils/converteData';
-// import { MaskedTextInput } from "react-native-mask-text";
 import DateTimePicker from "react-native-ui-datepicker";
-import dayjs from "dayjs";
-import { AnimalPerdidoI } from '@/utils/types/animiasPerdidos';
 
 export default function Cadastrado() {
   const [name, setName] = useState('');
@@ -387,11 +383,8 @@ export default function Cadastrado() {
       <View style={{ alignItems: "center", marginBottom: 30 }}>
         <Text style={styles.title}>Cadastro de Animal</Text>
 
-        {/* --- INÍCIO DA VERIFICAÇÃO DE USUÁRIO --- */}
         {user ? (
-          // =================================================
-          // BLOCO 1: USUÁRIO LOGADO (FORMULÁRIO COMPLETO)
-          // =================================================
+         
           <View style={{
             borderWidth: 1,
             borderColor: "#ccc",

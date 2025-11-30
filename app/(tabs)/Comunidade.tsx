@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  Image, 
-  Platform, 
-  useWindowDimensions, 
-  TouchableOpacity, 
-  TextInput, 
-  ScrollView, 
+import {
+  View,
+  StyleSheet,
+  Image,
+  Platform,
+  useWindowDimensions,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
   Text,
   ActivityIndicator
 } from 'react-native';
-
+import { router } from 'expo-router';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { SeletorDeImagem, SeletorDeImagemRef } from '@/components/seletorDeImagens';
 import { ImagePickerAsset } from 'expo-image-picker';
@@ -31,7 +31,7 @@ export default function ComunidadeScreen() {
   // Estados para Imagens
   const [outrasFotosPreview, setOutrasFotosPreview] = useState<string[]>([]);
   const [outrasFotosFiles, setOutrasFotosFiles] = useState<{ uri: string; name: string; type: string }[]>([]);
-  
+
   // Estados para o Post
   const [textoPost, setTextoPost] = useState("");
   const [listaPost, setListaPost] = useState<PostComunidadeI[]>([]);
@@ -53,7 +53,7 @@ export default function ComunidadeScreen() {
     try {
       // Ajuste a rota conforme seu backend real
       const response = await fetch(`${URL_Adocao}/posts-comunidade`);
-      
+
       if (response.ok) {
         const data = await response.json();
         setListaPost(data);
@@ -140,7 +140,7 @@ export default function ComunidadeScreen() {
 
     try {
       setEnviando(true);
-      
+
       // 1. Upload das imagens (se houver)
       let urlsImagens: string[] = [];
       if (outrasFotosFiles.length > 0) {
@@ -149,11 +149,11 @@ export default function ComunidadeScreen() {
         );
       }
 
-   
+
       const body = {
         texto: textoPost,
-        adotanteId: user.id,      
-        fotos: urlsImagens 
+        adotanteId: user.id,
+        fotos: urlsImagens
       };
 
       console.log("Enviando post:", body);
@@ -170,15 +170,15 @@ export default function ComunidadeScreen() {
 
       if (response.ok) {
         const novoPost = await response.json();
-        
+
         // Adiciona o novo post no topo da lista localmente
         setListaPost(prev => [novoPost, ...prev]);
-        
+
         // Limpa formulário
         setTextoPost("");
         setOutrasFotosFiles([]);
         setOutrasFotosPreview([]);
-        
+
         showAlert("Sucesso", "Publicação realizada!", "success");
       } else {
         const erro = await response.json();
@@ -198,99 +198,127 @@ export default function ComunidadeScreen() {
   }
   return (
     <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent}>
-      
+
       <View style={[styles.container, { width: isMobile ? '95%' : '100%', maxWidth: 800 }]}>
 
-        
-        <View style={styles.createPostCard}>
-          
-          <View style={styles.inputRow}>
-           
-            
-            <TextInput
-              style={styles.textInput}
-              placeholder={`No que você está pensando, ${user?.nome|| 'visitante'}?`}
-              placeholderTextColor="#888"
-              multiline
-              value={textoPost}
-              onChangeText={setTextoPost}
-            />
-          </View>
 
-          {/* Preview das Imagens Selecionadas */}
-          {outrasFotosPreview.length > 0 && (
-            <ScrollView horizontal style={styles.previewContainer}>
-              {outrasFotosPreview.map((uri, index) => (
-                <View key={index} style={styles.previewWrapper}>
-                  <Image source={{ uri }} style={styles.previewImage} />
-                  <TouchableOpacity 
-                    style={styles.removeBtn} 
-                    onPress={() => removerImagem(index)}
-                  >
-                    <FontAwesome name="times" size={12} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </ScrollView>
-          )}
+        {user ? (
+          <View style={styles.createPostCard}>
 
-          <View style={styles.divider} />
+            <View style={styles.inputRow}>
 
-          {/* Botões de Ação (Foto e Publicar) */}
-          <View style={styles.actionsRow}>
-            
-            <TouchableOpacity 
-              style={styles.mediaButton}
-              onPress={() => seletorRef.current?.abrirGaleria()}
-            >
-              <FontAwesome name="image" size={20} color={Colors.Butao} />
-              <Text style={styles.mediaText}>Foto/Vídeo</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[
-                styles.publishButton, 
-                (!textoPost && outrasFotosFiles.length === 0) && styles.publishButtonDisabled
-              ]}
-              onPress={publicarPost}
-              disabled={enviando || (!textoPost && outrasFotosFiles.length === 0)}
-            >
-              {enviando ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.publishText}>Publicar</Text>
-              )}
-            </TouchableOpacity>
 
-          </View>
+              <TextInput
+                style={styles.textInput}
+                placeholder={`No que você está pensando, ${user?.nome || 'visitante'}?`}
+                placeholderTextColor="#888"
+                multiline
+                value={textoPost}
+                onChangeText={setTextoPost}
+              />
+            </View>
 
-          {/* Componente Invisível para Lógica de Seleção */}
-          <SeletorDeImagem
-            ref={seletorRef}
-            onSelecionada={async (asset) => {
-              const previewUri = Platform.OS === "web"
+            {/* Preview das Imagens Selecionadas */}
+            {outrasFotosPreview.length > 0 && (
+              <ScrollView horizontal style={styles.previewContainer}>
+                {outrasFotosPreview.map((uri, index) => (
+                  <View key={index} style={styles.previewWrapper}>
+                    <Image source={{ uri }} style={styles.previewImage} />
+                    <TouchableOpacity
+                      style={styles.removeBtn}
+                      onPress={() => removerImagem(index)}
+                    >
+                      <FontAwesome name="times" size={12} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+
+              </ScrollView>
+            )}
+
+            <View style={styles.divider} />
+
+            {/* Botões de Ação (Foto e Publicar) */}
+            <View style={styles.actionsRow}>
+
+              <TouchableOpacity
+                style={styles.mediaButton}
+                onPress={() => seletorRef.current?.abrirGaleria()}
+              >
+                <FontAwesome name="image" size={20} color={Colors.Butao} />
+                <Text style={styles.mediaText}>Foto/Vídeo</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.publishButton,
+                  (!textoPost && outrasFotosFiles.length === 0) && styles.publishButtonDisabled
+                ]}
+                onPress={publicarPost}
+                disabled={enviando || (!textoPost && outrasFotosFiles.length === 0)}
+              >
+                {enviando ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.publishText}>Publicar</Text>
+                )}
+              </TouchableOpacity>
+
+            </View>
+
+            {/* Componente Invisível para Lógica de Seleção */}
+            <SeletorDeImagem
+              ref={seletorRef}
+              onSelecionada={async (asset) => {
+                const previewUri = Platform.OS === "web"
                   ? `data:image/jpeg;base64,${asset.base64}`
                   : asset.uri;
 
-              setOutrasFotosPreview((prev) => [...prev, previewUri]);
+                setOutrasFotosPreview((prev) => [...prev, previewUri]);
 
-              const resultado = await processarImagemSelecionada(asset);
-              if (resultado && resultado.processedFile) {
-                setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
-              }
-            }}
-          />
+                const resultado = await processarImagemSelecionada(asset);
+                if (resultado && resultado.processedFile) {
+                  setOutrasFotosFiles((prev) => [...prev, resultado.processedFile]);
+                }
+              }}
+            />
+          </View>
+        ):(
+
+        <View style={styles.loginWarningContainer}>
+          <FontAwesome name="lock" size={40} color={Colors.LetraCinza} style={{ marginBottom: 10 }} />
+          <Text style={styles.warningText}>
+            Identificamos que você não está logado.
+          </Text>
+          <Text style={styles.subWarningText}>
+            Para poder postar na comunidade, acesse sua conta.
+          </Text>
+          <View style={styles.authButtonsContainer}>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => router.push('/(auth)/login')}
+            >
+              <Text style={styles.loginButtonText}>Fazer Login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.registerButton}
+              onPress={() => router.push('/(auth)/register')}
+            >
+              <Text style={styles.registerButtonText}>Criar Conta</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
+)}
         {/* === LISTA DE POSTS === */}
         <View style={styles.feedContainer}>
           {listaPost.map((post) => (
             <PostCard key={post.id} data={post}
-           onDelete={() => removerPostDaListaVisual(post.id)} />
+              onDelete={() => removerPostDaListaVisual(post.id)} />
           ))}
           {listaPost.length === 0 && (
-            <Text style={{textAlign: 'center', color: '#888', marginTop: 20}}>
-                Nenhuma publicação ainda. Seja o primeiro!
+            <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>
+              Nenhuma publicação ainda. Seja o primeiro!
             </Text>
           )}
         </View>
@@ -310,7 +338,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
   },
-  
+
   // Card de Criação
   createPostCard: {
     backgroundColor: "#fff",
@@ -345,13 +373,13 @@ const styles = StyleSheet.create({
     minHeight: 40,
     maxHeight: 150,
     textAlignVertical: 'top',
-    paddingTop: 8, 
-    
+    paddingTop: 8,
+
     ...Platform.select({
-        web: { outlineStyle: 'none' } as any
+      web: { outlineStyle: 'none' } as any
     })
   },
-  
+
   // Preview Imagens
   previewContainer: {
     flexDirection: 'row',
@@ -419,7 +447,56 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-
+  loginWarningContainer: {
+    marginTop: 30,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    width: '100%'
+  },
+  warningText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center'
+  },
+  subWarningText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20
+  },
+  authButtonsContainer: {
+    flexDirection: 'row',
+    gap: 15,
+    width: '100%',
+    justifyContent: 'center'
+  },
+  loginButton: {
+    backgroundColor: Colors.Butao, // Azul/Verde do seu tema
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontWeight: 'bold'
+  },
+  registerButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: Colors.Butao
+  },
+  registerButtonText: {
+    color: Colors.Butao,
+    fontWeight: 'bold'
+  },
   // Feed
   feedContainer: {
     width: "100%",
