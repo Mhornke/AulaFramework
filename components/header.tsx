@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   dropdownDesktopNavegacao:{
      position: 'absolute',
     top: 60,
-    left: (Dimensions.get('window').width - Math.min(Dimensions.get('window').width, MAX_WIDTH_DESKTOP)) / 2 + 0, 
+    left:0, 
     width: "100%",
     backgroundColor:Colors.CorFundo,
     padding: 15,
