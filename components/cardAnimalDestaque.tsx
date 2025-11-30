@@ -12,17 +12,21 @@ const CONFIG_ETIQUETA = {
 }
 export default function Card({ data }: { data: AnimalPerdidoI }) {
   const config = CONFIG_ETIQUETA[data.tipoAnuncio] || { texto: '', cor: "transparent" }
- 
+
   return (
     <View style={{ width: "100%", alignItems: "center" }} >
-      {/* criar caminho para animais perdidos */}
       <TouchableOpacity
         onPress={() => {
           router.push("/perdidos")
         }}
         style={{ width: "100%" }}>
-
-        <Text style={{ color: "red", margin: 20, textAlign: "center", fontWeight: "700" }}>Animais Perdidos</Text>
+        <View style={{marginTop:13, marginBottom:19}}>
+          <Text style={{ color: Colors.Butao, fontWeight: "700", fontSize: 30 }}>- Volte pra casa</Text>
+          <View style={{ alignItems: "center" }}>
+            <Text style={{ color: "white", fontWeight: "400", fontSize: 13, width: "80%", textAlign: "center", alignItems: "center" }}>
+              Não precisa de capa para ser um herói, basta ter atenção. Uma pista sua pode ser a chave para um reencontro emocionante. Ajude-nos a encontrar quem se perdeu!</Text>
+          </View>
+        </View>
         <View style={styles.container}>
 
           {data?.fotos?.length > 0 ? (
@@ -41,7 +45,7 @@ export default function Card({ data }: { data: AnimalPerdidoI }) {
           <View style={styles.containerTextInfoLarge}>
 
             <View style={[styles.tegs, { flexDirection: "row", paddingHorizontal: 5, gap: 2 }]}>
-              <FontAwesome name="paw" size={16} color={Colors.Butao}/>
+              <FontAwesome name="paw" size={16} color={Colors.Butao} />
               <Text style={styles.Text}>
                 {data.especie?.nome}
               </Text>
@@ -78,28 +82,28 @@ export default function Card({ data }: { data: AnimalPerdidoI }) {
               onPress={() => {
                 router.push(`/datails/perdidos/${data.id}`)
               }}>
-              <View style={[styles.botao,{backgroundColor:'white'}]}>
+              <View style={[styles.botao, { backgroundColor: 'white' }]}>
                 <FontAwesome name="info-circle" size={16} color={Colors.Preto} />
-                <Text style={[styles.botaoTexto,{ color:Colors.Preto}]}>
-                  Informações                  
-                  </Text>
+                <Text style={[styles.botaoTexto, { color: Colors.Preto }]}>
+                  Informações
+                </Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => {
                 router.push("/perdidos")
-                
+
               }}>
-              
+
 
               <View style={styles.botao}>
-                <FontAwesome name="plus-circle" size={16}  color={"white"}/>
-                 <Text style={styles.botaoTexto}>
-                 Outros animais
-                  </Text>
+                <FontAwesome name="plus-circle" size={16} color={"white"} />
+                <Text style={styles.botaoTexto}>
+                  Outros animais
+                </Text>
               </View>
-              
+
 
             </TouchableOpacity>
 
@@ -122,13 +126,13 @@ const styles = StyleSheet.create({
   },
   containerbutao: {
     margin: 10,
-   
-    flexDirection:"row",
-     justifyContent:"center",
-     gap:100
+
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 100
   },
-  botaoTexto: {    
-    color: "#ffffff",    
+  botaoTexto: {
+    color: "#ffffff",
     textAlign: "center",
     fontWeight: "600",
   },
@@ -177,14 +181,14 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
   },
-  botao:{
-backgroundColor: Colors.Butao,
-padding:10,
-paddingHorizontal:15,
-borderRadius:5,
-flexDirection:"row",
-gap:5,
-justifyContent:"center",
-alignItems:"center"
+  botao: {
+    backgroundColor: Colors.Butao,
+    padding: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    flexDirection: "row",
+    gap: 5,
+    justifyContent: "center",
+    alignItems: "center"
   }
 });

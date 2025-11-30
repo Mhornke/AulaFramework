@@ -1,4 +1,4 @@
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View, TouchableOpacity, ImageBackground } from "react-native";
 
 import React, { useEffect, useRef, useState } from "react";
 import CardII from "../../components/cardAnimalNormal";
@@ -81,6 +81,40 @@ export default function Home() {
             alignSelf: 'center',
             paddingHorizontal: 20,
         },
+
+
+        backgroundImage: {
+            height: 400,
+            width: width,     
+            maxWidth:1200,
+            marginBottom:100
+        },
+
+        imageStyle: {
+            resizeMode: 'cover',
+            maxHeight: 380,
+            width: "100%",
+            borderRadius: 4
+        },
+        overlayContainer: {
+            padding: 20,
+            borderRadius: 10,
+            width: '100%',
+            alignItems: 'center',
+        },
+        titleText: {
+            fontWeight: "700",
+            fontSize: 40,
+            color: Colors.Butao,
+            marginBottom: 20,
+            textAlign: 'left',
+        },
+        bodyText: {
+            fontWeight: "400",
+            fontSize: 30,
+            color: "white",
+            textAlign: "center",
+        }
     });
 
 
@@ -136,8 +170,8 @@ export default function Home() {
             <>
                 <ScrollView ref={scrollViewRef}
                     showsVerticalScrollIndicator={false}
-                    style={{backgroundColor:"white"}}
-                    >
+                    style={{ backgroundColor: "white" }}
+                >
 
                     <Pesquisa />
                     <View>
@@ -173,46 +207,39 @@ export default function Home() {
                 >
                     <View style={[styles.contentWrapper, {}]}>
 
-                        <View style={{ flex: 1, }}>
+                        <View style={{ flex: 1, top: 30, zIndex: 9999 }}>
                             <Pesquisa />
                         </View>
                         {animaisDestaque.length > 0 ? (
 
-                            <View style={{ alignItems: "center", justifyContent: "center", flex: 10 }}>
+                            <View style={{ alignItems: "center", gap: 20, flex: 10 }}>
                                 <View style={{ alignItems: "center", justifyContent: "center", flex: 10 }}>
-                                    <View style={{ width: "100%", alignItems: "center" }}>
 
-                                       
-                                        <Text
-                                            style={{
-                                                fontWeight: "700",
-                                                fontSize: 25,
-                                                color: Colors.Butao,
-                                                marginBottom: 20,
-                                                alignSelf: "flex-start", 
-                                                paddingHorizontal: 20,   
-                                            }}
+                                    <View style={{ width: "100%", alignItems: "center", flex: 1, }}>
+                                        <ImageBackground
+                                            source={require('../../assets/images/fundo.jpg')}
+                                            style={[styles.backgroundImage,]}
+                                            imageStyle={styles.imageStyle}
                                         >
-                                            - Volte pra casa
-                                        </Text>
 
-                                       
-                                        <View style={{ width: '80%' }}>
-                                            <Text
-                                                style={{
-                                                    fontWeight: "400",
-                                                    fontSize: 15,
-                                                    color: Colors.Preto,
-                                                    textAlign: "center", 
-                                                    marginBottom: 50,
-                                                }}
-                                            >
-                                                Nosso amigo está perdido e precisamos da sua ajuda! 🐾
-                                                Se você viu ou tem alguma informação sobre ele/ela, por favor entre em contato. Cada pista conta e pode fazer toda a diferença para trazê-lo de volta para casa, seguro e feliz. Compartilhe esta mensagem e nos ajude a encontrá-lo!
+                                            <Text style={[styles.titleText, { left: 40,  }]}>
+                                                Amor e Carinho
                                             </Text>
-                                        </View>
+                                            <Text style={[styles.titleText, { left: 280, bottom:20 }]}>
+                                                - Nunca é Demais
+                                            </Text>
+                                            <View style={{ width: 350, right:160, top:100, alignContent:"flex-end", position:"absolute"}}>
 
-                                    </View>
+                                                <Text style={[styles.bodyText]}>
+                                                   "O amor deles é puro. O nosso cuidado deve ser à altura."
+                                                </Text>
+                                            </View>
+
+
+                                        </ImageBackground>
+
+
+                                    </View>                                    
                                 </View>
 
 

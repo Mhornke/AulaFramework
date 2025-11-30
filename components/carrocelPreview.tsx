@@ -17,14 +17,12 @@ interface CarrosselPreviewProps {
 export default function CarrosselPreview({ fotosUri, onRemoverFoto }: CarrosselPreviewProps) {
   const [indexAtual, setIndexAtual] = useState(0);
 
-  // Ajusta o índice se a foto atual for apagada para não quebrar a visualização
   useEffect(() => {
     if (indexAtual >= fotosUri.length && fotosUri.length > 0) {
       setIndexAtual(fotosUri.length - 1);
     }
   }, [fotosUri.length]);
 
-  // Se não houver fotos, mostra um placeholder simples
   if (!fotosUri || fotosUri.length === 0) {
     return (
       <View style={[styles.container, styles.placeholder]}>

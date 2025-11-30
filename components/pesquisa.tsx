@@ -69,12 +69,7 @@ export default function Pesquisa() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 15,
-    paddingVertical: 20,
-    height:100,
-  
-    marginBottom:100
+  container: {       
   },
   searchBar: {
     flexDirection: "row",
