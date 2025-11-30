@@ -212,9 +212,12 @@ export default function PostCard({ data, onDelete }: PostCardProps,) {
             <Text style={styles.timestamp}>{dataFormatada}</Text>
           </View>
         </View>
+        {user?.id === data.adotante.id && (
+
         <TouchableOpacity onPress={() => handleExcluirPost(data.id)}>
           <Text style={{ color: "red" }}>Excluir</Text>
         </TouchableOpacity>
+        )}
 
       </View>
 

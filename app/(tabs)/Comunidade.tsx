@@ -292,7 +292,7 @@ export default function ComunidadeScreen() {
             Identificamos que você não está logado.
           </Text>
           <Text style={styles.subWarningText}>
-            Para poder postar na comunidade, acesse sua conta.
+            Para poder acessar as funções da comunidade, entre em sua conta.
           </Text>
           <View style={styles.authButtonsContainer}>
             <TouchableOpacity

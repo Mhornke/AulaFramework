@@ -17,6 +17,7 @@ import { useAuth } from "../context/AuthContext";
 import { showAlert } from "./swalAlert";
 import DeleteUserButton from "./deleteUser";
 import DownBarAnimada from "./giraNoticias";
+import Colors from "../theme/color";
 
 
 const MAX_WIDTH_DESKTOP = 1200;
@@ -24,9 +25,10 @@ const MENU_WIDTH_MOBILE = 250;
 
 export default function Header() {
   const [openMenu, setOpenMenu] = useState(false);
+  const [openMenuNavega, setOpenMenuNavega] = useState(false);
   const { width } = Dimensions.get("window");
   const { user, logout } = useAuth();
-  const isMobile = width <= 768; 
+  const isMobile = width <= 768;
 
   const handleSair = () => {
     setOpenMenu(false);
@@ -37,6 +39,10 @@ export default function Header() {
 
   const navigateTo = (path: string) => {
     setOpenMenu(false);
+    router.push(path as any);
+  };
+  const navigateTo2 = (path: string) => {
+    setOpenMenuNavega(false);
     router.push(path as any);
   };
 
@@ -80,7 +86,7 @@ export default function Header() {
         <Modal visible={openMenu} transparent animationType="fade">
           <View style={styles.overlay}>
             <TouchableOpacity style={styles.overlayClickArea} onPress={() => setOpenMenu(false)} />
-            
+
             <View style={styles.drawer}>
               <View style={styles.drawerHeader}>
                 <Text style={styles.drawerTitle}>Menu</Text>
@@ -94,7 +100,7 @@ export default function Header() {
                   <>
                     <Text style={styles.welcomeText}>Olá, {user.nome}</Text>
                     <AlertButton />
-                    
+
                     <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/')}>
                       <FontAwesome name="home" size={20} color={Color.Butao} />
                       <Text style={styles.menuItemText}>Início</Text>
@@ -148,60 +154,76 @@ export default function Header() {
     );
   }
 
-  
+
   return (
     <View style={styles.headerContainer}>
       <View style={styles.desktopContent}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-          <LogoComponent />
          
+          <TouchableOpacity style={styles.desktopUserBtn} onPress={() => setOpenMenuNavega(true)}>
+            <FontAwesome name="bars" size={24} color="white" />
+          </TouchableOpacity>
+          <Modal visible={openMenuNavega} transparent animationType="fade">
+           
+            <TouchableOpacity style={styles.overlayDesktop} onPress={() => setOpenMenuNavega(false)}>
+              <View style={styles.dropdownDesktopNavegacao}>
+                
+
+                <TouchableOpacity style={styles.dropdownItemNav} onPress={() => navigateTo2('/(tabs)/')}>
+                  <Text style={{fontWeight:"400", color:"white"}}>Iniciar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.dropdownItemNav} onPress={() => navigateTo2('/(tabs)/Comunidade')}>
+                  <Text style={{fontWeight:"400", color:"white"}}>Comunidade</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.dropdownItemNav} onPress={() => navigateTo2('/(tabs)/perdidos')}>
+                  <Text style={{fontWeight:"400", color:"white"}}>Volte pra casa</Text>
+                </TouchableOpacity>
+
+               </View>
+            </TouchableOpacity>
+          </Modal>
+
+          <LogoComponent />
+
         </View>
 
         <View style={styles.desktopRightSide}>
-          <AlertButton />
-           <TouchableOpacity onPress={() => navigateTo('/(tabs)/Comunidade')}>
-             <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
-                <FontAwesome name="users" size={20} color="white" />
-             </View>
-          </TouchableOpacity>
+          <AlertButton />        
 
           {user ? (
-            <View style={styles.desktopUserArea}>
-              <Link href="/">
-                <FontAwesome name="home" size={26} color="white" />
-              </Link>
+            <View style={styles.desktopUserArea}>          
 
               <TouchableOpacity style={styles.desktopUserBtn} onPress={() => setOpenMenu(true)}>
-                 <Text style={{color: '#fff', fontWeight: 'bold'}}>{user.nome}</Text>
-                 <FontAwesome name="ellipsis-v" size={24} color="white" />
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>{user.nome}</Text>
+                <FontAwesome name="ellipsis-v" size={24} color="white" />
               </TouchableOpacity>
 
               <Modal visible={openMenu} transparent animationType="fade">
                 <TouchableOpacity style={styles.overlayDesktop} onPress={() => setOpenMenu(false)}>
                   <View style={styles.dropdownDesktop}>
                     <Text style={styles.dropdownTitle}>Menu do Usuário</Text>
-                    
+
                     <TouchableOpacity style={styles.dropdownItem} onPress={() => navigateTo('/(tabs)/pedidos')}>
                       <Text>Meus Pedidos</Text>
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity style={styles.dropdownItem} onPress={() => navigateTo('/(tabs)/listaPerdidosEncontrados')}>
                       <Text>Meus Pets cadastrados</Text>
                     </TouchableOpacity>
 
                     <View style={styles.divider} />
-                    
+
                     <TouchableOpacity style={styles.dropdownItem} onPress={handleSair}>
-                      <Text style={{color: 'red'}}>Sair</Text>
+                      <Text style={{ color: 'red' }}>Sair</Text>
                     </TouchableOpacity>
 
-                    <View style={{marginTop: 10}}>
-                       <DeleteUserButton />
+                    <View style={{ marginTop: 10 }}>
+                      <DeleteUserButton />
                     </View>
-                    
-                    <View style={{marginTop: 10, height: 30}}>
-                        <DownBarAnimada /> 
-                    </View>
+
+                   
                   </View>
                 </TouchableOpacity>
               </Modal>
@@ -225,7 +247,7 @@ const styles = StyleSheet.create({
     backgroundColor: Color.CorFundo,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    zIndex: 100, 
+    zIndex: 100,
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -254,7 +276,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 
- 
+
   mobileHeaderContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -264,7 +286,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
     flexDirection: 'row',
-    justifyContent: 'flex-end', 
+    justifyContent: 'flex-end',
   },
   overlayClickArea: {
     flex: 1,
@@ -301,7 +323,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
 
- 
+
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -325,7 +347,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 
-  
+
   alertButton: {
     flexDirection: "row",
     gap: 8,
@@ -344,14 +366,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  
+
   desktopContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
     maxWidth: MAX_WIDTH_DESKTOP,
-    alignSelf: 'center', 
+    alignSelf: 'center',
   },
   desktopRightSide: {
     flexDirection: 'row',
@@ -367,7 +389,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    cursor: 'pointer' 
+    cursor: 'pointer'
   },
   desktopLinkText: {
     color: '#fff',
@@ -378,15 +400,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 20,
   },
-  
+
   overlayDesktop: {
     flex: 1,
-    backgroundColor: 'transparent', 
+    backgroundColor: 'transparent',
   },
   dropdownDesktop: {
     position: 'absolute',
-    top: 70, 
-    right: (Dimensions.get('window').width - Math.min(Dimensions.get('window').width, MAX_WIDTH_DESKTOP)) / 2 + 20, // Calcula posição baseado no container centralizado
+    top: 70,
+    right: (Dimensions.get('window').width - Math.min(Dimensions.get('window').width, MAX_WIDTH_DESKTOP)) / 2 + 20, 
     width: 220,
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -396,6 +418,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  dropdownDesktopNavegacao:{
+     position: 'absolute',
+    top: 60,
+    left: (Dimensions.get('window').width - Math.min(Dimensions.get('window').width, MAX_WIDTH_DESKTOP)) / 2 + 0, 
+    width: "100%",
+    backgroundColor:Colors.CorFundo,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    flexDirection:"row", justifyContent:"space-around"
   },
   dropdownTitle: {
     fontWeight: 'bold',
@@ -407,5 +443,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: '#f0f0f0',
+  },
+  dropdownItemNav: {
+    paddingVertical: 10,
+    borderBottomWidth: 0.2,
+    borderBottomColor: Colors.Butao,
   }
 });
