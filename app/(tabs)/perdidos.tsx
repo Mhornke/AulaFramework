@@ -8,6 +8,7 @@ import Footer from "../../components/footer";
 import { AnimalPerdidoI } from "@/utils/types/animiasPerdidos";
 import { FontAwesome } from "@expo/vector-icons";
 import { URL_Adocao } from "@/utils/url";
+import Colors from "@/theme/color";
 
 export default function Perdidos() {
     const [animais, setAnimais] = useState<AnimalPerdidoI[]>([])
@@ -23,11 +24,10 @@ export default function Perdidos() {
 
     const styles = StyleSheet.create({
         containerText: {
-            flexDirection: "row",
-            flexWrap: "wrap",
-            height: 20,
-            alignItems: "flex-end",
-            paddingLeft: 20,
+            flexDirection: "row",       
+            height: 70,
+            borderRadius: 5,       
+            backgroundColor: "white"
         },
         text: {
             fontSize: 15,
@@ -69,9 +69,10 @@ export default function Perdidos() {
         contentWrapper: {
             width: '100%',
             maxWidth: 1200,
-            flex:1,
+            
             alignSelf: 'center',
             paddingHorizontal: 20,
+            paddingBottom: 40
         },
     });
 
@@ -96,28 +97,28 @@ export default function Perdidos() {
             }
         }
 
-       
+
         buscaDados()
-       
+
     }, []);
 
-   
+
     const animalEntregue = animais.filter(
-  (animal) => animal.encontrado === true
-);
+        (animal) => animal.encontrado === true
+    );
 
-const listaAnimaisEncontrados = animalEntregue
-  .slice(0, quantVisivelAdotados)
-  .map((animal) => (
-    <CardIII key={animal.id} data={animal as AnimalPerdidoI} />
-  ));
-const animalPerdido = animais.filter(
-  (animal) => animal.encontrado === false
-);
+    const listaAnimaisEncontrados = animalEntregue
+        .slice(0, quantVisivelAdotados)
+        .map((animal) => (
+            <CardIII key={animal.id} data={animal as AnimalPerdidoI} />
+        ));
+    const animalPerdido = animais.filter(
+        (animal) => animal.encontrado === false
+    );
 
-const listaAnimais = animalPerdido.map((animal) => (
-  <CardIIII key={animal.id} data={animal as AnimalPerdidoI} />
-));
+    const listaAnimais = animalPerdido.map((animal) => (
+        <CardIIII key={animal.id} data={animal as AnimalPerdidoI} />
+    ));
 
 
 
@@ -128,26 +129,32 @@ const listaAnimais = animalPerdido.map((animal) => (
         return (
             <>
                 <ScrollView ref={scrollViewRef}
-                showsVerticalScrollIndicator={false}>
+                    showsVerticalScrollIndicator={false}
+                    >
 
-                    {/* <Pesquisa /> */}
-                    <View >
-                    </View>
                     
-                        <Text style={[styles.text, {fontSize:23, fontWeight:'700'}]}>Animais perdidos</Text>
-                   
-                    {/* {animaisDestaque.length > 0 ? (
-                        <View style={{ alignItems: "center", marginTop: 20 }}>
-                          
 
-                            <Carrossel data={animaisDestaque} />
+                  <View style={[styles.containerText, { flexDirection: "column",padding:80, justifyContent:"center", alignItems:"center" }]}>
                             
+                            <View style={{}}>
+                                <Text style={[
+                                    styles.text,
+                                    { color: Colors.Butao, fontSize: 30, fontWeight: '700', }]}>
+                                    - Volte pra casa
+                                </Text>
+                            </View>
+
+                            <View style={{flexDirection:"column", gap:10, }}>
+                                <Text style={[styles.text,{color:Colors.Preto}]} >
+                                    Perdidos, mas não esquecidos.<FontAwesome name="heart" size={10} />
+                                </Text>
+                                <Text style={[styles.text,{color:Colors.Preto}]}>
+                                    Cada rostinho aqui tem alguém esperando. Fique alerta e ajude a reunir famílias!
+                                </Text>
+                            </View>
                         </View>
-                    ) : (
-                        <Text style={{ color: "#fff", textAlign: "center" }}>Nenhum animal em destaque no momento.</Text>
-                    )} */}
-                    <View style={[styles.card, {top:30}]}>
-                        
+                    <View style={[styles.card, { top: 30 }]}>
+
                         {listaAnimais}
                     </View>
                     <Footer />
@@ -161,43 +168,35 @@ const listaAnimais = animalPerdido.map((animal) => (
 
         return (
             < >
-                <ScrollView 
+                <ScrollView
                     showsVerticalScrollIndicator={false}
                     ref={scrollViewRef}
                     style={{
-                       
+
                     }}
                 >
-                    <View style={[styles.contentWrapper,{top:40,  }]}>    
-                        {/* Alterar a barra de pesquisa no back end */}
-                        {/* <Pesquisa /> */}
-                        <View style={styles.containerText}>
-
-                            <Text style={[styles.text,{color:'red', fontSize:23, fontWeight:'700'}]}>Animais perdidos</Text>
-                        </View>
-
-                        {/* {animaisDestaque.length > 0 ? (
-
-                            <View style={{ alignItems: "center", marginTop: 20 }}>
-                               
-    
-                                <Carrossel data={animaisDestaque} />
-    
-                            </View>
-
-                        ) : (
-                            <View style={{ alignItems: "center", justifyContent: "center", marginTop: 20 }}>
-                                <Text style={{ color: "black", textAlign: "center", marginBottom: 10 }}>
-                                    Nenhum animal em destaque no momento.
+                    <View style={[styles.contentWrapper, { top: 40, alignContent:"center",  }]}>
+                        
+                        <View style={[styles.containerText, { flexDirection: "column",padding:80, justifyContent:"center", alignItems:"center" }]}>
+                            
+                            <View style={{}}>
+                                <Text style={[
+                                    styles.text,
+                                    { color: Colors.Butao, fontSize: 30, fontWeight: '700', }]}>
+                                    - Volte pra casa
                                 </Text>
-
-                                <Image
-                                    source={require('../../assets/images/imagenVazia.jpg')}
-                                    style={{ width: 150, height: 150 }}
-                                />
                             </View>
-                        )
-                        } */}
+
+                            <View style={{flexDirection:"row", gap:10}}>
+                                <Text style={[styles.text,{color:Colors.Preto}]} >
+                                    Perdidos, mas não esquecidos.<FontAwesome name="heart" size={10} />
+                                </Text>
+                                <Text style={[styles.text,{color:Colors.Preto}]}>
+                                    Cada rostinho aqui tem alguém esperando. Fique alerta e ajude a reunir famílias!
+                                </Text>
+                            </View>
+                        </View>
+                   
 
                         <View style={styles.cardTable}>
                             {listaAnimais}
@@ -220,13 +219,13 @@ const listaAnimais = animalPerdido.map((animal) => (
                             </TouchableOpacity>
                         </View>
                     </View>
-                   
 
-                    <Footer  />
-                  
-                <TouchableOpacity style={styles.botaoFlutuante} onPress={scrollParaTopo}>
-                    <FontAwesome name="arrow-up" size={15} color="#fff" />
-                </TouchableOpacity>
+
+                    <Footer />
+
+                    <TouchableOpacity style={styles.botaoFlutuante} onPress={scrollParaTopo}>
+                        <FontAwesome name="arrow-up" size={15} color="#fff" />
+                    </TouchableOpacity>
                 </ScrollView>
             </>
         );

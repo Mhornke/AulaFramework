@@ -205,6 +205,10 @@ export default function Header() {
                   <View style={styles.dropdownDesktop}>
                     <Text style={styles.dropdownTitle}>Menu do Usuário</Text>
 
+                    <TouchableOpacity style={styles.dropdownItem} onPress={() => navigateTo('/mensagens/chat')}>
+                      <Text>Mensagens</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity style={styles.dropdownItem} onPress={() => navigateTo('/(tabs)/pedidos')}>
                       <Text>Meus Pedidos</Text>
                     </TouchableOpacity>

@@ -390,7 +390,15 @@ export default function ListaCadastro() {
                       {chatsDoAnimal.map((chat: any) => (
                         <View>
 
-                          <Link key={chat.id} href={`/mensagens/${chat.id}`} asChild>
+                          <Link
+                            key={chat.id}
+                            // CORREÇÃO AQUI:
+                            href={{
+                              pathname: "/mensagens/chat", // Caminho para o arquivo chat.tsx na pasta mensagens
+                              params: { chatId: chat.id }  // Passa o ID para saber qual conversa abrir
+                            }}
+                            asChild
+                          >
                             <TouchableOpacity style={{ padding: 8, backgroundColor: '#f9f9f9', marginBottom: 5, borderRadius: 4 }}>
                               <Text style={{ fontWeight: 'bold', fontSize: 12 }}>
                                 Conversa com {chat.participante1.id === user?.id ? chat.participante2.nome : chat.participante1.nome}
@@ -554,7 +562,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderLeftWidth: 1,
     borderLeftColor: '#e1e4e8',
-    position:"absolute",
-    right:0,
+    position: "absolute",
+    right: 0,
   }
 });

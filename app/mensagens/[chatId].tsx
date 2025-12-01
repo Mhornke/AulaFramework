@@ -1,59 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons"; 
 import Colors from "@/theme/color";
 import { URL_Adocao } from "@/utils/url";
-import { useLocalSearchParams } from "expo-router";
-import { Chat } from "@/utils/types/chat";
 import { useAuth } from "@/context/AuthContext";
 
-export default function ChatLayout() {
-  const [chat, setChat] = useState<Chat | null>(null);
+interface ChatLayoutProps {
+  idChat?: number;
+  onClose?: () => void;
+}
+
+export default function ChatLayout({ idChat, onClose }: ChatLayoutProps) {
+  // Ajustei para 'any' para aceitar os objetos participante1/participante2
+  const [chat, setChat] = useState<any | null>(null);
   const [mensagens, setMensagens] = useState<any[]>([]);
   const [texto, setTexto] = useState("");
   const [loading, setLoading] = useState(true);
-
-  const { chatId } = useLocalSearchParams();
+  
+  const flatListRef = useRef<FlatList>(null);
   const { user } = useAuth();
   const userId = user?.id;
+console.log(mensagens);
 
   useEffect(() => {
-    async function carregarDados() {
-      if (!user?.token || !chatId || chatId === "undefined") return;
+    async function carregarMensagensDoChat() {
+      if (!user?.token || !idChat) return;
 
       try {
-        setLoading(true);
-
-        // 1. BUSCAR O CHAT (Para saber quem é quem)
-        // Rota PLURAL: /mensagens/chats
-        const resChat = await fetch(`${URL_Adocao}/mensagens/chats`, {
+        setLoading(true);      
+        const response = await fetch(`${URL_Adocao}/mensagens/chat/${idChat}`, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
 
-        if (resChat.ok) {
-          const listaChats = await resChat.json();
-          // Acha o chat certo na lista
-          const chatEncontrado = listaChats.find((c: any) => c.id === chatId);
-
-          if (chatEncontrado) {
-            setChat(chatEncontrado);
-            console.log("Chat encontrado:", chatEncontrado); // O P2 deve ver seus dados aqui
-          } else {
-            console.log("Chat não encontrado na lista."); // Se o P2 cair aqui, é um problema.
+        if (response.ok) {
+          const dadosDoChat = await response.json();
+          setChat(dadosDoChat);
+      
+          if (dadosDoChat.mensagens) {
+            setMensagens(dadosDoChat.mensagens);
           }
-        }
-
-        // 2. BUSCAR MENSAGENS
-        // Rota PLURAL: /mensagens/:id
-        const resMsg = await fetch(`${URL_Adocao}/mensagens/${chatId}`, {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-
-        if (resMsg.ok) {
-          const dadosMsgs = await resMsg.json();
-          setMensagens(dadosMsgs);
         } else {
-          console.log("Erro ao buscar mensagens (404 ou 500)");
+          console.log("Erro ao buscar o chat específico:", response.status);
         }
 
       } catch (e) {
@@ -62,30 +49,18 @@ export default function ChatLayout() {
         setLoading(false);
       }
     }
-
-    console.log("Usuário logado (userId):", userId);
-    console.log("Chat ID recebido:", chatId);
-    carregarDados();
-  }, [chatId, user]);
+    carregarMensagensDoChat();
+  }, [idChat, user]); 
 
   const enviarMensagem = async () => {
-    if (!chat || !userId) {
-      console.error("Chat ou UserId está faltando:", { chat, userId });
-      return;
-    }
+    if (!chat || !userId) return;
 
-    
-    
     let idDestino = "";
     if (String(chat.participante1Id) === String(userId)) {
-      idDestino = chat.participante2Id; // Sou o 1, mando pro 2
+      idDestino = chat.participante2Id; 
     } else {
-      idDestino = chat.participante1Id; // Sou o 2, mando pro 1
+      idDestino = chat.participante1Id; 
     }
-    console.log("ID do P1 (idDestino):", chat.participante1Id);
-    console.log("ID do P2 (idDestino):", chat.participante2Id);
-    console.log('Mensagens[]:', chat.mensagens);
-    
 
     const body = {
       conteudo: texto,
@@ -94,7 +69,6 @@ export default function ChatLayout() {
     };
 
     try {
-      // Rota PLURAL: /mensagens
       const response = await fetch(`${URL_Adocao}/mensagens`, {
         method: "POST",
         headers: {
@@ -110,7 +84,6 @@ export default function ChatLayout() {
         setMensagens((prev) => [...prev, novaMsg]);
         setTexto("");
       } else {
-        console.log("Erro ao enviar:", response.status);
         Alert.alert("Erro", "Não foi possível enviar a mensagem.");
       }
     } catch (error) {
@@ -119,7 +92,6 @@ export default function ChatLayout() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    // Verifica se a mensagem é minha
     const souEu = String(item.remetenteId) === String(userId);
 
     return (
@@ -146,37 +118,79 @@ export default function ChatLayout() {
     );
   };
 
+  
+  const destinatario = (() => {
+    if (!chat || !user) return null;
+    if (String(chat.participante1Id) === String(user.id)) {
+        return chat.participante2; 
+    } 
+    return chat.participante1;
+  })();
+
+  const nomeHeader = destinatario?.nome || "Usuário";
+  const fotoHeader = destinatario?.foto || "https://placekitten.com/100/100"; 
+
   if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" color={Colors.Butao} />;
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
-    >
-      <FlatList
-        data={mensagens}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderItem}
-        contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
-      />
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={texto}
-          onChangeText={setTexto}
-          placeholder="Digite uma mensagem..."
-          placeholderTextColor="#aaa"
-          style={styles.input}
+    <View style={styles.container}> 
+      
+     
+      <View style={styles.headerContainer}>
+        <View style={styles.headerLeft}>
+           
+            <TouchableOpacity onPress={onClose} style={{ padding: 5, marginRight: 10 }}>
+                <Ionicons name="arrow-back" size={24} color={Colors.Butao} /> 
+            </TouchableOpacity>
+            
+          
+            <Image source={{ uri: fotoHeader }} style={styles.headerImage} />
+            
+            
+            <View>
+                <Text style={styles.headerName} numberOfLines={1}>
+                    {nomeHeader}
+                </Text>
+                {chat?.animal && (
+                    <Text style={styles.headerSubTitle}>
+                        Assunto: {chat.animal.nome}
+                    </Text>
+                )}
+            </View>
+        </View>
+      </View> 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+        <FlatList
+          ref={flatListRef}
+          data={mensagens}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
-        <TouchableOpacity style={styles.botaoEnviar} onPress={enviarMensagem}>
-          <FontAwesome name="send" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            value={texto}
+            onChangeText={setTexto}
+            placeholder="Digite uma mensagem..."
+            placeholderTextColor="#aaa"
+            style={styles.input}
+          />
+          <TouchableOpacity style={styles.botaoEnviar} onPress={enviarMensagem}>
+            <FontAwesome name="send" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // MANTIVE SEUS ESTILOS ORIGINAIS ABAIXO:
   container: { flex: 1, backgroundColor: Colors.CorFundo },
 
   mensagemContainer: {
@@ -185,7 +199,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-end"
   },
 
-  // Alinhamentos simplificados (sem row-reverse para não confundir)
   alinharEsquerda: {
     justifyContent: "flex-start"
   },
@@ -197,12 +210,11 @@ const styles = StyleSheet.create({
 
   balao: { maxWidth: "75%", padding: 10, borderRadius: 10 },
 
-  // Estilos dos balões
-  balaoOutro: { // Recebido (Cinza)
+  balaoOutro: { 
     backgroundColor: "#333",
     borderBottomLeftRadius: 2
   },
-  balaoEu: { // Enviado (Azul/Cor do tema)
+  balaoEu: { 
     backgroundColor: Colors.Butao,
     borderBottomRightRadius: 2
   },
@@ -232,5 +244,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 10
+  },
+
+  // === NOVOS ESTILOS APENAS PARA O HEADER ===
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.CorFundo, // Fundo do header (branco para destacar ou a cor que preferir)
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    elevation: 3, // Sombra
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+    backgroundColor: '#ccc'
+  },
+  headerName: {
+    color: '#e6e2e2ff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  headerSubTitle: {
+    color: '#666',
+    fontSize: 12,
   },
 });
