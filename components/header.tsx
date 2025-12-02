@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   dropdownDesktop: {
     position: 'absolute',
     top: 70,
-    right: 220,
+    right: (Dimensions.get('window').width - Math.min(Dimensions.get('window').width, MAX_WIDTH_DESKTOP)) / 2 + 20,
     width: 220,
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   },
   dropdownDesktopNavegacao: {
     position: 'absolute',
-    top: 60,
+    top: 91,
     left: 0,
     width: "100%",
     backgroundColor: Colors.CorFundo,

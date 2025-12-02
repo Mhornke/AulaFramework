@@ -22,6 +22,7 @@ import { AnimalPerdidoI } from "@/utils/types/animiasPerdidos";
 import ChatLayout from "@/app/mensagens/[chatId]";
 import Colors from "../../../theme/color";
 import { Chat } from "@/utils/types/chat";
+import LinkLoginSigin from "@/components/levaLoginSigin";
 
 
 export default function DetalhesPerdido() {
@@ -291,11 +292,7 @@ export default function DetalhesPerdido() {
               </Modal>
             </>
           ) : (
-            <Link href="/(auth)/login" asChild>
-              <TouchableOpacity style={styles.loginButton}>
-                <Text style={styles.loginButtonText}>Entre para entrar em contato</Text>
-              </TouchableOpacity>
-            </Link>
+           <LinkLoginSigin/>
           )}
         </View>
 

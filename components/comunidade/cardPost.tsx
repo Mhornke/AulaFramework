@@ -55,12 +55,15 @@ export default function PostCard({ data, onDelete }: PostCardProps,) {
 
   async function EnviarComentario(id: number) {
 
+    if (!user?.id) {
+      showAlert("Necessário fazer login para continuar","Faça login ou registre-se para fazer essa ação", "error")
+      return
+    }
     const body = {
       texto: conteudoComentario,
       adotanteId: user?.id,
       postComunidadeId: id
     }
-
     const response = await fetch(`${URL_Adocao}/comentarios`, {
       method: "POST",
       headers: {

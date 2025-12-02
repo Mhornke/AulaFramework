@@ -26,6 +26,7 @@ import { uploadParaCloudinary } from '@/utils/uploadParaCloundinary';
 import { useAuth } from '@/context/AuthContext';
 import Colors from '@/theme/color';
 import Swal from "sweetalert2";
+import LinkLoginSigin from '@/components/levaLoginSigin';
 
 export default function ComunidadeScreen() {
   // Estados para Imagens
@@ -285,30 +286,30 @@ export default function ComunidadeScreen() {
             />
           </View>
         ):(
-
-        <View style={styles.loginWarningContainer}>
-          <FontAwesome name="lock" size={40} color={Colors.LetraCinza} style={{ marginBottom: 10 }} />
-          <Text style={styles.warningText}>
-            Identificamos que você não está logado.
-          </Text>
-          <Text style={styles.subWarningText}>
-            Para poder acessar as funções da comunidade, entre em sua conta.
-          </Text>
-          <View style={styles.authButtonsContainer}>
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={() => router.push('/(auth)/login')}
-            >
-              <Text style={styles.loginButtonText}>Fazer Login</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={() => router.push('/(auth)/register')}
-            >
-              <Text style={styles.registerButtonText}>Criar Conta</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+<LinkLoginSigin/>
+        // <View style={styles.loginWarningContainer}>
+        //   <FontAwesome name="lock" size={40} color={Colors.LetraCinza} style={{ marginBottom: 10 }} />
+        //   <Text style={styles.warningText}>
+        //     Identificamos que você não está logado.
+        //   </Text>
+        //   <Text style={styles.subWarningText}>
+        //     Para poder acessar as funções da comunidade, entre em sua conta.
+        //   </Text>
+        //   <View style={styles.authButtonsContainer}>
+        //     <TouchableOpacity
+        //       style={styles.loginButton}
+        //       onPress={() => router.push('/(auth)/login')}
+        //     >
+        //       <Text style={styles.loginButtonText}>Fazer Login</Text>
+        //     </TouchableOpacity>
+        //     <TouchableOpacity
+        //       style={styles.registerButton}
+        //       onPress={() => router.push('/(auth)/register')}
+        //     >
+        //       <Text style={styles.registerButtonText}>Criar Conta</Text>
+        //     </TouchableOpacity>
+        //   </View>
+        // </View>
 )}
         {/* === LISTA DE POSTS === */}
         <View style={styles.feedContainer}>
