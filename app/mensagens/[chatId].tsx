@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Image, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from "react-native";
-import { FontAwesome, Ionicons } from "@expo/vector-icons"; 
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Colors from "@/theme/color";
 import { URL_Adocao } from "@/utils/url";
 import { useAuth } from "@/context/AuthContext";
@@ -16,18 +16,18 @@ export default function ChatLayout({ idChat, onClose }: ChatLayoutProps) {
   const [mensagens, setMensagens] = useState<any[]>([]);
   const [texto, setTexto] = useState("");
   const [loading, setLoading] = useState(true);
-  
+
   const flatListRef = useRef<FlatList>(null);
   const { user } = useAuth();
   const userId = user?.id;
-console.log(mensagens);
+  console.log(mensagens);
 
   useEffect(() => {
     async function carregarMensagensDoChat() {
       if (!user?.token || !idChat) return;
 
       try {
-        setLoading(true);      
+        setLoading(true);
         const response = await fetch(`${URL_Adocao}/mensagens/chat/${idChat}`, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
@@ -35,7 +35,7 @@ console.log(mensagens);
         if (response.ok) {
           const dadosDoChat = await response.json();
           setChat(dadosDoChat);
-      
+
           if (dadosDoChat.mensagens) {
             setMensagens(dadosDoChat.mensagens);
           }
@@ -50,16 +50,16 @@ console.log(mensagens);
       }
     }
     carregarMensagensDoChat();
-  }, [idChat, user]); 
+  }, [idChat, user]);
 
   const enviarMensagem = async () => {
     if (!chat || !userId) return;
 
     let idDestino = "";
     if (String(chat.participante1Id) === String(userId)) {
-      idDestino = chat.participante2Id; 
+      idDestino = chat.participante2Id;
     } else {
-      idDestino = chat.participante1Id; 
+      idDestino = chat.participante1Id;
     }
 
     const body = {
@@ -118,47 +118,47 @@ console.log(mensagens);
     );
   };
 
-  
+
   const destinatario = (() => {
     if (!chat || !user) return null;
     if (String(chat.participante1Id) === String(user.id)) {
-        return chat.participante2; 
-    } 
+      return chat.participante2;
+    }
     return chat.participante1;
   })();
 
   const nomeHeader = destinatario?.nome || "Usuário";
-  const fotoHeader = destinatario?.foto || "https://placekitten.com/100/100"; 
+  const fotoHeader = destinatario?.foto || "https://placekitten.com/100/100";
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" color={Colors.Butao} />;
 
   return (
-    <View style={styles.container}> 
-      
-     
+    <View style={styles.container}>
+
+
       <View style={styles.headerContainer}>
         <View style={styles.headerLeft}>
-           
-            <TouchableOpacity onPress={onClose} style={{ padding: 5, marginRight: 10 }}>
-                <Ionicons name="arrow-back" size={24} color={Colors.Butao} /> 
-            </TouchableOpacity>
-            
-          
-            <Image source={{ uri: fotoHeader }} style={styles.headerImage} />
-            
-            
-            <View>
-                <Text style={styles.headerName} numberOfLines={1}>
-                    {nomeHeader}
-                </Text>
-                {chat?.animal && (
-                    <Text style={styles.headerSubTitle}>
-                        Assunto: {chat.animal.nome}
-                    </Text>
-                )}
-            </View>
+
+          <TouchableOpacity onPress={onClose} style={{ padding: 5, marginRight: 10 }}>
+            <Ionicons name="arrow-back" size={24} color={Colors.Butao} />
+          </TouchableOpacity>
+
+
+          <Image source={{ uri: fotoHeader }} style={styles.headerImage} />
+
+
+          <View>
+            <Text style={styles.headerName} numberOfLines={1}>
+              {nomeHeader}
+            </Text>
+            {chat?.animal && (
+              <Text style={styles.headerSubTitle}>
+                Assunto: {chat.animal.nome}
+              </Text>
+            )}
+          </View>
         </View>
-      </View> 
+      </View>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
@@ -179,6 +179,18 @@ console.log(mensagens);
             placeholder="Digite uma mensagem..."
             placeholderTextColor="#aaa"
             style={styles.input}
+            returnKeyType="default"
+
+            onKeyPress={(e) => {
+
+              if (Platform.OS === 'web') {
+                const { shiftKey } = e.nativeEvent as any;
+                if (e.nativeEvent.key === 'Enter' && !shiftKey) {
+                  e.preventDefault();
+                  enviarMensagem();
+                }
+              }
+            }}
           />
           <TouchableOpacity style={styles.botaoEnviar} onPress={enviarMensagem}>
             <FontAwesome name="send" size={20} color="#fff" />
@@ -210,11 +222,11 @@ const styles = StyleSheet.create({
 
   balao: { maxWidth: "75%", padding: 10, borderRadius: 10 },
 
-  balaoOutro: { 
+  balaoOutro: {
     backgroundColor: "#333",
     borderBottomLeftRadius: 2
   },
-  balaoEu: { 
+  balaoEu: {
     backgroundColor: Colors.Butao,
     borderBottomRightRadius: 2
   },

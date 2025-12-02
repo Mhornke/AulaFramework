@@ -61,7 +61,8 @@ export default function PedidosPage() {
   if (!isAuthenticated) return null;
 
  return (
-    <View style={{ height, backgroundColor: "#f5f5f5" }}>
+    <View 
+    style={{  backgroundColor: "#f5f5f5" }}>
       <ScrollView contentContainerStyle={{ alignItems: "center", padding: 16 }}>
         <Text style={{ fontSize: 25, fontWeight: "700", marginBottom: 20 }}>Meus Pedidos</Text>
 
@@ -75,7 +76,8 @@ export default function PedidosPage() {
               : "https://placehold.co/400x400/png?text=Sem+Foto"; // Fallback se não tiver foto
 
             return (
-              <View style={{ width: "100%" }}>
+              <View style={{ width: "100%" }} 
+              key={pedido.id}>
 
               
                 <TouchableOpacity activeOpacity={0.9} >
@@ -127,17 +129,18 @@ export default function PedidosPage() {
                         </Text>
 
                         <Text numberOfLines={2} ellipsizeMode="tail" style={{marginBottom: 5, fontSize: 14, color: "#555"}}>
-                            <Text style={{ fontWeight: "bold" }}>Msg:</Text> {pedido.descricao}
+                            <Text style={{ fontWeight: "bold" }}>Pedido:</Text> {pedido.descricao}
                         </Text>
+                        
                         
                         <View style={{
                             marginTop: 5, 
                             paddingVertical: 4,
                             paddingHorizontal: 8, 
                             alignSelf: 'flex-start',
-                            backgroundColor: pedido.resposta ? (pedido.resposta.toLowerCase().includes("aprovado") || pedido.resposta.toLowerCase().includes("aceito") ? "#d4edda" : "#fff3cd") : "#e2e3e5",
+                            backgroundColor: pedido.resposta ? (pedido.resposta.toLowerCase().includes("aprovado") || pedido.resposta.toLowerCase().includes("aceito") ? "#f88787ff": "#1fda4aff" ) : "#d1d18cff",
                             borderRadius: 4
-                        }}>
+                          }}>
                             <Text style={{ fontWeight: "bold", color: "#333", fontSize: 12 }}>
                                 {pedido.resposta || "Aguardando análise"}
                             </Text>

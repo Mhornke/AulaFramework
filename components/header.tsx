@@ -56,7 +56,9 @@ export default function Header() {
       </Link>
       <View style={{ flexDirection: 'row' }}>
         <Text style={styles.logoTextMain}>Adote</Text>
-        <Text style={styles.logoTextSub}>.Com</Text>
+        <Text style={[styles.logoTextSub,{
+          borderBottomWidth:1,borderBottomColor:Colors.Butao
+        }]}>.Com</Text>
       </View>
     </View>
   );
