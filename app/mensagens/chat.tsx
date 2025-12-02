@@ -90,8 +90,12 @@ const getDadosOutroUsuario = (chat: ChatResumo) => {
   };
 
   return (
-    <View style={styles.containerPrincipal}>
+    <View  style={{alignItems:"center", width:"100%", height:"100%"
+
+    }}>
       
+      <View style={styles.containerPrincipal}>
+
       
       <View style={styles.ladoEsquerdo}>
         <View style={styles.headerLista}>
@@ -127,19 +131,20 @@ const getDadosOutroUsuario = (chat: ChatResumo) => {
           </View>
         )}
       </View>
-
+</View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  containerPrincipal: {
-    flex: 1,
+  containerPrincipal: {   
     flexDirection: 'row', 
-    backgroundColor: '#fff',
+    backgroundColor: '#1ff10bff',
     height: '100%', 
     overflow: 'hidden',
     borderRadius: 10, 
+    maxWidth:1200,
+    width:"100%"
   },
 
   ladoEsquerdo: {
