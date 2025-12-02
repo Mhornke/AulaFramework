@@ -56,22 +56,36 @@ export default function Header() {
       </Link>
       <View style={{ flexDirection: 'row' }}>
         <Text style={styles.logoTextMain}>Adote</Text>
-        <Text style={[styles.logoTextSub,{
-          borderBottomWidth:1,borderBottomColor:Colors.Butao
+        <Text style={[styles.logoTextSub, {
+          borderBottomWidth: 1, borderBottomColor: Colors.Butao
         }]}>.Com</Text>
       </View>
     </View>
   );
 
-  const AlertButton = () => (
+  const AlertButton = ({ isCompact = false }) => (
     <TouchableOpacity
       onPress={() => navigateTo('/cadastro')}
-      style={styles.alertButton}
+      activeOpacity={0.8}
+      style={[
+        styles.alertButton,
+        isCompact ? styles.alertButtonCompact : styles.alertButtonFull
+      ]}
     >
-      <FontAwesome name="exclamation-triangle" size={16} color="#e5fc62" />
-      <Text style={styles.alertButtonText}>Perdeu ou Encontrou</Text>
+      <View style={styles.alertIconContainer}>
+        <FontAwesome name="bullhorn" size={isCompact ? 16 : 20} color="#333" />
+      </View>
+      <View>
+        <Text style={[styles.alertButtonText, isCompact && { fontSize: 13 }]}>
+          ALERTA PET
+        </Text>
+        {!isCompact && (
+          <Text style={styles.alertButtonSubText}>Perdeu ou Encontrou?</Text>
+        )}
+      </View>
     </TouchableOpacity>
   );
+
 
 
   if (isMobile) {
@@ -159,31 +173,32 @@ export default function Header() {
 
   return (
     <View style={styles.headerContainer}>
+    
       <View style={styles.desktopContent}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-         
+
           <TouchableOpacity style={styles.desktopUserBtn} onPress={() => setOpenMenuNavega(true)}>
             <FontAwesome name="bars" size={24} color="white" />
           </TouchableOpacity>
           <Modal visible={openMenuNavega} transparent animationType="fade">
-           
+
             <TouchableOpacity style={styles.overlayDesktop} onPress={() => setOpenMenuNavega(false)}>
               <View style={styles.dropdownDesktopNavegacao}>
-                
+
 
                 <TouchableOpacity style={styles.dropdownItemNav} onPress={() => navigateTo2('/(tabs)/')}>
-                  <Text style={{fontWeight:"400", color:"white"}}>Iniciar</Text>
+                  <Text style={{ fontWeight: "400", color: "white" }}>Iniciar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.dropdownItemNav} onPress={() => navigateTo2('/(tabs)/Comunidade')}>
-                  <Text style={{fontWeight:"400", color:"white"}}>Comunidade</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.dropdownItemNav} onPress={() => navigateTo2('/(tabs)/perdidos')}>
-                  <Text style={{fontWeight:"400", color:"white"}}>Volte pra casa</Text>
+                  <Text style={{ fontWeight: "400", color: "white" }}>Comunidade</Text>
                 </TouchableOpacity>
 
-               </View>
+                <TouchableOpacity style={styles.dropdownItemNav} onPress={() => navigateTo2('/(tabs)/perdidos')}>
+                  <Text style={{ fontWeight: "400", color: "white" }}>Volte pra casa</Text>
+                </TouchableOpacity>
+
+              </View>
             </TouchableOpacity>
           </Modal>
 
@@ -192,10 +207,10 @@ export default function Header() {
         </View>
 
         <View style={styles.desktopRightSide}>
-          <AlertButton />        
+          <AlertButton />
 
           {user ? (
-            <View style={styles.desktopUserArea}>          
+            <View style={styles.desktopUserArea}>
 
               <TouchableOpacity style={styles.desktopUserBtn} onPress={() => setOpenMenu(true)}>
                 <Text style={{ color: '#fff', fontWeight: 'bold' }}>{user.nome}</Text>
@@ -229,14 +244,14 @@ export default function Header() {
                       <DeleteUserButton />
                     </View>
 
-                   
+
                   </View>
                 </TouchableOpacity>
               </Modal>
             </View>
           ) : (
             <View style={styles.authLinks}>
-             
+
               <Link href="/(auth)/login"><Text style={styles.desktopLinkText}>Entrar</Text></Link>
               <Link href="/(auth)/register"><Text style={styles.desktopLinkText}>Criar Conta</Text></Link>
             </View>
@@ -249,10 +264,9 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    width: "100%",
-    backgroundColor: Color.CorFundo,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: Colors.CorFundo,
+    paddingVertical: 10, 
+    paddingHorizontal:10,
     zIndex: 100,
     elevation: 5,
     shadowColor: "#000",
@@ -260,8 +274,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-
-
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -371,15 +383,15 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
   },
-
-
   desktopContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    maxWidth: MAX_WIDTH_DESKTOP,
+    maxWidth: 1200,
     alignSelf: 'center',
+    
+
   },
   desktopRightSide: {
     flexDirection: 'row',
@@ -389,7 +401,7 @@ const styles = StyleSheet.create({
   desktopUserArea: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    
   },
   desktopUserBtn: {
     flexDirection: 'row',
@@ -414,7 +426,7 @@ const styles = StyleSheet.create({
   dropdownDesktop: {
     position: 'absolute',
     top: 70,
-    right: (Dimensions.get('window').width - Math.min(Dimensions.get('window').width, MAX_WIDTH_DESKTOP)) / 2 + 20, 
+    right: 220,
     width: 220,
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -425,19 +437,19 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  dropdownDesktopNavegacao:{
-     position: 'absolute',
+  dropdownDesktopNavegacao: {
+    position: 'absolute',
     top: 60,
-    left:0, 
+    left: 0,
     width: "100%",
-    backgroundColor:Colors.CorFundo,
+    backgroundColor: Colors.CorFundo,
     padding: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    flexDirection:"row", justifyContent:"space-around"
+    flexDirection: "row", justifyContent: "space-around"
   },
   dropdownTitle: {
     fontWeight: 'bold',
@@ -454,5 +466,54 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 0.2,
     borderBottomColor: Colors.Butao,
-  }
+  },
+
+  alertButton: {
+    backgroundColor: "#FFD700",
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+
+  alertButtonCompact: {
+    
+   
+  
+    borderWidth: 2,
+    borderColor: '#F1C40F',
+  },
+
+
+  alertButtonFull: {
+    paddingVertical: 12,
+    paddingHorizontal: 50,
+    gap: 15,    
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+
+  alertIconContainer: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    padding: 6,
+    borderRadius: 20,
+  },
+
+  alertButtonText: {
+    fontWeight: "900",
+    color: "#333",
+    fontSize: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8
+  },
+
+  alertButtonSubText: {
+    fontSize: 12,
+    color: "#444",
+    fontWeight: "600"
+  },
 });
