@@ -2,27 +2,26 @@ import { Image, StyleSheet, View, Text, Dimensions } from "react-native";
 import { AnimalI } from "../utils/types/animias";
 import { FontAwesome } from "@expo/vector-icons";
 
-// Pega a largura da tela para calcular tamanho responsivo
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width / 2) - 20; // Divide por 2 e tira margens
+const CARD_WIDTH = (width / 2) - 20; 
 
 export default function CardIII({ data }: { data: AnimalI }) {
+   const uriImagem = (data.fotos && data.fotos.length > 0) 
+      ? data.fotos[0].codigoFoto // <--- Pega a primeira foto do array
+      : "https://placehold.co/400x400/png?text=Sem+Foto";
   return (
     <View style={styles.container}>
       <Image
-        // Dica: Verifique se sua API retorna 'foto' ou 'fotos[0]'
-        source={{ uri: data.foto }} 
+        source={{ uri: uriImagem}} 
         style={styles.image}
         resizeMode="cover"
       />
 
-      {/* Overlay com gradiente simulado (fundo escuro transparente) */}
       <View style={styles.overlay}>
         <Text style={styles.textName} numberOfLines={1}>{data.nome}</Text>
         
         <View style={styles.infoRow}>
           <View style={styles.patinhaContainer}>
-             {/* Exemplo: Renderiza patinhas baseado no porte ou idade (lógica opcional) */}
             <FontAwesome name="paw" size={14} color="#FFD700" />
             <Text style={styles.subText}> Adotado</Text>
           </View>
@@ -39,9 +38,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     margin: 8,
     borderRadius: 12,
-    overflow: "hidden", // Garante que a imagem respeite a borda arredondada
+    overflow: "hidden", 
     
-    // Sombras (Elevation para Android, Shadow para iOS)
     elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -57,7 +55,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Fundo preto com 60% de transparência
+    backgroundColor: "rgba(0, 0, 0, 0.6)", 
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderTopWidth: 1,

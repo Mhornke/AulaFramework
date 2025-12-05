@@ -263,7 +263,7 @@ export default function Home() {
 
                         <View style={[styles.cardTable,
                         {
-                            flexDirection: "column",
+                            flexDirection: "row",
                             paddingTop: 50,
 
                         }]}>

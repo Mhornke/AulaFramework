@@ -6,8 +6,8 @@ import { FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 
 export default function CardII({ data }: { data: AnimalI }) {
-  const sex = data?.sexo == "MACHO";
-  const shadowSex = sex ? '#c523da' : '#23a6da';
+  const sex = data?.sexo == "Macho";
+  const shadowSex = sex ? '#23a6da':'#c523da' ;
   return (
     <View style={styles.conteiner} key={data.id}>
       <Image
@@ -17,7 +17,7 @@ export default function CardII({ data }: { data: AnimalI }) {
 
       <Text style={[styles.TextName, {
         textShadowRadius: 20,
-        elevation: 5, textShadowColor: sex ? 'rgba(53, 3, 59, 0.88)' : "#08041df1"
+        elevation: 5, textShadowColor: shadowSex 
       }]}>{data.nome}</Text>
 
       <View style={[styles.containerText, { flexWrap: "wrap", flexDirection: "row", justifyContent: "center", gap: 5 }]}>
